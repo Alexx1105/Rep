@@ -43,12 +43,12 @@ struct IntervalLiveActivity: Widget {
                             .clipShape(RoundedRectangle(cornerRadius: 17.5))
                         
                             .overlay {
-                                let intervalNumberSelected: Float? = context.attributes.selectedInterval
+                                let intervalNumberSelected: Float? = context.state.selectedInterval
                                 Text("\(intervalNumberSelected ?? 0.0, format: .number)hrs").font(Font.system(size: 14))
                                     .fontWeight(.regular)
                                     .foregroundStyle(Color.intervalBlue)
                                 
-                        }
+                            }
                     }
                 }
             } compactLeading: {
@@ -66,12 +66,12 @@ struct IntervalLiveActivity: Widget {
                         .clipShape(RoundedRectangle(cornerRadius: 8.75))
                     
                         .overlay {
-                            let intervalNumberSelected: Float? = context.attributes.selectedInterval
+                            let intervalNumberSelected: Float? = context.state.selectedInterval
                             Text("\(intervalNumberSelected ?? 0.0, format: .number)hrs").font(Font.system(size: 14))
                                 .fontWeight(.regular)
                                 .foregroundStyle(Color.intervalBlue)
                             
-                    }
+                        }
                 }
                 
             } minimal: {
@@ -83,25 +83,25 @@ struct IntervalLiveActivity: Widget {
 
 
 
-extension IntervalLiveActivityAttributes {
-    fileprivate static var preview: IntervalLiveActivityAttributes {
-        IntervalLiveActivityAttributes(selectedInterval: 0.0)
-        
-    }
-}
-
-extension IntervalLiveActivityAttributes.ContentState {
-    fileprivate static var titleInterval: IntervalLiveActivityAttributes.ContentState {
-        IntervalLiveActivityAttributes.ContentState(plainText: "")
-        
-    }
-}
-
-#Preview("Notification", as: .content, using: IntervalLiveActivityAttributes.preview) {
-    IntervalLiveActivity()
-} contentStates: {
-    IntervalLiveActivityAttributes.ContentState.titleInterval
-}
-
-
+//extension IntervalLiveActivityAttributes {
+//    fileprivate static var preview: IntervalLiveActivityAttributes {
+//        IntervalLiveActivityAttributes()
+//
+//    }
+//}
+//
+//extension IntervalLiveActivityAttributes.ContentState {
+//    fileprivate static var titleInterval: IntervalLiveActivityAttributes.ContentState {
+//        IntervalLiveActivityAttributes.ContentState(plainText: "")
+//
+//    }
+//}
+//
+//#Preview("Notification", as: .content, using: IntervalLiveActivityAttributes.preview) {
+//    IntervalLiveActivity()
+//} contentStates: {
+//    IntervalLiveActivityAttributes.ContentState.titleInterval
+//}
+//
+//
 

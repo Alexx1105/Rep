@@ -5,6 +5,8 @@ import SwiftData
 import Supabase
 import OSLog
 import SwiftUI
+import KimchiKit
+import ActivityKit
 
 
 fileprivate struct FrequencyOption: Identifiable {
@@ -132,7 +134,13 @@ struct DynamicRepControlsView: View {
                                     }
                                     
                                     if let index = frequencyStopsPositions.firstIndex(of: nearest) {
-                
+                                        
+                                        Task {
+                                            startIntervalActivity()
+                                            await updateIntervalActivity()
+                                            //await endIntervalActivity()
+                                        }
+                                        
                                         Task {
                                             do {
                                                 let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").execute()
@@ -147,7 +155,6 @@ struct DynamicRepControlsView: View {
                                                 let selectedOption = frequencyOptions[index]
                                                 let now = Date()
                                                 let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: now)
-                                                
                                                 
                                                 if selectedOption.label == "Off" {
                                                     do {
