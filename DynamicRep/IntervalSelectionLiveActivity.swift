@@ -21,7 +21,7 @@ struct IntervalLiveActivity: Widget {
                     VStack(alignment: .leading) {
                         
                         let intervalTitle = context.state.plainText ?? "--"
-                        Text("for: \(intervalTitle)")
+                        Text("for:\(intervalTitle)")
                             .fontWeight(.regular)
                             .font(.system(size: 14))
                             .foregroundStyle(Color.gray)
@@ -43,8 +43,8 @@ struct IntervalLiveActivity: Widget {
                             .clipShape(RoundedRectangle(cornerRadius: 17.5))
                         
                             .overlay {
-                                let intervalNumberSelected: Float? = context.state.selectedInterval
-                                Text("\(intervalNumberSelected ?? 0.0, format: .number)hrs").font(Font.system(size: 14))
+                                let intervalNumberSelected: DateComponents? = context.state.selectedInterval
+                                Text("\(String(describing: intervalNumberSelected ?? nil))hrs").font(Font.system(size: 14))
                                     .fontWeight(.regular)
                                     .foregroundStyle(Color.intervalBlue)
                                 
@@ -66,8 +66,8 @@ struct IntervalLiveActivity: Widget {
                         .clipShape(RoundedRectangle(cornerRadius: 8.75))
                     
                         .overlay {
-                            let intervalNumberSelected: Float? = context.state.selectedInterval
-                            Text("\(intervalNumberSelected ?? 0.0, format: .number)hrs").font(Font.system(size: 14))
+                            let intervalNumberSelected: DateComponents? = context.state.selectedInterval
+                            Text("\(String(describing: intervalNumberSelected ?? nil))hrs").font(Font.system(size: 14))
                                 .fontWeight(.regular)
                                 .foregroundStyle(Color.intervalBlue)
                             
