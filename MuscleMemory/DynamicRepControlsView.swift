@@ -5,6 +5,8 @@ import SwiftData
 import Supabase
 import OSLog
 import SwiftUI
+import KimchiKit
+import ActivityKit
 
 
 fileprivate struct FrequencyOption: Identifiable {
@@ -120,9 +122,8 @@ struct DynamicRepControlsView: View {
                                     let clamped = min(max(proposed, frequencyStopsPositions.first!), frequencyStopsPositions.last!)
                                     drag = clamped - fullDrag
                                 }
-                                .onEnded { _ in   //TO-DO: add conditional to prevent re-sending of same notion page after each slider action
+                                .onEnded { _ in
                                     
-                              
                                     let endPosition = fullDrag + drag
                                     let nearest = frequencyStopsPositions.min { abs($0 - endPosition) < abs($1 - endPosition) }!
 
@@ -132,7 +133,15 @@ struct DynamicRepControlsView: View {
                                     }
                                     
                                     if let index = frequencyStopsPositions.firstIndex(of: nearest) {
-                
+                                       let opt = frequencyOptions[index]
+                                       let intervalTitle = pageTitle.first?.plain_text ?? "--"
+                                        
+                                        Task {
+                                            try await Task.sleep(nanoseconds: 500_000_000)
+                                            startIntervalActivity(label: opt.label, title: intervalTitle)
+                                            await updateIntervalActivity(label: opt.label, title: intervalTitle)
+                                        }
+                                        
                                         Task {
                                             do {
                                                 let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").execute()
@@ -147,7 +156,6 @@ struct DynamicRepControlsView: View {
                                                 let selectedOption = frequencyOptions[index]
                                                 let now = Date()
                                                 let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: now)
-                                                
                                                 
                                                 if selectedOption.label == "Off" {
                                                     do {

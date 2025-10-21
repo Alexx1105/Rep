@@ -23,6 +23,7 @@ struct DynamicRepBundle: WidgetBundle {
     }
     var body: some Widget {
         DynamicRepLiveActivity()
+        IntervalLiveActivity()
     }
 }
 

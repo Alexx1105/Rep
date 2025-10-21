@@ -12,21 +12,15 @@ import ActivityKit
 import KimchiKit
 
 
-struct test: View {
+struct Test: View {
     var body: some View {
         
-#if DEBUG
       Button("Start Local Live Activity") {
-          if #available(iOS 16.1, *) {
-              debugStartDynamicRepLiveActivity()
-          }
-      }
-      #endif
-        
-        
+             debugStartIntervalLiveActivity()
+        }
     }
 }
 
 #Preview {
-    test()
+    Test()
 }
