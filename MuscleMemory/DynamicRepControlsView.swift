@@ -122,9 +122,8 @@ struct DynamicRepControlsView: View {
                                     let clamped = min(max(proposed, frequencyStopsPositions.first!), frequencyStopsPositions.last!)
                                     drag = clamped - fullDrag
                                 }
-                                .onEnded { _ in   //TO-DO: add conditional to prevent re-sending of same notion page after each slider action
+                                .onEnded { _ in
                                     
-                              
                                     let endPosition = fullDrag + drag
                                     let nearest = frequencyStopsPositions.min { abs($0 - endPosition) < abs($1 - endPosition) }!
 
@@ -135,49 +134,48 @@ struct DynamicRepControlsView: View {
                                     
                                     if let index = frequencyStopsPositions.firstIndex(of: nearest) {
                                        let opt = frequencyOptions[index]
-                                       let _ = opt.interval
-                                   
+                                       let intervalTitle = pageTitle.first?.plain_text ?? "--"
                                         
                                         Task {
-                                            startIntervalActivity(label: opt.label, interval: opt.interval)
-                                            await updateIntervalActivity(label: opt.label, interval: opt.interval)
-                                            
+                                            try await Task.sleep(nanoseconds: 500_000_000)
+                                            startIntervalActivity(label: opt.label, title: intervalTitle)
+                                            await updateIntervalActivity(label: opt.label, title: intervalTitle)
                                         }
                                         
-//                                        Task {
-//                                            do {
-//                                                let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").execute()
-//                                                let result = selectQuery.value
-//                                                let queryID = result.map{String($0.id)}
-//                                                print("ID HERE: \(queryID)")
-//                                                
-//                                                await MainActor.run {
-//                                                 Query.accessQuery.queryID = queryID
-//                                                }
-//                                            
-//                                                let selectedOption = frequencyOptions[index]
-//                                                let now = Date()
-//                                                let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: now)
-//                                                
-//                                                if selectedOption.label == "Off" {
-//                                                    do {
-//                                                        let disable = try await supabaseDBClient.from("push_tokens").update(["offset_date" : "1970-01-01T00:00:00Z"]).in("id", values: queryID).execute()
-//                                                        print("slider off: \(disable)")
-//                                                    } catch {
-//                                                        print("failed to disable: \(error)")
-//                                                    }
-//                                                }
-//                                                
-//                                                do {
-//                                                    let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: queryID).execute()
-//                                                    print("OFFSET DATE SENT TO SUPABASE: \(send)")
-//                                                } catch {
-//                                                    print("failed to send offset date to supabase ❗️: \(error)")
-//                                                }
-//                                            } catch {
-//                                                print("failed to query id's from supabase ❌: \(error)")
-//                                            }
-//                                        }
+                                        Task {
+                                            do {
+                                                let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").execute()
+                                                let result = selectQuery.value
+                                                let queryID = result.map{String($0.id)}
+                                                print("ID HERE: \(queryID)")
+                                                
+                                                await MainActor.run {
+                                                 Query.accessQuery.queryID = queryID
+                                                }
+                                            
+                                                let selectedOption = frequencyOptions[index]
+                                                let now = Date()
+                                                let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: now)
+                                                
+                                                if selectedOption.label == "Off" {
+                                                    do {
+                                                        let disable = try await supabaseDBClient.from("push_tokens").update(["offset_date" : "1970-01-01T00:00:00Z"]).in("id", values: queryID).execute()
+                                                        print("slider off: \(disable)")
+                                                    } catch {
+                                                        print("failed to disable: \(error)")
+                                                    }
+                                                }
+                                                
+                                                do {
+                                                    let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: queryID).execute()
+                                                    print("OFFSET DATE SENT TO SUPABASE: \(send)")
+                                                } catch {
+                                                    print("failed to send offset date to supabase ❗️: \(error)")
+                                                }
+                                            } catch {
+                                                print("failed to query id's from supabase ❌: \(error)")
+                                            }
+                                        }
                                     }
                                 }).animation(nil, value: fingerTracking)
                     
