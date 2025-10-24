@@ -95,7 +95,9 @@ struct MainMenuTab: View {
                 
                 
             }
-            .frame(width: 370, height: 57)
+            .frame(maxWidth: .infinity)
+            .frame(height: 57)
+        
         
         
     }

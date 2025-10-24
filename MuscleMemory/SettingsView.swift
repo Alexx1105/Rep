@@ -29,11 +29,11 @@ struct SettingsView: View {
                         .opacity(textOpacity)
                     Spacer()
                     
-                    NavigationLink(destination: SignOutView()) {
-                        Text("Log out")
-                            .fontWeight(.regular)
-                            .foregroundStyle(Color.red)
-                    }
+//                    NavigationLink(destination: SignOutView()) {
+//                        Text("Log out")
+//                            .fontWeight(.regular)
+//                            .foregroundStyle(Color.red)
+//                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .frame(maxHeight: 230)

@@ -32,6 +32,11 @@ struct MainMenu: View {
     @State private var loading = false
     @State private var didLoad = false
     
+    @State private var tabSlideOver = false
+    @State private var deleteMultipleTabs = Set<String>()
+    @State private var selectedCheckBox = false
+    
+    
     var body: some View {
         
         VStack {
@@ -41,6 +46,7 @@ struct MainMenu: View {
                     .frame(width: 35, height: 35)
                     .opacity(0.25)
                     .padding(.leading)
+
                 
                 VStack(spacing: 3) {
                     Text("Workspace email")
@@ -67,7 +73,8 @@ struct MainMenu: View {
                 Spacer()
             }.frame(maxWidth: .infinity, maxHeight: 50)
                 .opacity(showUserEmail.first?.personEmail != nil ? 1 : 0)
-            
+        
+       
             
             
             Spacer()
@@ -82,43 +89,91 @@ struct MainMenu: View {
                 
                 Spacer()
                 Menu {
-                    Button(action: {}) { Label("Delete tabs", systemImage: "trash")}
+                    Button {
+                        withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) { tabSlideOver = true }
+                    } label: {
+                        Label("Select tab", systemImage: "checkmark.circle")
+                    }; Button {
+    
+                        tabSlideOver = false
+                        deleteMultipleTabs.removeAll()
+                        
+                    } label: {
+                        Label("Cancel select", systemImage: "xmark.circle")
+                    }
+                
+                    Button(role: .destructive) {
+                    } label: {
+                        Label("Delete selected tab/s", systemImage: "trash")
+                    }
                 } label: {
-                    Circle().frame(height: 35)}.glassEffect().buttonStyle(PlainButtonStyle())
+                    Circle()
+                    .frame(height: 35)}
+                    .glassEffect()
+                    .buttonStyle(PlainButtonStyle())
+                    
                     .overlay {
                         Image(systemName: "ellipsis")
                     }
+                
             }
             .frame(maxWidth: 370, maxHeight: 100 )
             Spacer()
             
             VStack {
                 ScrollView {
-                    Spacer()
                     
+                    Spacer()
                     ForEach(pageTitle, id: \.titleID) { isolatedContent in
+                        
                         let tabContent = isolatedContent.plain_text ?? ""
                         let tabEmoji = isolatedContent.emoji ?? ""
                         
-                        if !tabContent.isEmpty || !tabEmoji.isEmpty {
-                            NavigationLink {
-                                ImportedNotes(pageID: isolatedContent.titleID)
+                        let insertID = isolatedContent.titleID
+                        let selectedTab = deleteMultipleTabs.contains(insertID)
+                        
+                        HStack(spacing: 20) {
+                            if tabSlideOver {
                                 
-                                    .navigationBarBackButtonHidden(true)
-                                
-                            } label: {
-                                MainMenuTab(showEmoji: tabEmoji, showTitle: tabContent)
+                                Button {
+                                    
+                                    if selectedTab { deleteMultipleTabs.remove(insertID)
+                                    } else {
+                                        deleteMultipleTabs.insert(insertID)
+                                    }
+                                    
+                                } label: {
+                                    
+                                    Circle()
+                                        .fill(selectedTab ? Color.blue.opacity(0.7) : Color.mmBackground)
+                                        .stroke(Color.gray, lineWidth: 0.5)
+                                        .frame(width: 27, height: 27)
+                                        .transition(.move(edge: .trailing).combined(with: .slide))
+                                       
+                                }
+                            }
+                            
+                            if !tabContent.isEmpty || !tabEmoji.isEmpty {
+                                NavigationLink {
+                                    ImportedNotes(pageID: isolatedContent.titleID)
+                                    
+                                        .navigationBarBackButtonHidden(true)
+                                    
+                                } label: {
+                                    MainMenuTab(showEmoji: tabEmoji, showTitle: tabContent)
+                                }
                             }
                         }
                     }
-                }
+                }.padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))
-                   
+            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.mmBackground)
         .navigationBarBackButtonHidden()
+        
         
         .task {
             let pushTokenNotifications = UNUserNotificationCenter.current()
