@@ -90,20 +90,22 @@ struct DynamicRepControlsView: View {
             
             
             VStack(spacing: 5) {
+
                 HStack(alignment: .top) {
-                    Text("Frequency")
-                        .fontWeight(.semibold)
-                        .opacity(textOpacity)
-                    Spacer()
-                }
-                .padding(.leading, 15)
-                
-                HStack(alignment: .top) {
-                    Text("Control how often you receive flashcard repetition\nnotifications containing your notes.")
-                        .font(.system(size: 16)).lineSpacing(3)
-                        .fontWeight(.medium)
-                        .opacity(0.25)
-                        .padding(.leading, 1)
+                    VStack(alignment: .leading, spacing: 5){
+                        Text("Frequency")
+                            .fontWeight(.semibold)
+                            .opacity(textOpacity)
+                            
+                        
+                       
+                        Text("Control how often you receive flashcard\nrepetition notifications containing your notes.")
+                            .font(.system(size: 16)).lineSpacing(3)
+                            .fontWeight(.medium)
+                            .opacity(0.25)
+                            .padding(.trailing, 15)
+                        
+                    }
                 }
                 
                 ZStack(alignment: .top) {
@@ -204,28 +206,24 @@ struct DynamicRepControlsView: View {
                 }
             }
             
-            Spacer()
-            VStack(spacing: 5) {
-                
-                HStack(alignment: .top) {
-                    Text("Auto disable after ")
-                        .fontWeight(.semibold)
-                        .opacity(textOpacity)
-                    
-                    Spacer()
-                }
-                .padding(.leading, 15)
-                
-                HStack(alignment: .top) {
-                    Text(" MuscleMemory will reset after a full iteration over\n this notion page and repeat again unless one these\n settings are enabled.")
-                        .font(.system(size: 16)).lineSpacing(3)
-                        .fontWeight(.medium)
-                        .opacity(0.25)
-                        .padding(.leading, 1)
-                }
-                
                 ZStack {
                     VStack {
+                        Spacer()
+                        VStack(alignment: .leading, spacing: 5) {
+                                Text("Auto disable after ")
+                                    .fontWeight(.semibold)
+                                    .opacity(textOpacity)
+                                   
+                                
+                                Text("Rep will reset after a full iteration over this\nnotion page and repeat again unless one of\nthese settings are enabled.")
+                                    .font(.system(size: 16)).lineSpacing(3)
+                                    .fontWeight(.medium)
+                                    .opacity(0.25)
+                                
+                        }.padding(.top, 7)
+                         .frame(maxWidth: .infinity)
+                         .padding(.trailing, 20)
+                           
                         ZStack {
                             
                             Circle().glassEffect()
@@ -326,7 +324,7 @@ struct DynamicRepControlsView: View {
                 }
                 Spacer()
                 
-            }
+            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.mmBackground)

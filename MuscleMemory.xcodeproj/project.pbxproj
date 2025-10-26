@@ -25,7 +25,6 @@
 		B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */; };
 		B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2B837CA2BCB103000BBC748 /* Assets.xcassets */; };
 		B2B837CE2BCB103000BBC748 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2B837CD2BCB103000BBC748 /* Preview Assets.xcassets */; };
-		B2BB72602DAC1C9600EE857B /* MainMenuTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB725F2DAC1C9600EE857B /* MainMenuTab.swift */; };
 		B2C2A9A72E87A9F000816A0B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B205A9582D73B62D00FFF047 /* WidgetKit.framework */; };
 		B2C2A9AA2E87A9F200816A0B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D220DD2BD981B800E55834 /* SwiftUI.framework */; };
 		B2C2A9AE2E88911A00816A0B /* DynamicRepExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -33,7 +32,7 @@
 		B2EC7FCB2E80C57A00613126 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCA2E80C57A00613126 /* KimchiKit */; };
 		B2EC7FCE2E80C86100613126 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCD2E80C86100613126 /* Supabase */; };
 		B2EC7FD02E80C86500613126 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCF2E80C86500613126 /* KimchiKit */; };
-		B2F82DAC2E9F330800006533 /* LiquidGlassTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* LiquidGlassTab.swift */; };
+		B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponents.swift */; };
 		B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */; };
 /* End PBXBuildFile section */
 
@@ -106,10 +105,9 @@
 		B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedNotes.swift; sourceTree = "<group>"; };
 		B2B837CA2BCB103000BBC748 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B2B837CD2BCB103000BBC748 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		B2BB725F2DAC1C9600EE857B /* MainMenuTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuTab.swift; sourceTree = "<group>"; };
 		B2D220DD2BD981B800E55834 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		B2D362FE2E2C855900C3012C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		B2F82DAB2E9F32F400006533 /* LiquidGlassTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassTab.swift; sourceTree = "<group>"; };
+		B2F82DAB2E9F32F400006533 /* UIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIComponents.swift; sourceTree = "<group>"; };
 		B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionImportPageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -173,7 +171,7 @@
 			isa = PBXGroup;
 			children = (
 				B2D362FE2E2C855900C3012C /* .gitignore */,
-				B2F82DAB2E9F32F400006533 /* LiquidGlassTab.swift */,
+				B2F82DAB2E9F32F400006533 /* UIComponents.swift */,
 				B205064F2D98A3CC0082FEA2 /* PersistantDB.swift */,
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
 				B22E10F52D067E89003F3D9F /* SearchUserPages.swift */,
@@ -184,7 +182,6 @@
 				B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */,
 				B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */,
 				B26842CE2CC704DB00471001 /* MainMenu.swift */,
-				B2BB725F2DAC1C9600EE857B /* MainMenuTab.swift */,
 				B2B837C62BCB102F00BBC748 /* MuscleMemoryApp.swift */,
 				B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */,
 				B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */,
@@ -342,12 +339,11 @@
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
 				B2A0EFC52DC7D8F60076DBC0 /* DynamicRepControlsView.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
-				B2F82DAC2E9F330800006533 /* LiquidGlassTab.swift in Sources */,
+				B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,
 				B20506502D98A3E50082FEA2 /* PersistantDB.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,
 				B26A46672CD04C210064AF46 /* SignOutView.swift in Sources */,
-				B2BB72602DAC1C9600EE857B /* MainMenuTab.swift in Sources */,
 				B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */,
 				B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */,
 				B2B837C72BCB102F00BBC748 /* MuscleMemoryApp.swift in Sources */,
@@ -599,7 +595,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MuscleMemory/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
@@ -639,7 +635,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MuscleMemory/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
