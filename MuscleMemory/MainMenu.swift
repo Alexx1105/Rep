@@ -20,7 +20,7 @@ struct MainMenu: View {
     @Query var showUserEmail: [UserEmail]
     @Query var pageTitle: [UserPageTitle]
       
-    var pageID: String = ""
+    var pageID: String
     var filterTabTitle: [UserPageTitle] {
         pageTitle.filter{($0.titleID == pageID)}
     }
@@ -103,6 +103,19 @@ struct MainMenu: View {
                     }
                 
                     Button(role: .destructive) {
+                        guard !deleteMultipleTabs.isEmpty else { return }
+                        let deleteTabIDs = Set(deleteMultipleTabs)
+                        
+                        do {
+                            try modelContext.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
+                            try modelContext.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
+                            try modelContext.save()
+                            
+                            print("deletion successful")
+                        } catch {
+                            print("tab deletion error: \(error)")
+                        }
+                    
                     } label: {
                         Label("Delete selected tab/s", systemImage: "trash")
                     }
@@ -136,7 +149,6 @@ struct MainMenu: View {
                             if tabSlideOver {
                                 
                                 Button {
-                                    
                                     if selectedTab { deleteMultipleTabs.remove(insertID)
                                     } else {
                                         deleteMultipleTabs.insert(insertID)
@@ -144,12 +156,7 @@ struct MainMenu: View {
                                     
                                 } label: {
                                     
-                                    Circle()
-                                        .fill(selectedTab ? Color.blue.opacity(0.7) : Color.mmBackground)
-                                        .stroke(Color.gray, lineWidth: 0.5)
-                                        .frame(width: 27, height: 27)
-                                        .transition(.move(edge: .trailing).combined(with: .slide))
-                                       
+                                    TabSelectionCircle(selectedTab: selectedTab)
                                 }
                             }
                             
@@ -161,7 +168,7 @@ struct MainMenu: View {
                                     
                                 } label: {
                                     MainMenuTab(showEmoji: tabEmoji, showTitle: tabContent)
-                                }
+                                }.allowsHitTesting(!tabSlideOver)
                             }
                         }
                     }
@@ -189,5 +196,5 @@ struct MainMenu: View {
 
 
 #Preview {
-    MainMenu()
+    MainMenu(pageID: "")
 }

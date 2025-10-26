@@ -32,10 +32,10 @@ struct SignOutView: View {
                 
           
             Spacer()
-            Text("Sign into MuscleMemory ")
+            Text("Sign into Rep ")
                 .fontWeight(.bold)
                 .font(.system(size: 16))
-                .padding(.trailing, 70)
+                .padding(.trailing, 155)
                 .padding(.bottom, 1)
          
             Text("Powered by Kimchi Labs  ")

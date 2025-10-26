@@ -22,7 +22,7 @@ import SwiftData
                     .navigationDestination(for: NavPathItem.self) { navigationPathItem in
                         switch navigationPathItem {
                         case .home:
-                            MainMenu()
+                            MainMenu(pageID: "")
                         case .settings:
                             SettingsView()
                         case .importPage:
@@ -42,21 +42,21 @@ import SwiftData
 struct MuscleMemoryApp: App {
     
     let centralContainer = try! ModelContainer(for: UserEmail.self , UserPageTitle.self, UserPageContent.self)
+   
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     
     var body: some Scene {
         
         WindowGroup {
             RootTabs()
+    
                 .onOpenURL { url in
                     if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true ) {
                         if let codeParse = parseCodeQuery.queryItems?.first(where: {$0.name == "code" })?.value {
                             print("code Query recieved and parsed\(parseCodeQuery)")
                             
-                            
                             let pages = searchPages.shared.modelContextTitle
                             let context = OAuthTokens.shared.modelContextEmail
-                            
                             
                             Task {
                                 do {
@@ -77,7 +77,6 @@ struct MuscleMemoryApp: App {
                 .preferredColorScheme(toggleEnabled ? .dark : .light)
         }
         .modelContainer(centralContainer)
-        
         
     }
 }

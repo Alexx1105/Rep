@@ -131,14 +131,10 @@ public class searchPages: ObservableObject {
                 let storedTitle = UserPageTitle(titleID: pageID, icon: customType, plain_text: displayTitle, emoji: optionalEmoji)
                 modelContextTitle?.insert(storedTitle)
                 try modelContextTitle?.save()
-                
+
             } else {
                 print("an object is not being stored")
             }
-            
-            
-            
-            
             
         } catch {
             print("bad response")
