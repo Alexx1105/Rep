@@ -89,7 +89,7 @@
 		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
 		B22E10F52D067E89003F3D9F /* SearchUserPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchUserPages.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B254B0F72D6A1D2F00A0541F /* MuscleMemory.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MuscleMemory.entitlements; sourceTree = "<group>"; };
+		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
 		B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPermissions.swift; sourceTree = "<group>"; };
 		B25A0A472D91D9E300420892 /* DynamicRepTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepTest.swift; sourceTree = "<group>"; };
 		B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DynamicRepExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,7 +100,7 @@
 		B26A46662CD04C210064AF46 /* SignOutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutView.swift; sourceTree = "<group>"; };
 		B271C18F2CD1CEBB00710E70 /* NavPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavPath.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
-		B2B837C32BCB102F00BBC748 /* MuscleMemory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MuscleMemory.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2B837C62BCB102F00BBC748 /* MuscleMemoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuscleMemoryApp.swift; sourceTree = "<group>"; };
 		B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedNotes.swift; sourceTree = "<group>"; };
 		B2B837CA2BCB103000BBC748 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -151,7 +151,7 @@
 		B2B837BA2BCB102F00BBC748 = {
 			isa = PBXGroup;
 			children = (
-				B2B837C52BCB102F00BBC748 /* MuscleMemory */,
+				B2B837C52BCB102F00BBC748 /* Rep */,
 				B25A0A972D94FE3300420892 /* DynamicRep */,
 				B2D220DA2BD981B800E55834 /* Frameworks */,
 				B2B837C42BCB102F00BBC748 /* Products */,
@@ -161,13 +161,13 @@
 		B2B837C42BCB102F00BBC748 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B2B837C32BCB102F00BBC748 /* MuscleMemory.app */,
+				B2B837C32BCB102F00BBC748 /* Rep.app */,
 				B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B2B837C52BCB102F00BBC748 /* MuscleMemory */ = {
+		B2B837C52BCB102F00BBC748 /* Rep */ = {
 			isa = PBXGroup;
 			children = (
 				B2D362FE2E2C855900C3012C /* .gitignore */,
@@ -189,12 +189,12 @@
 				B26A46622CCFC4250064AF46 /* LaunchScreen.swift */,
 				B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */,
 				B25A0A472D91D9E300420892 /* DynamicRepTest.swift */,
-				B254B0F72D6A1D2F00A0541F /* MuscleMemory.entitlements */,
+				B254B0F72D6A1D2F00A0541F /* Rep.entitlements */,
 				B248E14F2CE052DF005B9649 /* Info.plist */,
 				B2B837CA2BCB103000BBC748 /* Assets.xcassets */,
 				B2B837CC2BCB103000BBC748 /* Preview Content */,
 			);
-			path = MuscleMemory;
+			path = Rep;
 			sourceTree = "<group>";
 		};
 		B2B837CC2BCB103000BBC748 /* Preview Content */ = {
@@ -240,9 +240,9 @@
 			productReference = B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		B2B837C22BCB102F00BBC748 /* MuscleMemory */ = {
+		B2B837C22BCB102F00BBC748 /* Rep */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B2B837E72BCB103000BBC748 /* Build configuration list for PBXNativeTarget "MuscleMemory" */;
+			buildConfigurationList = B2B837E72BCB103000BBC748 /* Build configuration list for PBXNativeTarget "Rep" */;
 			buildPhases = (
 				B2B837BF2BCB102F00BBC748 /* Sources */,
 				B2B837C02BCB102F00BBC748 /* Frameworks */,
@@ -257,9 +257,9 @@
 				B2997BDB2E564E36004AF870 /* PBXTargetDependency */,
 				B2C2A9AD2E888D7000816A0B /* PBXTargetDependency */,
 			);
-			name = MuscleMemory;
+			name = Rep;
 			productName = MuscleMemory;
-			productReference = B2B837C32BCB102F00BBC748 /* MuscleMemory.app */;
+			productReference = B2B837C32BCB102F00BBC748 /* Rep.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -280,7 +280,7 @@
 					};
 				};
 			};
-			buildConfigurationList = B2B837BE2BCB102F00BBC748 /* Build configuration list for PBXProject "MuscleMemory" */;
+			buildConfigurationList = B2B837BE2BCB102F00BBC748 /* Build configuration list for PBXProject "Rep" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -297,7 +297,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B2B837C22BCB102F00BBC748 /* MuscleMemory */,
+				B2B837C22BCB102F00BBC748 /* Rep */,
 				B25A0A932D94FE3300420892 /* DynamicRepExtension */,
 			);
 		};
@@ -586,15 +586,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = MuscleMemory/MuscleMemory.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"MuscleMemory/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Rep/Preview Content\"";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MuscleMemory/Info.plist;
+				INFOPLIST_FILE = Rep/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -626,15 +626,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = MuscleMemory/MuscleMemory.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"MuscleMemory/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Rep/Preview Content\"";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MuscleMemory/Info.plist;
+				INFOPLIST_FILE = Rep/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -673,7 +673,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B2B837BE2BCB102F00BBC748 /* Build configuration list for PBXProject "MuscleMemory" */ = {
+		B2B837BE2BCB102F00BBC748 /* Build configuration list for PBXProject "Rep" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B2B837E52BCB103000BBC748 /* Debug */,
@@ -682,7 +682,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B2B837E72BCB103000BBC748 /* Build configuration list for PBXNativeTarget "MuscleMemory" */ = {
+		B2B837E72BCB103000BBC748 /* Build configuration list for PBXNativeTarget "Rep" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B2B837E82BCB103000BBC748 /* Debug */,

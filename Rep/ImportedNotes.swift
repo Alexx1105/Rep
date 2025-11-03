@@ -55,7 +55,7 @@ struct ImportedNotes: View {
                     Button {
                            dismissTab()
                     } label: {
-                        Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(8)
+                        Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(13)
                     }.glassEffect()
                     
                     if let emojis = filterTitle.first?.emoji, let title = filterTitle.first?.plain_text {

@@ -62,6 +62,7 @@ struct MainMenu: View {
                             }
                         }
                     
+                    
                     if let email = showUserEmail.first?.personEmail {
                         Text("\(email)")
                             .fontWeight(.regular)
@@ -92,7 +93,7 @@ struct MainMenu: View {
                     Button {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) { tabSlideOver = true }
                     } label: {
-                        Label("Select tab", systemImage: "checkmark.circle")
+                        Label("Select tab/s", systemImage: "checkmark.circle")
                     }; Button {
     
                         tabSlideOver = false
@@ -121,7 +122,7 @@ struct MainMenu: View {
                     }
                 } label: {
                     Circle()
-                    .frame(height: 35)}
+                    .frame(height: 45)}
                     .glassEffect()
                     .buttonStyle(PlainButtonStyle())
                     

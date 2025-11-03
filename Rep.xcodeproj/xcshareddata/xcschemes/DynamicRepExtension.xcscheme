@@ -19,7 +19,7 @@
                BlueprintIdentifier = "B25A0A932D94FE3300420892"
                BuildableName = "DynamicRepExtension.appex"
                BlueprintName = "DynamicRepExtension"
-               ReferencedContainer = "container:MuscleMemory.xcodeproj">
+               ReferencedContainer = "container:Rep.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -49,7 +49,7 @@
             BlueprintIdentifier = "B25A0A932D94FE3300420892"
             BuildableName = "DynamicRepExtension.appex"
             BlueprintName = "DynamicRepExtension"
-            ReferencedContainer = "container:MuscleMemory.xcodeproj">
+            ReferencedContainer = "container:Rep.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -84,7 +84,7 @@
             BlueprintIdentifier = "B25A0A932D94FE3300420892"
             BuildableName = "DynamicRepExtension.appex"
             BlueprintName = "DynamicRepExtension"
-            ReferencedContainer = "container:MuscleMemory.xcodeproj">
+            ReferencedContainer = "container:Rep.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

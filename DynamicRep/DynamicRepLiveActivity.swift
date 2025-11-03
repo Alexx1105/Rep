@@ -32,12 +32,23 @@ struct DynamicRepLiveActivity: Widget {
             VStack(alignment: .leading, spacing: 3) {
                 
                 VStack(alignment: .leading) {
+                    
                     Text("from: \(context.state.plainText)")
                         .fontWeight(.regular)
                         .font(.system(size: 16))
-                        .foregroundStyle(Color.gray)
+                        .foregroundStyle(Color.intervalBlue)
                         .padding(.leading, 11)
                         .padding(.top, 12)
+                    
+                        
+//                        .overlay {
+//                            Rectangle()
+//                                .frame(width: .infinity, height: 23)
+//                                .foregroundStyle(Color.intervalBlue).opacity(0.2)
+//                                .frame(minWidth: 50 ,maxWidth: .infinity, maxHeight: 3)
+//                                
+//                        }
+//                        
                     
                     
                     VStack(alignment: .leading) {
@@ -92,16 +103,16 @@ struct DynamicRepLiveActivity: Widget {
                 
                 DynamicIslandExpandedRegion(.trailing) {
                     
-                    VStack(alignment: .trailing) {
-                        Circle()
-                            .frame(width: 53, height: 50)
-                            .foregroundStyle(Color.gray).opacity(0.20)
-                            .overlay {
-                                Image("mmicon")
-                            }
-                        Spacer()
-                    }
-                    .padding(.trailing, -4)
+//                    VStack(alignment: .trailing) {
+//                        Circle()
+//                            .frame(width: 53, height: 50)
+//                            .foregroundStyle(Color.gray).opacity(0.20)
+//                            .overlay {
+//                                Image("mmicon")
+//                            }
+//                        Spacer()
+//                    }
+//                    .padding(.trailing, -4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack {
