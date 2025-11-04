@@ -33,7 +33,6 @@ final class Query: ObservableObject {
     static let accessQuery = Query()
 }
 
-
 struct DynamicRepControlsView: View {
     
     @ObservedObject public var childQuery = Query.accessQuery
@@ -44,11 +43,13 @@ struct DynamicRepControlsView: View {
     
     @Environment(\.modelContext) var modelContextPage
     
+    
     @Query var pageContent: [UserPageContent]
     @Query var pageTitle: [UserPageTitle]
     
-    @State var storeSelectedOption: Int = 0
-    @State var storeDisableOption: Int = 0
+    @AppStorage("intervalOption") var storeSelectedOption: Int = 0
+    @AppStorage("disableOption") var storeDisableOption: Int = 0
+    
     
     var body: some View {
         VStack(spacing: 70) {
@@ -99,7 +100,7 @@ struct DynamicRepControlsView: View {
                     .init(label: "2h 30m",  symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 2, minute: 30)),
                     .init(label: "3h 40m",  symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 3, minute: 40))
                 ]
-                             
+                
                 ZStack(alignment: .top) {
                     SliderView(sliderOptions: frequencyOptions, initialSelectedOption: storeSelectedOption) { newOptionIndex in
                         switch newOptionIndex {
@@ -116,6 +117,7 @@ struct DynamicRepControlsView: View {
                         }
                         storeSelectedOption = newOptionIndex
                     }
+                    
                     .padding(.horizontal, 10)
                     .onChange(of: storeSelectedOption) {
                         guard storeSelectedOption < frequencyOptions.count else { return }
@@ -210,24 +212,25 @@ struct DynamicRepControlsView: View {
                         default:
                             break
                         }
+                        storeDisableOption = disable
                     }
                     
                     HStack(alignment: .top, spacing: 130) {
-                                               Text("Off")
-                                                   .fontWeight(.medium)
-                                                   .font(.system(size: 16))
-                                                   .opacity(textOpacity)
-                                               
-                                               Text("24hrs")
-                                                   .fontWeight(.medium)
-                                                   .font(.system(size: 16))
-                                                   .opacity(textOpacity)
-                                               
-                                               Text("48hrs")
-                                                   .fontWeight(.medium)
-                                                   .font(.system(size: 16))
-                                                   .opacity(textOpacity)
-                                               
+                        Text("Off")
+                            .fontWeight(.medium)
+                            .font(.system(size: 16))
+                            .opacity(textOpacity)
+                        
+                        Text("24hrs")
+                            .fontWeight(.medium)
+                            .font(.system(size: 16))
+                            .opacity(textOpacity)
+                        
+                        Text("48hrs")
+                            .fontWeight(.medium)
+                            .font(.system(size: 16))
+                            .opacity(textOpacity)
+                        
                     }.padding(.leading, 15)
                     
                     
@@ -281,6 +284,6 @@ struct DynamicRepControlsView: View {
 
 
 #Preview {
-    DynamicRepControlsView()
+    DynamicRepControlsView(storeSelectedOption: 0)
 }
 

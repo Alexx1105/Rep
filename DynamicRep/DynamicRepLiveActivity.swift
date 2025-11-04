@@ -32,23 +32,22 @@ struct DynamicRepLiveActivity: Widget {
             VStack(alignment: .leading, spacing: 3) {
                 
                 VStack(alignment: .leading) {
-                    
-                    Text("from: \(context.state.plainText)")
-                        .fontWeight(.regular)
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color.intervalBlue)
-                        .padding(.leading, 11)
-                        .padding(.top, 12)
-                    
-                        
-//                        .overlay {
-//                            Rectangle()
-//                                .frame(width: .infinity, height: 23)
-//                                .foregroundStyle(Color.intervalBlue).opacity(0.2)
-//                                .frame(minWidth: 50 ,maxWidth: .infinity, maxHeight: 3)
-//                                
-//                        }
-//                        
+                   
+                    ZStack {
+                        Text("from: \(context.state.plainText)")
+                            .fontWeight(.medium)
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color.intervalBlue)
+                            .padding(.horizontal)
+                            .padding(.top, 12)
+                            .background(Capsule()
+                                .frame(width: .infinity, height: 23)
+                                .foregroundStyle(Color.intervalBlue).opacity(0.3)
+                                .padding(.top)
+                                .padding(.leading, 1))
+
+                    }
+                       
                     
                     
                     VStack(alignment: .leading) {

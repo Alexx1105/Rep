@@ -9,7 +9,7 @@ import SwiftUI
 import Foundation
 import SwiftData
 import NotificationCenter
-
+import KimchiKit
 
 
 @MainActor
@@ -79,7 +79,6 @@ struct MainMenu: View {
             
             
             Spacer()
-            
             
             HStack {
                 
