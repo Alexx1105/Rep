@@ -91,28 +91,23 @@ struct DynamicRepLiveActivity: Widget {
                     HStack {
                         VStack(alignment: .leading) {
                             Text(context.state.plainText)
-                                .fontWeight(.regular)
+                                .fontWeight(.medium)
                                 .font(.system(size: 16))
-                                .foregroundStyle(Color.gray)
-                                .padding(.top, 14)
+                                .foregroundStyle(Color.intervalBlue)
+                                .padding(.horizontal)
+                                .padding(.top, 12)
+                                .background(Capsule()
+                                    .frame(width: .infinity, height: 23)
+                                    .foregroundStyle(Color.intervalBlue).opacity(0.3)
+                                    .padding(.top)
+                                    .padding(.leading, 1))
                             
                         }.frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
                 
-                DynamicIslandExpandedRegion(.trailing) {
-                    
-//                    VStack(alignment: .trailing) {
-//                        Circle()
-//                            .frame(width: 53, height: 50)
-//                            .foregroundStyle(Color.gray).opacity(0.20)
-//                            .overlay {
-//                                Image("mmicon")
-//                            }
-//                        Spacer()
-//                    }
-//                    .padding(.trailing, -4)
-                }
+                DynamicIslandExpandedRegion(.trailing) {}  ///Empty for now
+                
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack {
                         VStack(alignment: .leading) {

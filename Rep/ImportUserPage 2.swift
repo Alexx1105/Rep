@@ -48,7 +48,6 @@ public struct PushToSupabase: Encodable {
     var token: String
     var page_data: String
     var page_id: String
-    var page_title: String
 }
 
 let supabaseDBClient = SupabaseClient(supabaseURL: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co")!,
@@ -151,8 +150,8 @@ class ImportUserPage: ObservableObject {
                                 let formattedTokenString = data.map {String(format: "%02x", $0)}.joined()
                                 Logger().log("new push token created: \(data)")
                                 
-                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: storeStrings, page_id: pageIDString, page_title: SendTitle.shareTitle.displayTitle)
-                                let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
+                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: storeStrings, page_id: pageIDString)
+                                let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data").execute()
                                 let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
                                 
                                 Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")

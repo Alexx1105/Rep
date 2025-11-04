@@ -41,15 +41,6 @@ public struct NotionSearchRequest: Codable {    //add other properties (if neede
 
 
     public var returnedBlocks: [NotionSearchRequest.result] = []
-
-final class SendTitle {    ///so page title can be sent to supabase alongside page content in ImportUserPage.swift
-    static let shareTitle = SendTitle(displayTitle: "")
-    private init(displayTitle: String) {
-        self.displayTitle = displayTitle
-    }
-    
-    var displayTitle: String
-}
    
    
 @MainActor
@@ -141,8 +132,6 @@ public class searchPages: ObservableObject {
                 modelContextTitle?.insert(storedTitle)
                 try modelContextTitle?.save()
 
-                SendTitle.shareTitle.displayTitle = displayTitle
-                
             } else {
                 print("an object is not being stored")
             }
