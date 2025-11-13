@@ -29,12 +29,12 @@ struct DynamicRepLiveActivity: Widget {
         ActivityConfiguration(for: DynamicRepAttributes.self) { context in
             // Lock screen/banner UI goes here
             
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 2) {
                    
                     ZStack {
-                        Text("from: \(context.state.plainText)")
+                        Text(context.state.plainText)
                             .fontWeight(.medium)
                             .font(.system(size: 16))
                             .foregroundStyle(Color.intervalBlue)
@@ -46,19 +46,20 @@ struct DynamicRepLiveActivity: Widget {
                                 .padding(.top)
                                 .padding(.leading, 1))
 
-                    }
+                    }.padding(.leading, 7)
                        
                     
                     
-                    VStack(alignment: .leading) {
+                    HStack(alignment: .top) {
                         let contentArray: [String] = context.state.userContentPage
                         let array = contentArray.compactMap { $0 }
                         let content = array.joined(separator: "\n")
                         Text("\n\(content)")
                             .fontWeight(.semibold)
                             .font(.system(size: 16))
-                            .lineSpacing(3)
+                            .lineSpacing(2)
                             .lineLimit(7)
+                            .minimumScaleFactor(0.9)
                             .padding(.leading, 11)
                         
                     }
@@ -88,39 +89,39 @@ struct DynamicRepLiveActivity: Widget {
                 }
                 
                 DynamicIslandExpandedRegion(.center) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(context.state.plainText)
-                                .fontWeight(.medium)
-                                .font(.system(size: 16))
-                                .foregroundStyle(Color.intervalBlue)
-                                .padding(.horizontal)
-                                .padding(.top, 12)
-                                .background(Capsule()
-                                    .frame(width: .infinity, height: 23)
-                                    .foregroundStyle(Color.intervalBlue).opacity(0.3)
-                                    .padding(.top)
-                                    .padding(.leading, 1))
-                            
-                        }.frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                   
+                    HStack(alignment: .top) {
+                        Text(context.state.plainText)
+                            .fontWeight(.medium)
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color.intervalBlue)
+                            .padding(.horizontal)
+                            .background(Capsule()
+                                .frame(width: .infinity, height: 23)
+                                .foregroundStyle(Color.intervalBlue).opacity(0.3))
+                        
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                     .padding(.top)
+                    
                 }
                 
                 DynamicIslandExpandedRegion(.trailing) {}  ///Empty for now
                 
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            let contentArray: [String] = context.state.userContentPage
-                            let array = contentArray.compactMap { $0 }
-                            let content = array.joined(separator: "\n")
-                            Text("\(content)")
-                                .fontWeight(.semibold)
-                                .font(.system(size: 16))
-                                .padding(.leading, 7)
-                            
-                        }.frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    
+                    HStack(alignment: .top, spacing: 0) {
+                        let contentArray: [String] = context.state.userContentPage
+                        let array = contentArray.compactMap { $0 }
+                        let content = array.joined(separator: "\n")
+                        Text(content)
+                            .fontWeight(.semibold)
+                            .font(.system(size: 16))
+                           .minimumScaleFactor(0.9)
+                        
+                        Spacer()
+                    }.padding(.leading, 15)
+                     .frame(maxHeight: .infinity)
+                    
                 }
             } compactLeading: {
                 AppLogo()

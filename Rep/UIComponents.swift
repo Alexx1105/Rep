@@ -75,25 +75,6 @@ struct MainMenuTab: View {
                     }
                     
                     
-                    Button(role: .destructive, action: {
-                        Task {
-                            do {
-                                let toInt = Query.accessQuery.queryID
-                                print(toInt)
-                                let convert = toInt.compactMap{Int($0)}
-                                print("converted id: \(convert)")
-                                let _ = try await supabaseDBClient.from("push_tokens").update(["offset_date" : "1970-01-01T00:00:00Z"]).in("id", values: convert).execute()
-                                
-                                print("Dynamic rep disabled from menu popover")
-                            } catch {
-                                print("nil query id's or type mismatch error", error.localizedDescription)
-                            }
-                        }
-                        
-                        
-                    }) { Label("Disable", systemImage: "multiply.circle")
-                        
-                    }
                     
                 } label: {
                     

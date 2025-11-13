@@ -82,6 +82,8 @@ struct MainMenu: View {
             
             HStack {
                 
+                //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}
+                
                 Text("Your notes from Notion:")
                     .fontWeight(.semibold)
                     .opacity(textOpacity)

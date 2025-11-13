@@ -28,10 +28,41 @@ struct Offset: Codable {
     let offset_date: Date
 }
 
+struct SliderSelection: Equatable {
+    let label: String
+    let interval: DateComponents
+    
+}
+
+ var lastSelected: SliderSelection?
+
 final class Query: ObservableObject {
     @Published var queryID: [String] = []
     static let accessQuery = Query()
 }
+
+
+func staggerDateComponents(components: DateComponents, add: Int = 1) -> DateComponents {
+     var new = DateComponents()
+    
+    if let bumpHr = components.hour {
+        new.hour = bumpHr + add
+    }
+    return new
+}
+
+func indexBumpedOffsets(index: Int, now: Date, selectedOption: SliderView.SliderOption, perRows: Int = 5, currentDate: Calendar = .current) -> Date? {
+    
+    guard selectedOption.label != "Off" else { return nil }
+    
+    let compute = max(1, index / perRows) + 1
+    let bumpOffset = staggerDateComponents(components: selectedOption.interval, add: compute)
+    print("offsets: \(bumpOffset)")
+    
+    return Calendar.current.date(byAdding: bumpOffset, to: now)
+
+}
+
 
 struct DynamicRepControlsView: View {
     
@@ -143,25 +174,38 @@ struct DynamicRepControlsView: View {
                                 
                                 let selectedOption = frequencyOptions[storeSelectedOption]
                                 let now = Date()
-                                let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: now)
+                                let rows: Int = 5
                                 
-                                if selectedOption.label == "Off" {
+                                var base: Date = now
+                                
+                                for i in stride(from: 0, to: queryID.count, by: rows) {
+                                    
+                                    let currentSelection = SliderSelection(label: selectedOption.label, interval: selectedOption.interval)
+                                    
+                                    if lastSelected != currentSelection {
+                                        lastSelected = currentSelection
+                                        base = Date()
+                                    }
+                                    
+                                    let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: base)
+                                    
+                                    let _ = indexBumpedOffsets(index: i, now: base, selectedOption: selectedOption)
+                                    let batch = min(i + rows, queryID.count)
+                                    let idsPerBatch = Array(queryID[i..<batch])
+                                    
                                     do {
-                                        let disable = try await supabaseDBClient.from("push_tokens").update(["offset_date" : "1970-01-01T00:00:00Z"]).in("id", values: queryID).execute()
-                                        print("slider off: \(disable)")
+                                        let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).execute()
+                                        print("OFFSET DATE SENT TO SUPABASE: \(send)")
+                                        
                                     } catch {
-                                        print("failed to disable: \(error)")
+                                        print("failed to send offset date to supabase ❗️: \(error.localizedDescription)")
+                                    }
+                                    if let chainedOffsets = computedOffset {
+                                        base = chainedOffsets
                                     }
                                 }
-                                
-                                do {
-                                    let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: queryID).execute()
-                                    print("OFFSET DATE SENT TO SUPABASE: \(send)")
-                                } catch {
-                                    print("failed to send offset date to supabase ❗️: \(error)")
-                                }
                             } catch {
-                                print("failed to query id's from supabase ❌: \(error)")
+                                print("failed to query id's from supabase ❌: \(error.localizedDescription)")
                             }
                         }
                     }
@@ -277,9 +321,7 @@ struct DynamicRepControlsView: View {
         .background(Color.mmBackground)
         .navigationBarBackButtonHidden()
     }
-    
 }
-
 
 
 
