@@ -44,6 +44,7 @@ struct MainBlockBody: Codable, Identifiable {
 }
 
 
+
 public struct PushToSupabase: Encodable {
     var token: String
     var page_data: String
@@ -69,7 +70,8 @@ class ImportUserPage: ObservableObject {
     var storeStrings: String?
     var userContentPage: String?
     var userPageId: String?
-    
+    var storePageIDSets: Set<String> = []
+  
     public func pageEndpoint() async throws {
         let pageID = returnedBlocks.first?.id ?? "pageID is nil"
         let pagesEndpoint = "https://api.notion.com/v1/blocks/"
@@ -139,24 +141,29 @@ class ImportUserPage: ObservableObject {
                 for i in returnDecodedResults {
                     for storeStrings in i.ExtractedFields {
                         
-                        let pageID = returnedBlocks.first?.id ?? ""
+                        var pageID = returnedBlocks.first?.id ?? ""
+                        storePageIDSets.insert(pageID)
+                        print("page ids interted: \([storePageIDSets])")
+                        pageID = returnedBlocks.first?.id ?? ""
                         let storedPages = UserPageContent(userContentPage: storeStrings, userPageId: pageID)
                         modelContextPage?.insert(storedPages)
                         print("SEND THIS TO SUPABASE: \(storeStrings)")
-                        print("block id persited: \(pageID)")
+                        print("page id persited: \(pageID)")
                         
-                        Task { [pageIDString = i.id] in
+                        
+                        Task {
                             
                             for await data in Activity<DynamicRepAttributes>.pushToStartTokenUpdates {
                                 let formattedTokenString = data.map {String(format: "%02x", $0)}.joined()
                                 Logger().log("new push token created: \(data)")
                                 
-                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: storeStrings, page_id: pageIDString, page_title: SendTitle.shareTitle.displayTitle)
+                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: storeStrings, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
                                 let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
                                 let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
-                                
+                              
                                 Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
                                 Logger().log("push token successfully sent up to Supabase: \(String(describing:(sendToken)))")
+                               
                             }
                         }
                     }

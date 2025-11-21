@@ -74,7 +74,7 @@ public class searchPages: ObservableObject {
    
     let searchEndpoint = URL(string: "https://api.notion.com/v1/search")
     
-    private init() { }
+    private init() {}
     
     public func userEndpoint(modelContextTitle: ModelContext?) async throws {
         guard let url = searchEndpoint else { return }

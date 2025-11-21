@@ -16,16 +16,17 @@ import KimchiKit
 struct MainMenu: View {
     
     @Environment(\.modelContext) var modelContext
+    @Environment(\.colorScheme) var colorScheme
     
     @Query var showUserEmail: [UserEmail]
     @Query var pageTitle: [UserPageTitle]
       
     var pageID: String
+    
     var filterTabTitle: [UserPageTitle] {
         pageTitle.filter{($0.titleID == pageID)}
     }
-    
-    @Environment(\.colorScheme) var colorScheme
+
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
@@ -35,8 +36,14 @@ struct MainMenu: View {
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
-    
-    
+
+    private func delete(pageID: [String]) async throws {
+       
+        let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
+        print("page ids here: \(pageID)")
+   }
+
+
     var body: some View {
         
         VStack {
@@ -75,14 +82,12 @@ struct MainMenu: View {
             }.frame(maxWidth: .infinity, maxHeight: 50)
                 .opacity(showUserEmail.first?.personEmail != nil ? 1 : 0)
         
-       
-            
             
             Spacer()
             
             HStack {
                 
-                //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}
+                //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
                 
                 Text("Your notes from Notion:")
                     .fontWeight(.semibold)
@@ -97,27 +102,36 @@ struct MainMenu: View {
                         Label("Select tab/s", systemImage: "checkmark.circle")
                     }; Button {
     
-                        tabSlideOver = false
                         deleteMultipleTabs.removeAll()
+                        tabSlideOver = false
                         
                     } label: {
                         Label("Cancel select", systemImage: "xmark.circle")
                     }
-                
+                      Divider()
                     Button(role: .destructive) {
                         guard !deleteMultipleTabs.isEmpty else { return }
                         let deleteTabIDs = Set(deleteMultipleTabs)
-                        
+               
                         do {
                             try modelContext.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
                             try modelContext.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             try modelContext.save()
                             
+                             let ids = Array(deleteMultipleTabs)
+                         
+                            print("stored ids: \(deleteMultipleTabs)")
+                            Task {
+                                try await delete(pageID: ids )
+                            }
+                            
+                            tabSlideOver = false
+                            
                             print("deletion successful")
                         } catch {
                             print("tab deletion error: \(error)")
                         }
-                    
+                      
                     } label: {
                         Label("Delete selected tab/s", systemImage: "trash")
                     }
@@ -151,6 +165,7 @@ struct MainMenu: View {
                             if tabSlideOver {
                                 
                                 Button {
+                                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
                                     if selectedTab { deleteMultipleTabs.remove(insertID)
                                     } else {
                                         deleteMultipleTabs.insert(insertID)
@@ -165,11 +180,10 @@ struct MainMenu: View {
                             if !tabContent.isEmpty || !tabEmoji.isEmpty {
                                 NavigationLink {
                                     ImportedNotes(pageID: isolatedContent.titleID)
-                                    
                                         .navigationBarBackButtonHidden(true)
                                     
                                 } label: {
-                                    MainMenuTab(showEmoji: tabEmoji, showTitle: tabContent)
+                                    MainMenuTab(emoji: tabEmoji, title: tabContent, pageID: isolatedContent.titleID)
                                 }.allowsHitTesting(!tabSlideOver)
                             }
                         }
@@ -194,7 +208,7 @@ struct MainMenu: View {
         }
     }
 }
-
+    
 
 
 #Preview {

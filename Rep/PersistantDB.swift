@@ -24,12 +24,15 @@ import SwiftUI
     @Attribute public var userContentPage: String?
     @Attribute public var userPageId: String
     @Attribute public var rich_text: String?
+    @Attribute public var plain_text: String?
+
     
-    public init(userContentPage: String? = nil, userPageId: String, rich_text: String? = nil) {
+    public init(userContentPage: String? = nil, userPageId: String, rich_text: String? = nil, plain_text: String? = nil) {
         self.id = UUID()
         self.userContentPage = userContentPage
         self.userPageId = userPageId
         self.rich_text = rich_text
+        self.plain_text = plain_text
     }
 }
 

@@ -69,11 +69,10 @@ struct DynamicRepControlsView: View {
     @ObservedObject public var childQuery = Query.accessQuery
     @Environment(\.dismiss) var dismissControlsTab
     @Environment(\.colorScheme) var colorScheme
-    private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
-    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-    
     @Environment(\.modelContext) var modelContextPage
     
+    private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
     @Query var pageContent: [UserPageContent]
     @Query var pageTitle: [UserPageTitle]
@@ -81,7 +80,15 @@ struct DynamicRepControlsView: View {
     @AppStorage("intervalOption") var storeSelectedOption: Int = 0
     @AppStorage("disableOption") var storeDisableOption: Int = 0
     
+    var pageID: String
+    var filterTitle: String {
+        return pageTitle.first(where: { $0.titleID == pageID})?.plain_text ?? ""
+    }
     
+    var filterPageID: String {
+        return pageTitle.first(where: { $0.titleID == pageID})?.titleID ?? ""
+    }
+
     var body: some View {
         VStack(spacing: 70) {
             
@@ -97,13 +104,12 @@ struct DynamicRepControlsView: View {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
-                    
-                    if let title = pageTitle.first?.plain_text {
-                        Text("\(title)")
+                   
+                        Text(filterTitle)
                             .font(.system(size: 16)).lineSpacing(3)
                             .fontWeight(.medium)
                             .opacity(0.25)
-                    }
+                    
                 }
             }.padding(.top, 5)
             
@@ -153,7 +159,7 @@ struct DynamicRepControlsView: View {
                     .onChange(of: storeSelectedOption) {
                         guard storeSelectedOption < frequencyOptions.count else { return }
                         let opt = frequencyOptions[storeSelectedOption]
-                        let intervalTitle = pageTitle.first?.plain_text ?? "--"
+                        let intervalTitle = filterTitle
                         
                         Task {
                             try await Task.sleep(nanoseconds: 500_000_000)
@@ -192,13 +198,15 @@ struct DynamicRepControlsView: View {
                                     let _ = indexBumpedOffsets(index: i, now: base, selectedOption: selectedOption)
                                     let batch = min(i + rows, queryID.count)
                                     let idsPerBatch = Array(queryID[i..<batch])
+                                  
+                                    let _ = UserPageContent(userPageId: pageContent.first?.userPageId ?? "")
                                     
                                     do {
-                                        let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).execute()
+                                        let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [filterPageID]).execute()
                                         print("OFFSET DATE SENT TO SUPABASE: \(send)")
-                                        
+                                        print("page ids here: \(filterPageID)")
                                     } catch {
-                                        print("failed to send offset date to supabase ❗️: \(error.localizedDescription)")
+                                        print("failed to send offset timestamps to supabase ❗️: \(error.localizedDescription)")
                                     }
                                     if let chainedOffsets = computedOffset {
                                         base = chainedOffsets
@@ -210,7 +218,6 @@ struct DynamicRepControlsView: View {
                         }
                     }
                 }
-                
                 
                 
                 HStack {
@@ -312,7 +319,7 @@ struct DynamicRepControlsView: View {
                         }.buttonStyle(PlainButtonStyle())
                         
                     }.frame(maxHeight: .infinity)
-                        .padding(.top, 5)
+                     .padding(.top, 5)
                 }
             }
             Spacer()
@@ -326,6 +333,6 @@ struct DynamicRepControlsView: View {
 
 
 #Preview {
-    DynamicRepControlsView(storeSelectedOption: 0)
+    DynamicRepControlsView(storeSelectedOption: 0, pageID: "")
 }
 

@@ -14,7 +14,7 @@ struct RootTabs: View {
     var body: some View {
         NavigationStack {
             TabView {
-                Tab("Menu", image: "menuButton") {
+                Tab("Menu", systemImage: "list.bullet") {
                     MainMenu(pageID: "pageID")
                 }
                 Tab("Settings", systemImage: "gear") {
@@ -47,9 +47,9 @@ struct MainMenuTab: View {
     @Environment(\.colorScheme) var colorScheme
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-    let showEmoji: String?
-    let showTitle: String?
-    
+    let emoji: String?
+    let title: String?
+    let pageID: String
     
     var body: some View {
         
@@ -70,7 +70,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(storeSelectedOption: 0)) {
+                    NavigationLink(destination: DynamicRepControlsView(storeSelectedOption: 0, pageID: pageID)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
@@ -85,19 +85,25 @@ struct MainMenuTab: View {
                         .padding(5)
                 }
                 
-                if showEmoji != nil || showTitle != nil {
-                    Text(String("\(showEmoji ?? "")"))
-                    Text(String("\(showTitle ?? "")"))
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.mmDark)
-                } else {
-                    Rectangle()
-                        .cornerRadius(5)
-                        .frame(width: 150, height: 20)
-                        .opacity(0.1)
+                HStack(alignment: .center) {
                     
+                    if emoji != nil || title != nil {
+                        Text(String("\(emoji ?? "")"))
+                        Text(String("\(title ?? "")"))
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        
+                    } else {
+                        Rectangle()
+                            .cornerRadius(5)
+                            .frame(width: 150, height: 20)
+                            .opacity(0.1)
+                        
+                    }
                 }
-                
+                .frame(alignment: .leading)
                 
                 Spacer()
                 Image("arrowChevron")
@@ -250,7 +256,7 @@ struct SliderView: View {
 }
 
 #Preview {
-    MainMenuTab(showEmoji: "", showTitle: "") ///page tab
+    MainMenuTab(emoji: "emoji", title: "title", pageID: "pageID") ///page tab
 }
 
 
