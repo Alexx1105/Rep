@@ -145,19 +145,23 @@ class ImportUserPage: ObservableObject {
                         storePageIDSets.insert(pageID)
                         print("page ids interted: \([storePageIDSets])")
                         pageID = returnedBlocks.first?.id ?? ""
-                        let storedPages = UserPageContent(userContentPage: storeStrings, userPageId: pageID)
+                        
+                        let remove = CharacterSet(charactersIn: "•")
+                        let formatString = remove.union(.whitespacesAndNewlines)
+                        let formattedString = storeStrings.trimmingCharacters(in: formatString)
+                        
+                        let storedPages = UserPageContent(userContentPage: formattedString, userPageId: pageID)
                         modelContextPage?.insert(storedPages)
                         print("SEND THIS TO SUPABASE: \(storeStrings)")
                         print("page id persited: \(pageID)")
                         
                         
                         Task {
-                            
                             for await data in Activity<DynamicRepAttributes>.pushToStartTokenUpdates {
                                 let formattedTokenString = data.map {String(format: "%02x", $0)}.joined()
                                 Logger().log("new push token created: \(data)")
                                 
-                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: storeStrings, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
+                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: formattedString, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
                                 let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
                                 let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
                               

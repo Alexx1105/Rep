@@ -47,7 +47,6 @@ final class SendTitle {    ///so page title can be sent to supabase alongside pa
     private init(displayTitle: String) {
         self.displayTitle = displayTitle
     }
-    
     var displayTitle: String
 }
    
@@ -73,7 +72,6 @@ public class searchPages: ObservableObject {
     }
    
     let searchEndpoint = URL(string: "https://api.notion.com/v1/search")
-    
     private init() {}
     
     public func userEndpoint(modelContextTitle: ModelContext?) async throws {

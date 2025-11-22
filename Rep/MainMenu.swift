@@ -17,11 +17,9 @@ struct MainMenu: View {
     
     @Environment(\.modelContext) var modelContext
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.modelContext) var modelContextPage
     
     @Query var showUserEmail: [UserEmail]
     @Query var pageTitle: [UserPageTitle]
-    @Query var pageContent: [UserPageContent]
     
     var pageID: String
     

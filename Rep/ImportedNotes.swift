@@ -82,9 +82,8 @@ struct ImportedNotes: View {
                     
                     List(filterPage, id: \.self) { block in
                         
-                        Text(block.userContentPage ?? "")
-                            .font(.system(size: 16)).lineSpacing(3)
-                        
+                        Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
+                            .font(.system(size: 16)).lineSpacing(1)
                             .listRowBackground(Color.mmBackground)
                             .listRowSeparator(.hidden)
                         
