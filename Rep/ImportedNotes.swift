@@ -33,14 +33,8 @@ struct ImportedNotes: View {
     @State private var didLoad = false
     
     public func callEndpoint() async {
-        Task {
-            do {
-                ImportUserPage.shared.modelContextPagesStored(pagesContext: modelContextPage)
-                try await ImportUserPage.shared.pageEndpoint()
-            } catch {
-                print("error fetching persisted page data", error.localizedDescription)
-            }
-        }
+        ImportUserPage.shared.modelContextPagesStored(pagesContext: modelContextPage)
+        print("page data loaded from cache ✅")
     }
     
     

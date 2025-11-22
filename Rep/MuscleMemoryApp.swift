@@ -44,7 +44,7 @@ struct MuscleMemoryApp: App {
     let centralContainer = try! ModelContainer(for: UserEmail.self , UserPageTitle.self, UserPageContent.self)
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
-    
+   
     var body: some Scene {
         
         WindowGroup {

@@ -17,10 +17,12 @@ struct MainMenu: View {
     
     @Environment(\.modelContext) var modelContext
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.modelContext) var modelContextPage
     
     @Query var showUserEmail: [UserEmail]
     @Query var pageTitle: [UserPageTitle]
-      
+    @Query var pageContent: [UserPageContent]
+    
     var pageID: String
     
     var filterTabTitle: [UserPageTitle] {
@@ -36,6 +38,7 @@ struct MainMenu: View {
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
+    
 
     private func delete(pageID: [String]) async throws {
        

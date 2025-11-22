@@ -74,8 +74,6 @@ struct MainMenuTab: View {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
-                    
-                    
                 } label: {
                     
                     Image(systemName: "clock.arrow.2.circlepath")
@@ -100,7 +98,6 @@ struct MainMenuTab: View {
                             .cornerRadius(5)
                             .frame(width: 150, height: 20)
                             .opacity(0.1)
-                        
                     }
                 }
                 .frame(alignment: .leading)
@@ -112,16 +109,10 @@ struct MainMenuTab: View {
                 
             }
             .padding(.leading)
-            
-            
         }
         .frame(maxWidth: .infinity)
         .frame(height: 57)
-        
-        
-        
     }
-    
 }
 
 struct SliderView: View {

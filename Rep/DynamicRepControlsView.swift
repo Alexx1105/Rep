@@ -80,6 +80,8 @@ struct DynamicRepControlsView: View {
     @AppStorage("intervalOption") var storeSelectedOption: Int = 0
     @AppStorage("disableOption") var storeDisableOption: Int = 0
     
+    @State var individualSliderSelection: Int = 0   ///state binding to save selected interval for each individual tab
+    
     var pageID: String
     var filterTitle: String {
         return pageTitle.first(where: { $0.titleID == pageID})?.plain_text ?? ""
