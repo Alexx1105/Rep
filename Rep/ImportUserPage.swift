@@ -17,9 +17,13 @@ import KimchiKit
 struct MainBlockBody: Codable, Identifiable {
     let id = UUID()
     let results: [Block]
+    let next_cursor: String?
+    let has_more: Bool
     
     private enum CodingKeys: CodingKey {
         case results
+        case next_cursor
+        case has_more
     }
     
     struct Block: Codable {
@@ -55,6 +59,8 @@ public struct PushToSupabase: Encodable {
 let supabaseDBClient = SupabaseClient(supabaseURL: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co")!,
                                       supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94Z3Vtd3F4bmdocWNjYXp6cXZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0MTE0MjQsImV4cCI6MjA2Mjk4NzQyNH0.gt_S5p_sGgAEN1fJSPYIKEpDMMvo3PNx-pnhlC_2fKQ")
 
+let authToken = accessToken ?? ""
+var appendToken = "Bearer " + authToken
 
 @MainActor
 class ImportUserPage: ObservableObject {
@@ -77,7 +83,7 @@ class ImportUserPage: ObservableObject {
         let pagesEndpoint = "https://api.notion.com/v1/blocks/"
         let append = pagesEndpoint + "\(pageID)/children"
         
-        appendedID = append                             //assign before being compared so it is not nil by default
+        appendedID = append
         if appendedID == append {
             print("page ID was appended")
         } else {
@@ -93,16 +99,11 @@ class ImportUserPage: ObservableObject {
         guard let url = addURL else { return }
         var request = URLRequest(url: url)
         
-        if let authToken = accessToken {
-            let appendToken = "Bearer " + authToken
-            request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-            request.addValue(appendToken, forHTTPHeaderField: "Authorization")
-            print("page ID was successfully appended to the url")
-            print(appendToken)
-        } else {
-            print("headers could not be added or token could not be appended")
-        }
-        
+        guard !appendToken.isEmpty else { return }
+        request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
+        request.addValue(appendToken, forHTTPHeaderField: "Authorization")
+        print("page ID was successfully appended to the url")
+       
         
         do {
             request.httpMethod = "GET"
@@ -119,8 +120,36 @@ class ImportUserPage: ObservableObject {
             
             let decodePageData = JSONDecoder()
             let decodePage = try decodePageData.decode(MainBlockBody.self, from: userData)
-            var returnDecodedResults = decodePage.results
             
+            var allResults = decodePage.results
+            var moreResults = decodePage.has_more
+            var cursor = decodePage.next_cursor
+            
+            while moreResults, let _ = cursor {
+                if let nextCursor = decodePage.next_cursor {
+                    let paginate = append + "?page_size=100&start_cursor=\(nextCursor)"
+                    let nextURL = URL(string: paginate)
+                
+                    var buildNewURL = URLRequest(url: nextURL!)
+                    buildNewURL.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
+                    buildNewURL.addValue(appendToken, forHTTPHeaderField: "Authorization")
+                    
+                    let (nextData, _) = try await URLSession.shared.data(for: buildNewURL)
+                    let decodeNextPageData = try JSONDecoder().decode(MainBlockBody.self, from: nextData)
+                    print("decoded paginated data: \(decodeNextPageData)")
+                    
+                    allResults.append(contentsOf: decodeNextPageData.results)
+                    moreResults = decodeNextPageData.has_more
+                    cursor = decodeNextPageData.next_cursor
+                    
+                     print("paginated successfully ✅")
+                } else {
+                    print("page pagination with next_cursor failed ❌")
+                }
+            }
+            
+            var returnDecodedResults = allResults
+        
             for i in 0..<returnDecodedResults.count {
                 var extractedFields: [String] = []
                 if let paragraph = returnDecodedResults[i].paragraph, let richText = paragraph.rich_text {

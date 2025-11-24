@@ -13,7 +13,8 @@ import SwiftData
 struct ImportedNotes: View {
     var pageID: String
     var filterPage: [UserPageContent] {
-        pageContent.filter{($0.userPageId) == pageID }
+        guard !pageID.isEmpty else { return [] }
+        return pageContent.filter{($0.userPageId) == pageID }
     }
     
     var filterTitle: [UserPageTitle] {
@@ -97,12 +98,7 @@ struct ImportedNotes: View {
             .background(Color.mmBackground)
         }
         .task {
-            guard pageContent.isEmpty else { return }
-            guard !loading, !didLoad else { return }
-            loading = true
-            defer { loading = false }
-            await callEndpoint()
-            didLoad = true
+             await callEndpoint()
         }
     }
 }

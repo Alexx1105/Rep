@@ -80,7 +80,7 @@ struct DynamicRepControlsView: View {
     @AppStorage("intervalOption") var storeSelectedOption: Int = 0
     @AppStorage("disableOption") var storeDisableOption: Int = 0
     
-    @State var individualSliderSelection: Int = 0   ///state binding to save selected interval for each individual tab
+    @State var individualSliderSelection: [String: Int] = [:]   ///state binding to save selected interval for each individual tab
     
     var pageID: String
     var filterTitle: String {
@@ -90,6 +90,11 @@ struct DynamicRepControlsView: View {
     var filterPageID: String {
         return pageTitle.first(where: { $0.titleID == pageID})?.titleID ?? ""
     }
+    
+//    var storeSelectedOption: Int {
+//        set { individualSliderSelection[filterPageID] = newValue}
+//        get { individualSliderSelection[filterPageID] ?? 0 }
+//    }
 
     var body: some View {
         VStack(spacing: 70) {
@@ -154,7 +159,7 @@ struct DynamicRepControlsView: View {
                         default:
                             break
                         }
-                        storeSelectedOption = newOptionIndex
+                       storeSelectedOption = newOptionIndex
                     }
                     
                     .padding(.horizontal, 10)
@@ -189,7 +194,6 @@ struct DynamicRepControlsView: View {
                                 for i in stride(from: 0, to: queryID.count, by: rows) {
                                     
                                     let currentSelection = SliderSelection(label: selectedOption.label, interval: selectedOption.interval)
-                                    
                                     if lastSelected != currentSelection {
                                         lastSelected = currentSelection
                                         base = Date()
@@ -335,6 +339,6 @@ struct DynamicRepControlsView: View {
 
 
 #Preview {
-    DynamicRepControlsView(storeSelectedOption: 0, pageID: "")
+    DynamicRepControlsView(pageID: "")
 }
 

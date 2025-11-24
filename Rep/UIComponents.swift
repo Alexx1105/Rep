@@ -70,7 +70,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(storeSelectedOption: 0, pageID: pageID)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: pageID)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
