@@ -378,9 +378,9 @@ struct PaymentMenuCard: View {
                     
         
                         Button {
-                            
-                            ///payment button logic here
-                            
+                            Task {
+                                try await runPaymentFlow()   ///payment button logic here
+                            }
                         } label: {
                             RoundedRectangle(cornerRadius: 30).glassEffect()
                                 .frame(maxWidth: 350, maxHeight: 48)
