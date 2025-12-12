@@ -116,6 +116,8 @@ struct DynamicRepControlsView: View {
                             .font(.system(size: 16)).lineSpacing(3)
                             .fontWeight(.medium)
                             .opacity(0.25)
+                            .truncationMode(.tail)
+                    
                     
                 }
             }.padding(.top, 5)

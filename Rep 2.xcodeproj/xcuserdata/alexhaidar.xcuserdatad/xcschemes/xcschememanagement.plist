@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>DynamicRepExtension.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>MuscleMemory.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>isShown</key>
+			<true/>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>B205A9562D73B62D00FFF047</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B25A0A5C2D920AC000420892</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B25A0A932D94FE3300420892</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B2B837C22BCB102F00BBC748</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B2B837D22BCB103000BBC748</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B2B837DC2BCB103000BBC748</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B2D220D82BD981B800E55834</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>B2DC38132D795B73003A8B7E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
