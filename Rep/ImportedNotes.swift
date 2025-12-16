@@ -30,10 +30,10 @@ struct ImportedNotes: View {
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
-    @State private var loading = false
-    @State private var didLoad = false
+    @State private var loadedPage: [UserPageContent] = []
+
     
-    public func callEndpoint() async {
+    public func callEndpoint() {
         ImportUserPage.shared.modelContextPagesStored(pagesContext: modelContextPage)
         print("page data loaded from cache ✅")
     }
@@ -95,7 +95,9 @@ struct ImportedNotes: View {
             .background(Color.mmBackground)
         }
         .task {
-             await callEndpoint()
+            //callEndpoint()
+            ImportUserPage.shared.modelContextPagesStored(pagesContext: modelContextPage)
+            loadedPage = pageContent.filter { $0.userPageId == pageID }
         }
     }
 }

@@ -248,7 +248,7 @@ struct SliderView: View {
 
 struct PaymentMenuCard: View {
     @Binding var isPresented: Bool
-   
+    //@StateObject private var paymentStore = PaymentStore()
     var body: some View {
         
         
@@ -379,7 +379,7 @@ struct PaymentMenuCard: View {
         
                         Button {
                             Task {
-                                try await runPaymentFlow()   ///payment button logic here
+                                try await PaymentStore().runPaymentFlow()
                             }
                         } label: {
                             RoundedRectangle(cornerRadius: 30).glassEffect()
@@ -388,11 +388,11 @@ struct PaymentMenuCard: View {
                                 
                             
                                 .overlay {
-                                    Text("Upgrade").foregroundStyle(Color.kimchiLabs)
+                                    Text("Coming Soon").foregroundStyle(Color.kimchiLabs)  //change back to "Upgrade" later
                                         .fontWeight(.heavy)
                                         
                                 }.padding(.bottom)
-                        }
+                        }.disabled(true)   //dont forgot to remove 
                     }.padding(.top, 5)
               
                 

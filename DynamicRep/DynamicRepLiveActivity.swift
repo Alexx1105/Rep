@@ -34,8 +34,9 @@ struct DynamicRepLiveActivity: Widget {
                 VStack(alignment: .leading, spacing: 2) {
                    
                     ZStack {
-                        Text(context.state.plainText)
+                        Text(context.state.plainText).truncationMode(.tail)
                             .fontWeight(.medium)
+                            .lineLimit(1)
                             .font(.system(size: 16))
                             .foregroundStyle(Color.intervalBlue)
                             .padding(.horizontal)
@@ -91,14 +92,15 @@ struct DynamicRepLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.center) {
                    
                     HStack(alignment: .top) {
-                        Text(context.state.plainText)
+                        Text(context.state.plainText).truncationMode(.tail)
+                            .lineLimit(1)
                             .fontWeight(.medium)
                             .font(.system(size: 16))
                             .foregroundStyle(Color.intervalBlue)
-                            .padding(.horizontal)
                             .background(Capsule()
                                 .frame(width: .infinity, height: 23)
                                 .foregroundStyle(Color.intervalBlue).opacity(0.3))
+                     
                         
                     }.frame(maxWidth: .infinity, alignment: .leading)
                      .padding(.top)
@@ -116,7 +118,10 @@ struct DynamicRepLiveActivity: Widget {
                         Text(content)
                             .fontWeight(.semibold)
                             .font(.system(size: 16))
-                           .minimumScaleFactor(0.9)
+                            .minimumScaleFactor(0.9)
+                            .foregroundStyle(Color.white)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(nil)
                         
                         Spacer()
                     }.padding(.leading, 15)
@@ -139,7 +144,7 @@ struct DynamicRepLiveActivity: Widget {
             } minimal: {
                 
             }
-            .keylineTint(Color.white)
+            .keylineTint(Color.intervalBlue)
         }
     }
 }

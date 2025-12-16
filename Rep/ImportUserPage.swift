@@ -47,6 +47,11 @@ struct MainBlockBody: Codable, Identifiable {
     }
 }
 
+extension MainBlockBody {
+    static func joinContent(_ c: [MainBlockBody.RichText]) -> String {
+        c.map{ $0.text?.content ?? "" }.joined()
+    }
+}
 
 
 public struct PushToSupabase: Encodable {
@@ -77,7 +82,7 @@ class ImportUserPage: ObservableObject {
     var userContentPage: String?
     var userPageId: String?
     var storePageIDSets: Set<String> = []
-  
+    
     public func pageEndpoint() async throws {
         let pageID = returnedBlocks.first?.id ?? "pageID is nil"
         let pagesEndpoint = "https://api.notion.com/v1/blocks/"
@@ -103,7 +108,7 @@ class ImportUserPage: ObservableObject {
         request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
         request.addValue(appendToken, forHTTPHeaderField: "Authorization")
         print("page ID was successfully appended to the url")
-       
+        
         
         do {
             request.httpMethod = "GET"
@@ -129,7 +134,7 @@ class ImportUserPage: ObservableObject {
                 if let nextCursor = decodePage.next_cursor {
                     let paginate = append + "?page_size=100&start_cursor=\(nextCursor)"
                     let nextURL = URL(string: paginate)
-                
+                    
                     var buildNewURL = URLRequest(url: nextURL!)
                     buildNewURL.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
                     buildNewURL.addValue(appendToken, forHTTPHeaderField: "Authorization")
@@ -142,29 +147,30 @@ class ImportUserPage: ObservableObject {
                     moreResults = decodeNextPageData.has_more
                     cursor = decodeNextPageData.next_cursor
                     
-                     print("paginated successfully ✅")
+                    print("paginated successfully ✅")
                 } else {
                     print("page pagination with next_cursor failed ❌")
                 }
             }
             
             var returnDecodedResults = allResults
-        
+            
             for i in 0..<returnDecodedResults.count {
                 var extractedFields: [String] = []
-                if let paragraph = returnDecodedResults[i].paragraph, let richText = paragraph.rich_text {
-                    for text in richText {
-                        if let content = text.text?.content {
-                            extractedFields.append(content)
-                        }
-                    }
+                if let paragraph = returnDecodedResults[i].paragraph?.rich_text {
+                    
+                    let joinedContent = MainBlockBody.joinContent(paragraph)
+                    extractedFields.append(contentsOf: [joinedContent])
+                    
                 }
                 returnDecodedResults[i].ExtractedFields = extractedFields
+                
             }
             
             DispatchQueue.main.async {
                 self.mainBlockBody = returnDecodedResults
             }
+            
             
             do {
                 for i in returnDecodedResults {
@@ -175,9 +181,8 @@ class ImportUserPage: ObservableObject {
                         print("page ids interted: \([storePageIDSets])")
                         pageID = returnedBlocks.first?.id ?? ""
                         
-                        let remove = CharacterSet(charactersIn: "•")
-                        let formatString = remove.union(.whitespacesAndNewlines)
-                        let formattedString = storeStrings.trimmingCharacters(in: formatString)
+                        let formattedString = storeStrings.trimmingCharacters(in: .whitespacesAndNewlines)
+                        print("bullet point text: \(formattedString)")
                         
                         let storedPages = UserPageContent(userContentPage: formattedString, userPageId: pageID)
                         modelContextPage?.insert(storedPages)
@@ -190,13 +195,18 @@ class ImportUserPage: ObservableObject {
                                 let formattedTokenString = data.map {String(format: "%02x", $0)}.joined()
                                 Logger().log("new push token created: \(data)")
                                 
-                                let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: formattedString, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
-                                let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
-                                let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
-                              
-                                Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
-                                Logger().log("push token successfully sent up to Supabase: \(String(describing:(sendToken)))")
-                               
+                                let chunkedRows = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
+                                print("SEPARATED BY NEW LINE: \(chunkedRows)")
+                                
+                                for row in chunkedRows {
+                                    
+                                    let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
+                                    let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
+                                    let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
+                                    
+                                    Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
+                                    Logger().log("push token successfully sent up to Supabase: \(String(describing:(sendToken)))")
+                                }
                             }
                         }
                     }

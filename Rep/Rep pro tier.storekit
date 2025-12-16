@@ -21,17 +21,20 @@
     "_askToBuyEnabled" : false,
     "_billingGracePeriodEnabled" : false,
     "_billingIssuesEnabled" : false,
+    "_compatibilityTimeRate" : {
+      "3" : 4
+    },
     "_developerTeamID" : "L96XRPBK46",
-    "_disableDialogs" : false,
+    "_disableDialogs" : true,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 786590136.55153596,
+    "_lastSynchronizedDate" : 787457088.89750302,
     "_locale" : "en_US",
-    "_renewalBillingIssuesEnabled" : false,
+    "_renewalBillingIssuesEnabled" : true,
     "_storefront" : "USA",
     "_storeKitErrors" : [
 
     ],
-    "_timeRate" : 0
+    "_timeRate" : 11
   },
   "subscriptionGroups" : [
     {
@@ -61,7 +64,7 @@
             }
           ],
           "productID" : "kimchilabs.pro",
-          "recurringSubscriptionPeriod" : "P1Y",
+          "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Rep (Pro Tier)",
           "subscriptionGroupID" : "21849675",
           "type" : "RecurringSubscription",

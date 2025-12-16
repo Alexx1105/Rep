@@ -44,6 +44,7 @@ struct MuscleMemoryApp: App {
     let centralContainer = try! ModelContainer(for: UserEmail.self , UserPageTitle.self, UserPageContent.self)
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
+    @StateObject private var paymentStore = PaymentStore()
    
     var body: some Scene {
         
@@ -77,6 +78,7 @@ struct MuscleMemoryApp: App {
                 .preferredColorScheme(toggleEnabled ? .dark : .light)
         }
         .modelContainer(centralContainer)
+        .environmentObject(paymentStore)
         
     }
 }

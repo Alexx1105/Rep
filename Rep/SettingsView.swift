@@ -54,7 +54,7 @@ struct SettingsView: View {
                     Divider()
                     HStack(alignment: .top) {
                         
-                        Toggle("Appearence", isOn: $toggleEnabled)
+                        Toggle("Appearance", isOn: $toggleEnabled)
                             .fontWeight(.semibold)
                             .opacity(textOpacity)
                             .tint(.blue)
