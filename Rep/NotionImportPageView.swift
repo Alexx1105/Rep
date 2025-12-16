@@ -33,11 +33,14 @@ struct NotionImportPageView: View {
             Spacer()
             ZStack(alignment: .center) {
                 
-                RoundedRectangle(cornerRadius: 30)
-                    .fill(.white.opacity(elementOpacityDark))
-                    .frame(width: 370, height: 160)
+             
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(width: 370, height: 160)
+                        .glassEffect(.clear, in: .rect(cornerRadius: 30))
                     
-                    .overlay(RoundedRectangle(cornerRadius: 30).stroke(Color.mmDark, lineWidth: 0.2))
+                
+                    
                    
                 
                 HStack(alignment: .top) {

@@ -1,0 +1,82 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "FF61E718",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6755852969",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_compatibilityTimeRate" : {
+      "3" : 4
+    },
+    "_developerTeamID" : "L96XRPBK46",
+    "_disableDialogs" : true,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 787457088.89750302,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : true,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 11
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21849675",
+      "localizations" : [
+
+      ],
+      "name" : "Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "8.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6756088134",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited page imports, emoji support, and more ",
+              "displayName" : "Pro Tier",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kimchilabs.pro",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Rep (Pro Tier)",
+          "subscriptionGroupID" : "21849675",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

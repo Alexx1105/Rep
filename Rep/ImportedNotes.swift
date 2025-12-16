@@ -66,10 +66,7 @@ struct ImportedNotes: View {
                         
                     }
                     Spacer()
-                    Button(action: {}) {         //TO-DO: modify to prompt premium tier panel
-                        Image("mmProIcon")
-                        
-                    }.glassEffect()
+                  
                 }
                 .frame(maxWidth: 370)
                 .padding(.top, 5)

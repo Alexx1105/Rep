@@ -16,35 +16,45 @@ struct SettingsView: View {
     @Environment(\.modelContext) var modelContext
      var showUserEmail: [UserEmail] = []
     
+    @State private var presentPopover: Bool = false
+    
     var body: some View {
         
         NavigationView {
             VStack(alignment: .leading) {
                 
-                HStack(spacing: 10) {
+                HStack(spacing: 13) {
                     
                     
                     Text("Settings")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
-                    Spacer()
+                        .padding(.leading)
+                  
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                     
                     
-//                    NavigationLink(destination: SignOutView()) {
-//                        Text("Log out")
-//                            .fontWeight(.regular)
-//                            .foregroundStyle(Color.red)
-//                    }
+                    Button("Upgrade Plan"){
+                        withAnimation {
+                            presentPopover = true
+                        }
+                    }
+                    .fontWeight(.semibold)
+                    .font(.system(size: 12))
+                    .buttonStyle(.glassProminent)
+                    .padding(.trailing)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .frame(maxHeight: 230)
-                .padding(.horizontal, 25)
+                .frame(maxWidth: .infinity)
+                .frame(maxHeight: 235)
+              
                
+                
                 
                 VStack(alignment: .leading) {
                     Divider()
                     HStack(alignment: .top) {
                         
-                        Toggle("Appearence", isOn: $toggleEnabled)
+                        Toggle("Appearance", isOn: $toggleEnabled)
                             .fontWeight(.semibold)
                             .opacity(textOpacity)
                             .tint(.blue)
@@ -68,8 +78,12 @@ struct SettingsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.mmBackground)
-         
-            
+            .overlay {
+                if presentPopover {
+                    PaymentMenuCard(isPresented: $presentPopover)
+                        .transition(.move(edge: .bottom))
+                }
+            }
         }
     }
 }
