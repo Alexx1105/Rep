@@ -34,7 +34,7 @@ struct SliderSelection: Equatable {
     
 }
 
- var lastSelected: SliderSelection?
+var lastSelected: SliderSelection?
 
 final class Query: ObservableObject {
     @Published var queryID: [String] = []
@@ -42,26 +42,14 @@ final class Query: ObservableObject {
 }
 
 
-func staggerDateComponents(components: DateComponents, add: Int = 1) -> DateComponents {
-     var new = DateComponents()
+func staggerDateComponents(components: DateComponents, add: Int = 1, multiplier: Int) -> DateComponents {
+    var new = DateComponents()
     
-    if let bumpHr = components.hour {
-        new.hour = bumpHr + add
-    }
+    new.hour = (components.hour ?? 0) * multiplier
+    new.minute = (components.minute ?? 0) * multiplier
     return new
 }
 
-func indexBumpedOffsets(index: Int, now: Date, selectedOption: SliderView.SliderOption, perRows: Int = 5, currentDate: Calendar = .current) -> Date? {
-    
-    guard selectedOption.label != "Off" else { return nil }
-    
-    let compute = max(1, index / perRows) + 1
-    let bumpOffset = staggerDateComponents(components: selectedOption.interval, add: compute)
-    print("offsets: \(bumpOffset)")
-    
-    return Calendar.current.date(byAdding: bumpOffset, to: now)
-
-}
 
 
 struct DynamicRepControlsView: View {
@@ -80,7 +68,9 @@ struct DynamicRepControlsView: View {
     @AppStorage("intervalOption") var storeSelectedOption: Int = 0
     @AppStorage("disableOption") var storeDisableOption: Int = 0
     
-    @State var individualSliderSelection: [String: Int] = [:]   ///state binding to save selected interval for each individual tab
+    @State var localPage: [String: Date] = [:]          ///acts as local per-page base compute
+    @State private var currentTask: Task<Void, Never>?
+ 
     
     var pageID: String
     var filterTitle: String {
@@ -91,11 +81,8 @@ struct DynamicRepControlsView: View {
         return pageTitle.first(where: { $0.titleID == pageID})?.titleID ?? ""
     }
     
-//    var storeSelectedOption: Int {
-//        set { individualSliderSelection[filterPageID] = newValue}
-//        get { individualSliderSelection[filterPageID] ?? 0 }
-//    }
-
+    
+    
     var body: some View {
         VStack(spacing: 70) {
             
@@ -111,12 +98,12 @@ struct DynamicRepControlsView: View {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
-                   
-                        Text(filterTitle)
-                            .font(.system(size: 16)).lineSpacing(3)
-                            .fontWeight(.medium)
-                            .opacity(0.25)
-                            .truncationMode(.tail)
+                    
+                    Text(filterTitle)
+                        .font(.system(size: 16)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.25)
+                        .truncationMode(.tail)
                     
                     
                 }
@@ -161,7 +148,7 @@ struct DynamicRepControlsView: View {
                         default:
                             break
                         }
-                       storeSelectedOption = newOptionIndex
+                        storeSelectedOption = newOptionIndex
                     }
                     
                     .padding(.horizontal, 10)
@@ -176,9 +163,26 @@ struct DynamicRepControlsView: View {
                             await updateIntervalActivity(label: opt.label, title: intervalTitle)
                         }
                         
-                        Task {
+                        @MainActor
+                        func sliderChangeTask() {           ///fixes prev slider state being retained on slider change
+                            currentTask?.cancel()
+                            
+                            localPage[filterPageID] = Date()
+                            
+                            let basePerPage = localPage[filterPageID]!
+                            let selectedOption = frequencyOptions[storeSelectedOption]
+                            let pageID = filterPageID
+                            let pageContentID = pageContent.first?.userPageId ?? ""
+                            
+                            currentTask = Task {
+                                await scheduleTask(selectedOption: selectedOption, pageID: pageID, pageContentID: pageContentID, basePerPage: basePerPage)
+                            }
+                        }
+                        
+                        func scheduleTask(selectedOption: SliderView.SliderOption, pageID: String, pageContentID: String, basePerPage: Date) async {
+                            
                             do {
-                                let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").execute()
+                                let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
                                 let result = selectQuery.value
                                 let queryID = result.map{String($0.id)}
                                 print("ID HERE: \(queryID)")
@@ -187,43 +191,35 @@ struct DynamicRepControlsView: View {
                                     Query.accessQuery.queryID = queryID
                                 }
                                 
-                                let selectedOption = frequencyOptions[storeSelectedOption]
-                                let now = Date()
                                 let rows: Int = 5
-                                
-                                var base: Date = now
+                                let base = basePerPage
                                 
                                 for i in stride(from: 0, to: queryID.count, by: rows) {
                                     
-                                    let currentSelection = SliderSelection(label: selectedOption.label, interval: selectedOption.interval)
-                                    if lastSelected != currentSelection {
-                                        lastSelected = currentSelection
-                                        base = Date()
-                                    }
+                                    if Task.isCancelled { return }
+                                    print("prev task cancelled")
                                     
-                                    let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: base)
+                                    let stagger = (i / rows) + 1
+                                    let scaledOffsets = staggerDateComponents(components: selectedOption.interval, multiplier: stagger)
                                     
-                                    let _ = indexBumpedOffsets(index: i, now: base, selectedOption: selectedOption)
+                                    let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: scaledOffsets, to: base)
+                                    
                                     let batch = min(i + rows, queryID.count)
                                     let idsPerBatch = Array(queryID[i..<batch])
-                                  
-                                    let _ = UserPageContent(userPageId: pageContent.first?.userPageId ?? "")
                                     
                                     do {
-                                        let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [filterPageID]).execute()
+                                        let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [pageID]).execute()
                                         print("OFFSET DATE SENT TO SUPABASE: \(send)")
-                                        print("page ids here: \(filterPageID)")
+                                        print("page ids here: \(pageID)")
                                     } catch {
                                         print("failed to send offset timestamps to supabase ❗️: \(error.localizedDescription)")
-                                    }
-                                    if let chainedOffsets = computedOffset {
-                                        base = chainedOffsets
                                     }
                                 }
                             } catch {
                                 print("failed to query id's from supabase ❌: \(error.localizedDescription)")
                             }
                         }
+                        sliderChangeTask()
                     }
                 }
                 
@@ -327,7 +323,7 @@ struct DynamicRepControlsView: View {
                         }.buttonStyle(PlainButtonStyle())
                         
                     }.frame(maxHeight: .infinity)
-                     .padding(.top, 5)
+                        .padding(.top, 5)
                 }
             }
             Spacer()
