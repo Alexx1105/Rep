@@ -34,6 +34,7 @@ struct SliderSelection: Equatable {
     
 }
 
+
 var lastSelected: SliderSelection?
 
 final class Query: ObservableObject {
@@ -65,7 +66,12 @@ struct DynamicRepControlsView: View {
     @Query var pageContent: [UserPageContent]
     @Query var pageTitle: [UserPageTitle]
     
-    @AppStorage("intervalOption") var storeSelectedOption: Int = 0
+    @AppStorage var storeSelectedOption: Int
+    init(pageID: String) {
+        self.pageID = pageID
+        self._storeSelectedOption = AppStorage(wrappedValue: 0, "intervalOption_\(pageID)")
+    }
+    
     @AppStorage("disableOption") var storeDisableOption: Int = 0
     
     @State var localPage: [String: Date] = [:]          ///acts as local per-page base compute
@@ -80,7 +86,6 @@ struct DynamicRepControlsView: View {
     var filterPageID: String {
         return pageTitle.first(where: { $0.titleID == pageID})?.titleID ?? ""
     }
-    
     
     
     var body: some View {
