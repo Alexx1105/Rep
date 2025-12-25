@@ -403,7 +403,7 @@ struct PaymentMenuCard: View {
             Rectangle()
                 .fill(Color.clear)
                 .frame(maxWidth: .infinity, maxHeight: 800)
-                .glassEffect(.clear, in: .rect(cornerRadius: 35))         ///glass background here
+                .glassEffect(.regular, in: .rect(cornerRadius: 35))         ///glass background here
                 
         }
     }

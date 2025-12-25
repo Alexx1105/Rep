@@ -34,11 +34,11 @@ struct NotionImportPageView: View {
             ZStack(alignment: .center) {
                 
              
-                    Rectangle()
+                Rectangle()
                         .fill(Color.clear)
                         .frame(width: 370, height: 160)
-                        .glassEffect(.clear, in: .rect(cornerRadius: 30))
-                    
+                        .glassEffect(.regular, in: .rect(cornerRadius: 30))
+              
                 
                     
                    

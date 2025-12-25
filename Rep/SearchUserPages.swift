@@ -74,6 +74,8 @@ public class searchPages: ObservableObject {
     let searchEndpoint = URL(string: "https://api.notion.com/v1/search")
     private init() {}
     
+    
+    
     public func userEndpoint(modelContextTitle: ModelContext?) async throws {
         guard let url = searchEndpoint else { return }
         var request = URLRequest(url: url)
@@ -111,7 +113,7 @@ public class searchPages: ObservableObject {
             let text = getText?.title.first?.plain_text
             let emojis = title?.icon?.emoji
             let customType = title?.icon?.type
-        
+            
             let optionalEmoji = emojis ?? ""
            
             DispatchQueue.main.async {

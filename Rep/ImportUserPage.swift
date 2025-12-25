@@ -28,14 +28,28 @@ struct MainBlockBody: Codable, Identifiable {
     
     struct Block: Codable {
         let id: String
+        let type: String
         let paragraph: Paragraph?
+        let bulleted_list_item: Paragraph?
+        let numbered_list_item: Paragraph?
+        let heading_1: Paragraph?
+        let heading_2: Paragraph?
+        let heading_3: Paragraph?
+       
         var ExtractedFields: [String] = []
         
         private enum CodingKeys: CodingKey {
             case id
+            case type
             case paragraph
+            case bulleted_list_item
+            case numbered_list_item
+            case heading_1
+            case heading_2
+            case heading_3
         }
     }
+    
     struct Paragraph: Codable {
         let rich_text: [RichText]?
     }
@@ -125,11 +139,11 @@ class ImportUserPage: ObservableObject {
             
             let decodePageData = JSONDecoder()
             let decodePage = try decodePageData.decode(MainBlockBody.self, from: userData)
-            
+        
             var allResults = decodePage.results
             var moreResults = decodePage.has_more
             var cursor = decodePage.next_cursor
-            
+         
             while moreResults, let _ = cursor {
                 if let nextCursor = decodePage.next_cursor {
                     let paginate = append + "?page_size=100&start_cursor=\(nextCursor)"
@@ -157,14 +171,39 @@ class ImportUserPage: ObservableObject {
             
             for i in 0..<returnDecodedResults.count {
                 var extractedFields: [String] = []
+                let blockList = returnDecodedResults[i]
+                
+                switch blockList.type {
+                case "numbered_list_item":
+                    if let n = blockList.numbered_list_item?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(n))
+                    }
+                case "bulleted_list_item":
+                    if let b = blockList.bulleted_list_item?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(b))
+                    }
+                case "heading_1":
+                    if let h1 = blockList.heading_1?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(h1))
+                    }
+                case "heading_2":
+                    if let h2 = blockList.heading_2?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(h2))
+                    }
+                case "heading_3":
+                    if let h3 = blockList.heading_3?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(h3))
+                    }
+                default: break
+                }
+                
                 if let paragraph = returnDecodedResults[i].paragraph?.rich_text {
-                    
+    
                     let joinedContent = MainBlockBody.joinContent(paragraph)
                     extractedFields.append(contentsOf: [joinedContent])
-                    
+                    print("ALL LISTS: \(joinedContent)")
                 }
                 returnDecodedResults[i].ExtractedFields = extractedFields
-                
             }
             
             DispatchQueue.main.async {
