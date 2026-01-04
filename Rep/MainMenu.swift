@@ -36,7 +36,7 @@ struct MainMenu: View {
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
-    
+    @State private var isAutoSync: Bool = false
 
     private func delete(pageID: [String]) async throws {
        
@@ -85,17 +85,42 @@ struct MainMenu: View {
         
             
             Spacer()
-            
+            //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
             HStack {
-                
-                //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
-                
-                Text("Your notes from Notion:")
-                    .fontWeight(.semibold)
-                    .opacity(textOpacity)
-            
-                
+                VStack(alignment: .leading, spacing: 5) {
+                    
+                    if !isAutoSync {  //remove ! after rest of functionality is added
+                        ZStack {
+                            
+                            Capsule()
+                                .frame(maxWidth: 130, maxHeight: 21)
+                                .glassEffect(.regular)
+                            
+                            HStack(spacing: 5) {
+                                
+                                Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
+                                    .resizable()
+                                    .frame(width: 10, height: 8)
+                                    .opacity(textOpacity)
+                                
+                                Text("Last updated: ")
+                                    .font(.system(size: 10)).lineSpacing(3)
+                                    .fontWeight(.medium)
+                                    .opacity(textOpacity)
+                                    .padding(.trailing, 3)
+                                
+                            }
+                        }
+                    } else {
+                        EmptyView()
+                    }
+                    Text("Your notes from Notion:")
+                        .fontWeight(.semibold)
+                        .opacity(textOpacity)
+                        .padding(.bottom)
+                }
                 Spacer()
+                
                 Menu {
                     Button {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) { tabSlideOver = true }
@@ -147,7 +172,8 @@ struct MainMenu: View {
                     }
                 
             }
-            .frame(maxWidth: 370, maxHeight: 100 )
+            .frame(maxWidth: .infinity, maxHeight: 100 )
+            .padding(.horizontal)
             Spacer()
             
             VStack {
@@ -214,4 +240,5 @@ struct MainMenu: View {
 
 #Preview {
     MainMenu(pageID: "")
+        .environment(\.sizeCategory, .large)
 }
