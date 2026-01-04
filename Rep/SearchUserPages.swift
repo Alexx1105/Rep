@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-public struct NotionSearchRequest: Codable {    //add other properties (if needed) later
+public struct NotionSearchRequest: Codable {    
     public let results: [result]
     public let object: String?
   
