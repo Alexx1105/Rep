@@ -320,11 +320,10 @@ struct PaymentMenuCard: View {
                 }.frame(maxHeight: 630, alignment: .top)
                 
                 ZStack {
-                    
-                    RoundedRectangle(cornerRadius: 25).frame(width: 135, height: 260)
-                        .foregroundStyle(Color.intervalBlue).opacity(0.2)
-                        .frame(maxWidth: 325, alignment: .trailing)
-                        .frame(maxHeight: 420, alignment: .bottom)
+//                    RoundedRectangle(cornerRadius: 25).frame(width: 135, height: 260)
+//                        .foregroundStyle(Color.intervalBlue).opacity(0.2)
+//                        .frame(maxWidth: 325, alignment: .trailing)
+//                        .frame(maxHeight: 500, alignment: .center)
                     
                     VStack(spacing: 20) {
                         HStack(spacing: 80) {
@@ -339,11 +338,12 @@ struct PaymentMenuCard: View {
                             
                         }.frame(maxWidth: 280, alignment: .leading)
                         
-                        HStack(spacing: 98) {
-                            Text("• Hyper mode support").font(.system(size: 12)).fontWeight(.medium).opacity(0.50)
-                            Text("• Hyper mode support").font(.system(size: 12)).fontWeight(.medium).opacity(0.50)
+                        HStack(spacing: 102) {
+                            Text("• basic mode support").font(.system(size: 12)).fontWeight(.medium).opacity(0.50)
+                            Text("• Hyper mode support").font(.system(size: 12)).fontWeight(.heavy).foregroundStyle(Color.intervalBlue)
                             
                         }.frame(maxWidth: 280, alignment: .leading)
+                    
                         
                         HStack(spacing: 73) {
                             Text("• Import up to two pages at a time").font(.system(size: 12)).fontWeight(.medium).opacity(0.50)
