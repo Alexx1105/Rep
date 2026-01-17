@@ -183,7 +183,7 @@ struct DynamicRepControlsView: View {
     var body: some View {
         VStack(spacing: 70) {
             
-            HStack(alignment: .top, spacing: 68) {
+            HStack(alignment: .top) {
                 
                 Button {
                     dismissControlsTab()
@@ -191,6 +191,8 @@ struct DynamicRepControlsView: View {
                     Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark).padding(13)
                 }.glassEffect()
                 
+                Spacer()
+              
                 VStack(alignment: .trailing ,spacing: 5) {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
@@ -205,7 +207,8 @@ struct DynamicRepControlsView: View {
                     
                     
                 }
-            }.padding(.top, 5)
+            }.frame(maxWidth: .infinity)
+                .padding(.horizontal)
             
             
             VStack(spacing: 5) {

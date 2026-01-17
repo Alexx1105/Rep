@@ -44,8 +44,12 @@ struct MuscleMemoryApp: App {
     let centralContainer = try! ModelContainer(for: UserEmail.self , UserPageTitle.self, UserPageContent.self)
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
+    @AppStorage("auto.sync") private var isAutoSync: Bool = false
+    
     @StateObject private var paymentStore = PaymentStore()
-   
+    
+    @State private var autoSyncTask: Task<Void, Never>?
+  
     var body: some Scene {
         
         WindowGroup {
@@ -69,6 +73,42 @@ struct MuscleMemoryApp: App {
                                     print("failed async operation(s):\(error)")
                                 }
                             }
+                            
+                            @MainActor
+                            func startAutoSyncTask() {
+                                autoSyncTask?.cancel()
+                                
+                                autoSyncTask = Task {
+                                    while !Task.isCancelled {
+                                        do {
+                                            try await searchPages.shared.userEndpoint(modelContextTitle: pages)
+                                            try await Task.sleep(nanoseconds: 60_000_000_000)
+                                            
+                                            print("sync task ran successfully 🔄")
+                                        } catch {
+                                            print("auto sync task error: \(error)")
+                                        }
+                                    }
+                                }
+                            }
+                        
+                            @MainActor
+                            func stopAutoSyncTask() {
+                                
+                                autoSyncTask?.cancel()
+                                autoSyncTask = nil
+                                
+                                print("sync task stopped successfully ⏹️")
+                            }
+                            
+                            if isAutoSync {
+                                startAutoSyncTask()
+                                print("IS SYNCING ON: \(isAutoSync)")
+                            } else {
+                                stopAutoSyncTask()
+                                print("IS SYNCING OFF: \(isAutoSync)")
+                            }
+                           
                             
                         } else {
                             print("code query is nil:\(parseCodeQuery)")

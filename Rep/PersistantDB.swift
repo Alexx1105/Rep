@@ -37,7 +37,7 @@ import SwiftUI
 }
 
 @Model public class UserPageTitle {                             ///tab title + optional emojis
-    @Attribute public var titleID: String
+    @Attribute(.unique) var titleID: String
     @Attribute public var icon: String?
     @Attribute public var plain_text: String?
     @Attribute public var emoji: String?
@@ -47,9 +47,9 @@ import SwiftUI
         self.icon = icon
         self.plain_text = plain_text
         self.emoji = emoji
-        
     }
 }
+
 
 
 //@Model public class AuthKeys {                                   //TO-DO: store OAuth key here later

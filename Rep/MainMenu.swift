@@ -32,11 +32,11 @@ struct MainMenu: View {
     
     @State private var loading = false
     @State private var didLoad = false
-    
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
-    @State private var isAutoSync: Bool = false
+
+    @AppStorage("auto.sync") private var isAutoSync: Bool = false
 
     private func delete(pageID: [String]) async throws {
        
@@ -44,7 +44,7 @@ struct MainMenu: View {
         print("page ids here: \(pageID)")
    }
 
-
+    
     var body: some View {
         
         VStack {
@@ -89,31 +89,45 @@ struct MainMenu: View {
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
                     
-                    if !isAutoSync {  //remove ! after rest of functionality is added
+       
+                    if isAutoSync {  //remove ! after rest of functionality is added
+                        
                         ZStack {
                             
                             Capsule()
-                                .frame(maxWidth: 130, maxHeight: 21)
-                                .glassEffect(.regular)
+                                .frame(minWidth: 110,maxWidth: 180, maxHeight: 21)
+                                .glassEffect()
                             
-                            HStack(spacing: 5) {
+                            HStack(spacing: 3) {
                                 
                                 Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
                                     .resizable()
                                     .frame(width: 10, height: 8)
                                     .opacity(textOpacity)
                                 
-                                Text("Last updated: ")
+                                
+                                Text("Last updated:")
                                     .font(.system(size: 10)).lineSpacing(3)
-                                    .fontWeight(.medium)
+                                    .fontWeight(.semibold)
                                     .opacity(textOpacity)
                                     .padding(.trailing, 3)
+                               
+                                    
+                                        let time: Date = LastEdited.shared.lastEditedAt ?? Date()
+                                        
+                                        Text(time.formatted(.dateTime.weekday().day().hour().minute()))
+                                            .font(.system(size: 10))
+                                            .fontWeight(.regular)
+                                            .opacity(textOpacity)
+                                           
+                                    
                                 
-                            }
+                            }.frame(alignment: .leading)
                         }
                     } else {
                         EmptyView()
                     }
+                    
                     Text("Your notes from Notion:")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)

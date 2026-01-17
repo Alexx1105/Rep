@@ -10,13 +10,17 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissSettingsTab
+    
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+   
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
-    @AppStorage("autosynctoggle") private var autoSyncEnabled: Bool = false
+    @AppStorage("auto.sync") private var isAutoSync: Bool = false
+  
     @Environment(\.modelContext) var modelContext
-     var showUserEmail: [UserEmail] = []
+     
+    var showUserEmail: [UserEmail] = []
     
     @State private var presentPopover: Bool = false
     
@@ -85,12 +89,12 @@ struct SettingsView: View {
                                         .frame(width: 40, height: 21)
                                 }.padding(.leading, 5)
                             
-                            Toggle("Auto Sync", isOn: $autoSyncEnabled)
+                            Toggle("Auto Sync", isOn: $isAutoSync)
                                 .fontWeight(.semibold)
                                 .opacity(textOpacity)
                                 .tint(.blue)
-                                .onChange(of: hyperToggleEnabled) { oldValue, newValue in
-                                    print("hyper mode toggled in settings view: \(newValue)")
+                                .onChange(of: isAutoSync) { oldValue, newValue in
+                                    print("auto sync toggled in settings view: \(newValue)")
                                 }
                             
                         }.frame(alignment: .leading)
@@ -98,7 +102,7 @@ struct SettingsView: View {
                     }.frame(maxWidth: .infinity)
                         .padding(.horizontal)
                     
-                    Text("Toggle Auto Sync to enable real time\nsyncing between your notion and your imported notes")
+                    Text("Toggle Auto Sync to enable on-demand\nsyncing between your notion and your imported notes")
                         .font(.system(size: 16)).lineSpacing(3)
                         .fontWeight(.medium)
                         .opacity(0.25)
