@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import OSLog
 
 public struct NotionSearchRequest: Codable {
     public let results: [result]
@@ -61,13 +62,15 @@ final class LastEdited: ObservableObject {
     var lastEditedAt: Date
     var lastFetchedAt: Date
     var isAutoSync: Bool
+    var plain_text: String
     
-    init(pageID: String, pageTitle: String, lastEditedAt: Date, lastFetchedAt: Date, isAutoSync: Bool) {
+    init(pageID: String, pageTitle: String, lastEditedAt: Date, lastFetchedAt: Date, isAutoSync: Bool, plain_text: String) {
         self.pageID = pageID
         self.pageTitle = pageTitle
         self.lastEditedAt = lastEditedAt
         self.lastFetchedAt = lastFetchedAt
         self.isAutoSync = isAutoSync
+        self.plain_text = plain_text
     }
 }
 
@@ -85,11 +88,22 @@ public class searchPages: ObservableObject {
     @Published var icon: String?
     @Published var plain_text: String?
     @Published var emoji: String?
-  
+    
     
     var modelContextTitle: ModelContext?
     public func modelContextTitleStored(context: ModelContext?) {
         self.modelContextTitle = context
+    }
+    
+    @MainActor
+    public func fetchAuthToken(context: ModelContext) throws -> String {
+        let fetchDescriptor = FetchDescriptor<AuthToken>()
+        let fetchAuth = try context.fetch(fetchDescriptor)
+        
+        guard let token = fetchAuth.first?.accessToken, !token.isEmpty else {
+            throw URLError(.unknown)
+        }
+        return token
     }
     
     func fetchSyncPg(pageID: String) throws -> NotionPageMetaData? {          ///query synced page
@@ -150,17 +164,19 @@ public class searchPages: ObservableObject {
         }
     }
     
-    public func userEndpoint(modelContextTitle: ModelContext?) async throws {
+    public func userEndpoint(modelContextTitle: ModelContext?, modelContext: ModelContext) async throws {
         guard let url = searchEndpoint else { return }
         var request = URLRequest(url: url)
         
-        if let passToken = accessToken {
-            request.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
-            request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-            
-        } else {
-            print("header values could not be added")
+        let passToken = try fetchAuthToken(context: modelContext)
+
+        guard !passToken.isEmpty else {
+            return print("headers could not be added ❗️")
         }
+        
+        request.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
+        request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
+        
         
         do {
             request.httpMethod = "POST"
@@ -202,7 +218,7 @@ public class searchPages: ObservableObject {
     
             guard let syncedPageID = id, let notionLastEditedTime = lastEdited else { return }
             if let existingPageSync = try fetchSyncPg(pageID: syncedPageID) {
-             
+                
                 if notionLastEditedTime > existingPageSync.lastFetchedAt {
                     print("LAST EDITED: \(existingPageSync.lastEditedAt)", "|", "LAST FETCHED: \(existingPageSync.lastFetchedAt)")
                     
@@ -216,7 +232,7 @@ public class searchPages: ObservableObject {
                 try modelContextTitle?.save()
                 
             } else {
-                let firstTimePageSync = NotionPageMetaData(pageID: syncedPageID, pageTitle: text!, lastEditedAt: notionLastEditedTime,lastFetchedAt: .distantPast, isAutoSync: true)
+                let firstTimePageSync = NotionPageMetaData(pageID: syncedPageID, pageTitle: text!, lastEditedAt: notionLastEditedTime, lastFetchedAt: .distantPast, isAutoSync: true, plain_text: accessObject ?? "plain text nil")
                 modelContextTitle?.insert(firstTimePageSync)
                 
                 if notionLastEditedTime <= firstTimePageSync.lastFetchedAt { return }

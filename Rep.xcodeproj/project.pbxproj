@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B20506502D98A3E50082FEA2 /* PersistantDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* PersistantDB.swift */; };
+		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
@@ -86,7 +86,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		B205064F2D98A3CC0082FEA2 /* PersistantDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistantDB.swift; sourceTree = "<group>"; };
+		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
@@ -184,7 +184,7 @@
 				B2575D102EE269B500B82793 /* Rep pro tier.storekit */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponents.swift */,
-				B205064F2D98A3CC0082FEA2 /* PersistantDB.swift */,
+				B205064F2D98A3CC0082FEA2 /* LocalCache.swift */,
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
 				B22E10F52D067E89003F3D9F /* SearchUserPages.swift */,
 				B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */,
@@ -357,7 +357,7 @@
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
 				B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,
-				B20506502D98A3E50082FEA2 /* PersistantDB.swift in Sources */,
+				B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,
 				B26A46672CD04C210064AF46 /* SignOutView.swift in Sources */,
 				B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */,

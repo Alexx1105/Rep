@@ -50,16 +50,14 @@ import SwiftUI
     }
 }
 
+@Model public class AuthToken {                                 ///Oauth token
+    @Attribute(.unique) public var accessToken: String
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+    }
+}
 
 
-//@Model public class AuthKeys {                                   //TO-DO: store OAuth key here later
-//    @Attribute(.unique) public var oauthPermanentKey: String!
-//
-//    public init(oauthPermanentKey: String!) {
-//        self.oauthPermanentKey = oauthPermanentKey
-//    }
-//}
-//
-//
 
 

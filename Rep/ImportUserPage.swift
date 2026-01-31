@@ -12,6 +12,8 @@ import Supabase
 import OSLog
 import ActivityKit
 import KimchiKit
+import CryptoKit
+
 
 
 struct MainBlockBody: Codable, Identifiable {
@@ -73,14 +75,27 @@ public struct PushToSupabase: Encodable {
     var page_data: String
     var page_id: String
     var page_title: String
+    var content_hash: String
 }
+
 
 let supabaseDBClient = SupabaseClient(supabaseURL: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co")!,
                                       supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94Z3Vtd3F4bmdocWNjYXp6cXZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0MTE0MjQsImV4cCI6MjA2Mjk4NzQyNH0.gt_S5p_sGgAEN1fJSPYIKEpDMMvo3PNx-pnhlC_2fKQ")
 
 
-let authToken = accessToken ?? ""
-var appendToken = "Bearer " + authToken
+@Model final class SyncUserContentPage {
+    @Attribute(.unique) var hashed: String
+    
+     var content: String
+     var pageID: String
+    
+    init(hashed: String, content: String, pageID: String) {
+        self.content = content
+        self.pageID = pageID
+        self.hashed = hashed
+    }
+}
+
 
 @MainActor
 class ImportUserPage: ObservableObject {
@@ -93,18 +108,37 @@ class ImportUserPage: ObservableObject {
     public func modelContextPagesStored(pagesContext: ModelContext?) {
         self.modelContextPage = pagesContext
     }
+    
+    
+    @MainActor
+    public func fetchAuthToken(context: ModelContext) throws -> String {
+        let descriptor = FetchDescriptor<AuthToken>()
+        let fetch = try context.fetch(descriptor)
+        
+        guard let token = fetch.first?.accessToken, !token.isEmpty else {
+            throw URLError(.unknown)
+        }
+        return token
+    }
+    
     var storeStrings: String?
     var userContentPage: String?
     var userPageId: String?
     var storePageIDSets: Set<String> = []
     
-    var autoSyncEnabled: Bool = false
+    func fetchSyncContent(hash: String) throws -> SyncUserContentPage? {
+        guard let _ = modelContextPage else { return nil }
+        
+        let fetch = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate { $0.hashed == hash })
+        return try modelContextPage?.fetch(fetch).first
+    }
     
-    public func pageEndpoint() async throws {
+    
+    public func pageEndpoint(modelContext: ModelContext) async throws {
         let pageID = returnedBlocks.first?.id ?? "pageID is nil"
         let pagesEndpoint = "https://api.notion.com/v1/blocks/"
         let append = pagesEndpoint + "\(pageID)/children"
-        
+      
         appendedID = append
         if appendedID == append {
             print("page ID was appended")
@@ -121,9 +155,15 @@ class ImportUserPage: ObservableObject {
         guard let url = addURL else { return }
         var request = URLRequest(url: url)
         
-        guard !appendToken.isEmpty else { return }
+        let passAuth = try fetchAuthToken(context: modelContext)
+        print("token is: \(passAuth)")
+        
+        guard !passAuth.isEmpty else {
+            return print("auth token is nil ❗️")
+        }
+        
         request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-        request.addValue(appendToken, forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(passAuth)", forHTTPHeaderField: "Authorization")
         print("page ID was successfully appended to the url")
         
         
@@ -131,6 +171,7 @@ class ImportUserPage: ObservableObject {
             request.httpMethod = "GET"
             
             let (userData, response) = try await URLSession.shared.data(for: request)
+            print("RESP: \(response)")
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw URLError(.badServerResponse)
             }
@@ -154,7 +195,7 @@ class ImportUserPage: ObservableObject {
                     
                     var buildNewURL = URLRequest(url: nextURL!)
                     buildNewURL.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-                    buildNewURL.addValue(appendToken, forHTTPHeaderField: "Authorization")
+                    buildNewURL.addValue("Bearer \(passAuth)", forHTTPHeaderField: "Authorization")
                     
                     let (nextData, _) = try await URLSession.shared.data(for: buildNewURL)
                     let decodeNextPageData = try JSONDecoder().decode(MainBlockBody.self, from: nextData)
@@ -225,11 +266,6 @@ class ImportUserPage: ObservableObject {
                         let formattedString = storeStrings.trimmingCharacters(in: .whitespacesAndNewlines)
                         print("bullet point text: \(formattedString)")
                         
-                        let storedPages = UserPageContent(userContentPage: formattedString, userPageId: pageID)
-                        modelContextPage?.insert(storedPages)
-                        print("SEND THIS TO SUPABASE: \(storeStrings)")
-                        print("page id persissted: \(pageID)")
-                        
                         
                         Task {
                             for await data in Activity<DynamicRepAttributes>.pushToStartTokenUpdates {
@@ -240,15 +276,32 @@ class ImportUserPage: ObservableObject {
                                 print("SEPARATED BY NEW LINE: \(chunkedRows)")
                                 
                                 for row in chunkedRows {
+                                    print("did content change?: \(row)")
                                     
-                                    let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
+                                    let hashContent = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
                                     
-                                    let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
-                                    let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
-                                    
-                                    Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
-                                    Logger().log("push token successfully sent up to Supabase: \(String(describing:(sendToken)))")
-                                    
+                                    if try fetchSyncContent(hash: hashContent) == nil {   ///hash does not exist = content changed
+                                        let storeSyncedPages = SyncUserContentPage(hashed: hashContent, content: row, pageID: pageID)
+                                        modelContextPage?.insert(storeSyncedPages)
+                                        
+                                        print("did hash change?: \(hashContent)")
+                                        
+                                    } else {
+                                        continue
+                                    }
+                                             
+                                    do {
+                                        let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle, content_hash: hashContent)
+                                        print("compare page data before supabase send: \(row)")
+                                        //let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
+                                        let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+                                        
+                                        Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
+                                        //Logger().log("push token successfully sent up to Supabase: \(String(describing:(sendToken)))")
+                                   
+                                    } catch {
+                                        print("supabse insertion errror ❗️\(error.localizedDescription)")
+                                    }
                                 }
                             }
                         }

@@ -17,7 +17,7 @@ struct MainMenu: View {
     
     @Environment(\.modelContext) var modelContext
     @Environment(\.colorScheme) var colorScheme
-    
+   
     @Query var showUserEmail: [UserEmail]
     @Query var pageTitle: [UserPageTitle]
     
@@ -45,6 +45,50 @@ struct MainMenu: View {
    }
 
     
+    @MainActor
+    public class TaskController: ObservableObject {
+        private var autoSyncTask: Task<Void, Never>?
+        private(set) var isSync: Bool = false
+        
+        private let pages: ModelContext
+        private let context: ModelContext
+        
+        init(pages: ModelContext, context: ModelContext) {
+            self.pages = pages
+            self.context = context
+        }
+        
+        
+        @MainActor
+        func startAutoSyncTask() {
+            
+            autoSyncTask = Task {
+                while !Task.isCancelled {
+                    do {
+                        try await searchPages.shared.userEndpoint(modelContextTitle: pages, modelContext: context)
+                        try await ImportUserPage.shared.pageEndpoint(modelContext: context)
+                        try await Task.sleep(nanoseconds: 60_000_000_000)
+                        
+                        print("sync task ran successfully 🔄")
+                    } catch {
+                        print("auto sync task error: \(error)")
+                    }
+                }
+            }
+        }
+        
+        @MainActor
+        func stopAutoSyncTask() {
+            
+            autoSyncTask?.cancel()
+            autoSyncTask = nil
+            
+            print("sync task stopped successfully ⏹️")
+        }
+    }
+    
+    @State private var taskController: TaskController?
+    
     var body: some View {
         
         VStack {
@@ -54,7 +98,7 @@ struct MainMenu: View {
                     .frame(width: 35, height: 35)
                     .opacity(0.25)
                     .padding(.leading)
-
+                
                 
                 VStack(spacing: 3) {
                     Text("Workspace email")
@@ -82,15 +126,15 @@ struct MainMenu: View {
                 Spacer()
             }.frame(maxWidth: .infinity, maxHeight: 50)
                 .opacity(showUserEmail.first?.personEmail != nil ? 1 : 0)
-        
+            
             
             Spacer()
             //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
                     
-       
-                    if isAutoSync {  //remove ! after rest of functionality is added
+                    
+                    if isAutoSync {
                         
                         ZStack {
                             
@@ -111,16 +155,16 @@ struct MainMenu: View {
                                     .fontWeight(.semibold)
                                     .opacity(textOpacity)
                                     .padding(.trailing, 3)
-                               
-                                    
-                                        let time: Date = LastEdited.shared.lastEditedAt ?? Date()
-                                        
-                                        Text(time.formatted(.dateTime.weekday().day().hour().minute()))
-                                            .font(.system(size: 10))
-                                            .fontWeight(.regular)
-                                            .opacity(textOpacity)
-                                           
-                                    
+                                
+                                
+                                let time: Date = LastEdited.shared.lastEditedAt ?? Date()
+                                
+                                Text(time.formatted(.dateTime.weekday().day().hour().minute()))
+                                    .font(.system(size: 10))
+                                    .fontWeight(.regular)
+                                    .opacity(textOpacity)
+                                
+                                
                                 
                             }.frame(alignment: .leading)
                         }
@@ -141,25 +185,25 @@ struct MainMenu: View {
                     } label: {
                         Label("Select tab/s", systemImage: "checkmark.circle")
                     }; Button {
-    
+                        
                         deleteMultipleTabs.removeAll()
                         tabSlideOver = false
                         
                     } label: {
                         Label("Cancel select", systemImage: "xmark.circle")
                     }
-                      Divider()
+                    Divider()
                     Button(role: .destructive) {
                         guard !deleteMultipleTabs.isEmpty else { return }
                         let deleteTabIDs = Set(deleteMultipleTabs)
-               
+                        
                         do {
                             try modelContext.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
                             try modelContext.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             try modelContext.save()
                             
-                             let ids = Array(deleteMultipleTabs)
-                         
+                            let ids = Array(deleteMultipleTabs)
+                            
                             print("stored ids: \(deleteMultipleTabs)")
                             Task {
                                 try await delete(pageID: ids )
@@ -171,19 +215,19 @@ struct MainMenu: View {
                         } catch {
                             print("tab deletion error: \(error)")
                         }
-                      
+                        
                     } label: {
                         Label("Delete selected tab/s", systemImage: "trash")
                     }
                 } label: {
                     Circle()
                     .frame(height: 45)}
-                    .glassEffect()
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    .overlay {
-                        Image(systemName: "ellipsis")
-                    }
+                .glassEffect()
+                .buttonStyle(PlainButtonStyle())
+                
+                .overlay {
+                    Image(systemName: "ellipsis")
+                }
                 
             }
             .frame(maxWidth: .infinity, maxHeight: 100 )
@@ -247,9 +291,25 @@ struct MainMenu: View {
                 print("user could not register: \(error)")
             }
         }
+        
+        .onChange(of: isAutoSync) { _, synced in
+            guard let controller = taskController else { return }
+            
+            if synced {
+                controller.startAutoSyncTask()
+            } else {
+                controller.stopAutoSyncTask()
+            }
+        }
+        
+        .onAppear {                      ///init task controller after UI renders
+            if taskController == nil {
+                taskController = TaskController(pages: modelContext, context: modelContext)
+            }
+        }
     }
 }
-    
+
 
 
 #Preview {
