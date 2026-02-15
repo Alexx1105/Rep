@@ -16,7 +16,8 @@ struct SettingsView: View {
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
-    @AppStorage("auto.sync") private var isAutoSync: Bool = false
+    @ObservedObject var AutoSync = SyncController.shared
+   
   
     @Environment(\.modelContext) var modelContext
      
@@ -89,11 +90,11 @@ struct SettingsView: View {
                                         .frame(width: 40, height: 21)
                                 }.padding(.leading, 5)
                             
-                            Toggle("Auto Sync", isOn: $isAutoSync)
+                            Toggle("Auto Sync", isOn: $AutoSync.isAutoSync)
                                 .fontWeight(.semibold)
                                 .opacity(textOpacity)
                                 .tint(.blue)
-                                .onChange(of: isAutoSync) { oldValue, newValue in
+                                .onChange(of: AutoSync.isAutoSync) { oldValue, newValue in
                                     print("auto sync toggled in settings view: \(newValue)")
                                 }
                             

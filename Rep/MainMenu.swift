@@ -15,18 +15,19 @@ import KimchiKit
 @MainActor
 struct MainMenu: View {
     
-    @Environment(\.modelContext) var modelContext
+    @Environment(\.modelContext) var context
     @Environment(\.colorScheme) var colorScheme
-   
+    
+    @Query(sort: [SortDescriptor(\UserPageTitle.titleID)])
+    var pageTitle: [UserPageTitle]
+    
     @Query var showUserEmail: [UserEmail]
-    @Query var pageTitle: [UserPageTitle]
     
     var pageID: String
+    //    var filterTabTitle: [UserPageTitle] {
+    //        pageTitle.filter{($0.titleID == pageID)}
+    //    }
     
-    var filterTabTitle: [UserPageTitle] {
-        pageTitle.filter{($0.titleID == pageID)}
-    }
-
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
@@ -35,15 +36,15 @@ struct MainMenu: View {
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
-
-    @AppStorage("auto.sync") private var isAutoSync: Bool = false
-
+    
+    @ObservedObject private var AutoSync = SyncController.shared
+    
     private func delete(pageID: [String]) async throws {
-       
+        
         let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
         print("page ids here: \(pageID)")
-   }
-
+    }
+    
     
     @MainActor
     public class TaskController: ObservableObject {
@@ -60,18 +61,37 @@ struct MainMenu: View {
         
         
         @MainActor
+        func runSyncWhenReady() async throws {
+            do {
+                try await searchPages.shared.userEndpoint(context: pages)
+                
+                let description = FetchDescriptor<NotionPageMetaData>()
+                let pageID = try context.fetch(description)
+                
+                for pg in pageID {
+                    try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
+                }
+                
+                print("sync task ran successfully 🔄")
+            } catch {
+                print("auto sync task error: \(error)")
+            }
+        }
+        
+        @MainActor
         func startAutoSyncTask() {
             
-            autoSyncTask = Task {
-                while !Task.isCancelled {
-                    do {
-                        try await searchPages.shared.userEndpoint(modelContextTitle: pages, modelContext: context)
-                        try await ImportUserPage.shared.pageEndpoint(modelContext: context)
-                        try await Task.sleep(nanoseconds: 60_000_000_000)
-                        
-                        print("sync task ran successfully 🔄")
-                    } catch {
-                        print("auto sync task error: \(error)")
+            if SyncController.shared.isAutoSync {
+                
+                autoSyncTask = Task { @MainActor in
+                    while !Task.isCancelled {
+                        do {
+                            try await runSyncWhenReady()
+                            try await Task.sleep(nanoseconds: 60_000_000_000)
+                            
+                        } catch {
+                            print("cancellation error: \(error)")
+                        }
                     }
                 }
             }
@@ -109,8 +129,7 @@ struct MainMenu: View {
                     
                         .onAppear {
                             Task {
-                                searchPages.shared.modelContextTitleStored(context: modelContext)
-                                OAuthTokens.shared.modelContextEmailStored(emailStored: modelContext)
+                                OAuthTokens.shared.modelContextEmailStored(emailStored: context)
                             }
                         }
                     
@@ -134,8 +153,8 @@ struct MainMenu: View {
                 VStack(alignment: .leading, spacing: 5) {
                     
                     
-                    if isAutoSync {
-                        
+                    if AutoSync.isAutoSync {
+        
                         ZStack {
                             
                             Capsule()
@@ -163,8 +182,6 @@ struct MainMenu: View {
                                     .font(.system(size: 10))
                                     .fontWeight(.regular)
                                     .opacity(textOpacity)
-                                
-                                
                                 
                             }.frame(alignment: .leading)
                         }
@@ -198,9 +215,25 @@ struct MainMenu: View {
                         let deleteTabIDs = Set(deleteMultipleTabs)
                         
                         do {
-                            try modelContext.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
-                            try modelContext.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
-                            try modelContext.save()
+                            try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
+                            try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
+                            
+                            let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
+                            for i in try context.fetch(fetchDesc) {
+                                i.isDeleted = true
+                            }
+                            
+                            for id in deleteTabIDs {
+                                let desc = FetchDescriptor<DeletedPage>(
+                                    predicate: #Predicate { $0.pageID == id }
+                                )
+                                
+                                if try context.fetch(desc).isEmpty {
+                                    context.insert(DeletedPage(pageID: id))
+                                }
+                            }
+                            
+                            try context.save()
                             
                             let ids = Array(deleteMultipleTabs)
                             
@@ -291,8 +324,9 @@ struct MainMenu: View {
                 print("user could not register: \(error)")
             }
         }
-        
-        .onChange(of: isAutoSync) { _, synced in
+    
+
+        .onChange(of: AutoSync.isAutoSync) { _, synced in
             guard let controller = taskController else { return }
             
             if synced {
@@ -304,7 +338,7 @@ struct MainMenu: View {
         
         .onAppear {                      ///init task controller after UI renders
             if taskController == nil {
-                taskController = TaskController(pages: modelContext, context: modelContext)
+                taskController = TaskController(pages: context, context: context)
             }
         }
     }
@@ -315,4 +349,5 @@ struct MainMenu: View {
 #Preview {
     MainMenu(pageID: "")
         .environment(\.sizeCategory, .large)
+    
 }
