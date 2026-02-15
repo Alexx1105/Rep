@@ -301,11 +301,17 @@ func hasEverExisted(hash: String, pageID: String, context: ModelContext) throws 
                             print("supabse insertion errror ❗️\(error.localizedDescription)")
                         }
                     }
-                   
-                    let page = UserPageContent(userContentPage: formattedString, userPageId: pageID)
-                    context.insert(page)
-                    try context.save()
                     
+                    let fetch = FetchDescriptor<UserPageContent>(predicate: #Predicate {$0.userPageId == pageID})    ///update importedNotes.swift with changed synced text
+                    
+                    if let existingText = try context.fetch(fetch).first {
+                        existingText.userContentPage = formattedString
+                        
+                    } else {
+                        let page = UserPageContent(userContentPage: formattedString, userPageId: pageID)
+                        context.insert(page)
+                        try context.save()
+                    }
                     
                 } catch {
                     print("url session error:\(error)")

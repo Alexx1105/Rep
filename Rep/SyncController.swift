@@ -7,12 +7,18 @@
 
 import Foundation
 
-
 @MainActor
 final class SyncController: ObservableObject {
     static let shared = SyncController()
-    @Published var isAutoSync: Bool = false
+    @Published var isAutoSync: Bool {
+        didSet {
+            UserDefaults.standard.set(isAutoSync, forKey: "isAutoSync")
+        }
+    }
+
     @Published var didRunBootstrap: Bool = false
-    private init() {}
+
+    private init() {
+        self.isAutoSync = UserDefaults.standard.bool(forKey: "isAutoSync")
+    }
 }
-    
