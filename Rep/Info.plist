@@ -21,5 +21,11 @@
 			<true/>
 		</dict>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>Permitted background task scheduler identifiers
+</string>
+	</array>
 </dict>
 </plist>

@@ -8,7 +8,7 @@
 import SwiftUI
 import AuthenticationServices
 import SwiftData
-
+import BackgroundTasks
 
 
     struct ContainerView: View {
@@ -40,6 +40,14 @@ import SwiftData
 
 @main
 struct MuscleMemoryApp: App {
+    
+    init() {
+        BackgroundRefresh.bgTaskRegister()
+        
+        if SyncController.shared.isAutoSync {
+            BackgroundRefresh.bgTaskRequest()
+        }
+    }
     
     let centralContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self, AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self)
    
@@ -116,7 +124,7 @@ struct MuscleMemoryApp: App {
     }
 }
 
-   
+
 
 #Preview {
     ContainerView()

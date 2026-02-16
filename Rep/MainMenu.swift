@@ -10,6 +10,7 @@ import Foundation
 import SwiftData
 import NotificationCenter
 import KimchiKit
+import BackgroundTasks
 
 
 @MainActor
@@ -24,10 +25,7 @@ struct MainMenu: View {
     @Query var showUserEmail: [UserEmail]
     
     var pageID: String
-    //    var filterTabTitle: [UserPageTitle] {
-    //        pageTitle.filter{($0.titleID == pageID)}
-    //    }
-    
+        
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
@@ -59,43 +57,50 @@ struct MainMenu: View {
             self.context = context
         }
         
+//        private func bgAppRefresh(task: BGAppRefreshTask) {
+//            
+//            Task {
+//                try await runSyncWhenReady()
+//            }
+//        }
+//        
+//        @MainActor
+//        func runSyncWhenReady() async throws {
+//            
+//            do {
+//                try await searchPages.shared.userEndpoint(context: pages)
+//                
+//                let description = FetchDescriptor<NotionPageMetaData>()
+//                let pageID = try context.fetch(description)
+//                
+//                for pg in pageID {
+//                    try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
+//                }
+//                
+//                print("sync task ran successfully 🔄")
+//            } catch {
+//                print("auto sync task error: \(error)")
+//            }
+//        }
         
-        @MainActor
-        func runSyncWhenReady() async throws {
-            do {
-                try await searchPages.shared.userEndpoint(context: pages)
-                
-                let description = FetchDescriptor<NotionPageMetaData>()
-                let pageID = try context.fetch(description)
-                
-                for pg in pageID {
-                    try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
-                }
-                
-                print("sync task ran successfully 🔄")
-            } catch {
-                print("auto sync task error: \(error)")
-            }
-        }
-        
-        @MainActor
-        func startAutoSyncTask() {
-            
-            if SyncController.shared.isAutoSync {
-                
-                autoSyncTask = Task { @MainActor in
-                    while !Task.isCancelled {
-                        do {
-                            try await runSyncWhenReady()
-                            try await Task.sleep(nanoseconds: 60_000_000_000)
-                            
-                        } catch {
-                            print("cancellation error: \(error)")
-                        }
-                    }
-                }
-            }
-        }
+//        @MainActor
+//        func startAutoSyncTask() {
+//            
+//            if SyncController.shared.isAutoSync {
+//                
+//                autoSyncTask = Task { @MainActor in
+//                    while !Task.isCancelled {
+//                        do {
+//                            try await runSyncWhenReady()
+//                            try await Task.sleep(nanoseconds: 60_000_000_000)
+//                            
+//                        } catch {
+//                            print("cancellation error: \(error)")
+//                        }
+//                    }
+//                }
+//            }
+//        }
         
         @MainActor
         func stopAutoSyncTask() {
@@ -330,7 +335,7 @@ struct MainMenu: View {
             guard let controller = taskController else { return }
             
             if synced {
-                controller.startAutoSyncTask()
+                BackgroundRefresh.shared.startAutoSyncTask(pages: context, context: context)
             } else {
                 controller.stopAutoSyncTask()
             }

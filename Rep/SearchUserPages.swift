@@ -172,11 +172,6 @@ public class searchPages: ObservableObject {
     
     public func userEndpoint(context: ModelContext) async throws {
         
-        //        if SyncController.shared.isAutoSync && SyncController.shared.didRunBootstrap {
-        //            return print("skipped call to userEndpoint, auto sync is on ")
-        //        }
-        
-        
         guard let url = searchEndpoint else { return }
         var request = URLRequest(url: url)
         
@@ -249,7 +244,7 @@ public class searchPages: ObservableObject {
                 
                 
                 guard let notionLastEditedTime = lastEdited else { continue }
-            
+                
                 if let existingPageSync = try fetchSyncPg(pageID: syncedPageID, context: context) {     ///sync path to update existing page
                     
                     if notionLastEditedTime > existingPageSync.lastFetchedAt {
