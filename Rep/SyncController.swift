@@ -61,7 +61,7 @@ final class BackgroundRefresh {
                 while !Task.isCancelled {
                     do {
                         try await runSyncWhenReady(context: context, pages: pages)
-                        try await Task.sleep(nanoseconds: 120_000_000_000)      ///2 min
+                        try await Task.sleep(nanoseconds: 1_800_000_000_000)    ///30min
                         
                     } catch {
                         print("cancellation error: \(error)")
@@ -91,7 +91,7 @@ final class BackgroundRefresh {
     
     static func bgTaskRegister() {
         
-        let identifier: String = "Musclememory.KimchiLabs.com"
+        let identifier: String = "MuscleMemory.KimchiLabs.com"
         BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
             guard let task = task as? BGAppRefreshTask else { return }
             
@@ -100,7 +100,7 @@ final class BackgroundRefresh {
     }
     
     static func bgTaskRequest() {
-        let taskRequest = BGAppRefreshTaskRequest(identifier: "Musclememory.KimchiLabs.com")
+        let taskRequest = BGAppRefreshTaskRequest(identifier: "MuscleMemory.KimchiLabs.com")
         taskRequest.earliestBeginDate = Date(timeIntervalSinceNow: 60)
         
         do {
