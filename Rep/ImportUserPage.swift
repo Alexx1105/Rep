@@ -12,6 +12,8 @@ import Supabase
 import OSLog
 import ActivityKit
 import KimchiKit
+import CryptoKit
+
 
 
 struct MainBlockBody: Codable, Identifiable {
@@ -35,7 +37,7 @@ struct MainBlockBody: Codable, Identifiable {
         let heading_1: Paragraph?
         let heading_2: Paragraph?
         let heading_3: Paragraph?
-       
+        
         var ExtractedFields: [String] = []
         
         private enum CodingKeys: CodingKey {
@@ -73,32 +75,70 @@ public struct PushToSupabase: Encodable {
     var page_data: String
     var page_id: String
     var page_title: String
+    var content_hash: String
 }
+
 
 let supabaseDBClient = SupabaseClient(supabaseURL: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co")!,
                                       supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94Z3Vtd3F4bmdocWNjYXp6cXZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0MTE0MjQsImV4cCI6MjA2Mjk4NzQyNH0.gt_S5p_sGgAEN1fJSPYIKEpDMMvo3PNx-pnhlC_2fKQ")
 
-let authToken = accessToken ?? ""
-var appendToken = "Bearer " + authToken
+
+@Model final class SyncUserContentPage {
+    @Attribute(.unique) var hashed: String
+    
+    var content: String
+    var pageID: String
+    var isDeleted: Bool = false
+    
+    init(hashed: String, content: String, pageID: String) {
+        self.content = content
+        self.pageID = pageID
+        self.hashed = hashed
+    }
+}
+
+@Model final class DeletedPage {
+    @Attribute(.unique) var pageID: String
+    var deletedAt: Date = Date()
+    init(pageID: String) { self.pageID = pageID }
+}
+
+@MainActor
+func isPageDeleted(_ pageID: String, in context: ModelContext) throws -> Bool {
+    let desc = FetchDescriptor<DeletedPage>(predicate: #Predicate { $0.pageID == pageID })
+    return try context.fetch(desc).first != nil
+}
+
 
 @MainActor
 class ImportUserPage: ObservableObject {
     
     public static let shared = ImportUserPage()
+    
     @Published var mainBlockBody: [MainBlockBody.Block] = []
     var appendedID: String?
     
-    var modelContextPage: ModelContext?
-    public func modelContextPagesStored(pagesContext: ModelContext?) {
-        self.modelContextPage = pagesContext
+    
+    @MainActor
+    public func fetchAuthToken(context: ModelContext) throws -> String {
+        let descriptor = FetchDescriptor<AuthToken>()
+        let fetch = try context.fetch(descriptor)
+        
+        guard let token = fetch.first?.accessToken, !token.isEmpty else {
+            throw URLError(.unknown)
+        }
+        return token
     }
+    
     var storeStrings: String?
     var userContentPage: String?
     var userPageId: String?
     var storePageIDSets: Set<String> = []
     
-    public func pageEndpoint() async throws {
-        let pageID = returnedBlocks.first?.id ?? "pageID is nil"
+    
+    public func pageEndpoint(pageID: String, context: ModelContext) async throws {
+        
+        let pageID = pageID
         let pagesEndpoint = "https://api.notion.com/v1/blocks/"
         let append = pagesEndpoint + "\(pageID)/children"
         
@@ -118,9 +158,15 @@ class ImportUserPage: ObservableObject {
         guard let url = addURL else { return }
         var request = URLRequest(url: url)
         
-        guard !appendToken.isEmpty else { return }
+        let passAuth = try fetchAuthToken(context: context)
+        print("token is: \(passAuth)")
+        
+        guard !passAuth.isEmpty else {
+            return print("auth token is nil ❗️")
+        }
+        
         request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-        request.addValue(appendToken, forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(passAuth)", forHTTPHeaderField: "Authorization")
         print("page ID was successfully appended to the url")
         
         
@@ -128,6 +174,7 @@ class ImportUserPage: ObservableObject {
             request.httpMethod = "GET"
             
             let (userData, response) = try await URLSession.shared.data(for: request)
+            print("RESP: \(response)")
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw URLError(.badServerResponse)
             }
@@ -139,11 +186,11 @@ class ImportUserPage: ObservableObject {
             
             let decodePageData = JSONDecoder()
             let decodePage = try decodePageData.decode(MainBlockBody.self, from: userData)
-        
+            
             var allResults = decodePage.results
             var moreResults = decodePage.has_more
             var cursor = decodePage.next_cursor
-         
+            
             while moreResults, let _ = cursor {
                 if let nextCursor = decodePage.next_cursor {
                     let paginate = append + "?page_size=100&start_cursor=\(nextCursor)"
@@ -151,7 +198,7 @@ class ImportUserPage: ObservableObject {
                     
                     var buildNewURL = URLRequest(url: nextURL!)
                     buildNewURL.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-                    buildNewURL.addValue(appendToken, forHTTPHeaderField: "Authorization")
+                    buildNewURL.addValue("Bearer \(passAuth)", forHTTPHeaderField: "Authorization")
                     
                     let (nextData, _) = try await URLSession.shared.data(for: buildNewURL)
                     let decodeNextPageData = try JSONDecoder().decode(MainBlockBody.self, from: nextData)
@@ -198,7 +245,7 @@ class ImportUserPage: ObservableObject {
                 }
                 
                 if let paragraph = returnDecodedResults[i].paragraph?.rich_text {
-    
+                    
                     let joinedContent = MainBlockBody.joinContent(paragraph)
                     extractedFields.append(contentsOf: [joinedContent])
                     print("ALL LISTS: \(joinedContent)")
@@ -211,46 +258,53 @@ class ImportUserPage: ObservableObject {
             }
             
             
+            let formattedString = returnDecodedResults.flatMap{ $0.ExtractedFields }.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            print("bullet point text: \(formattedString)")
+            
+            let chunkedRows = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
+            print("SEPARATED BY NEW LINE: \(chunkedRows)")
+            
+            let liveActivityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: { _ in true})
+            guard liveActivityToken != nil else { return }
+            
+            let formattedTokenString = liveActivityToken?.base64EncodedString()
+            Logger().log("new push token created: \(String(describing: liveActivityToken))")
+            
+            
             do {
-                for i in returnDecodedResults {
-                    for storeStrings in i.ExtractedFields {
+                
+                let pageID = pageID
+                storePageIDSets.insert(pageID)
+                
+                for row in chunkedRows {
+                    print("did content change?: \(row)")
+                    
+                    let hashContent = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
+                    
+                    do {
+                        guard let token = formattedTokenString else { continue }
+                        guard !row.isEmpty || !pageID.isEmpty else { continue }
                         
-                        var pageID = returnedBlocks.first?.id ?? ""
-                        storePageIDSets.insert(pageID)
-                        print("page ids interted: \([storePageIDSets])")
-                        pageID = returnedBlocks.first?.id ?? ""
+                        let pushAndPageData = PushToSupabase(token: token, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle, content_hash: hashContent)
+                        let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
                         
-                        let formattedString = storeStrings.trimmingCharacters(in: .whitespacesAndNewlines)
-                        print("bullet point text: \(formattedString)")
+                        Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
                         
-                        let storedPages = UserPageContent(userContentPage: formattedString, userPageId: pageID)
-                        modelContextPage?.insert(storedPages)
-                        print("SEND THIS TO SUPABASE: \(storeStrings)")
-                        print("page id persited: \(pageID)")
-                        
-                        
-                        Task {
-                            for await data in Activity<DynamicRepAttributes>.pushToStartTokenUpdates {
-                                let formattedTokenString = data.map {String(format: "%02x", $0)}.joined()
-                                Logger().log("new push token created: \(data)")
-                                
-                                let chunkedRows = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
-                                print("SEPARATED BY NEW LINE: \(chunkedRows)")
-                                
-                                for row in chunkedRows {
-                                    
-                                    let pushAndPageData = PushToSupabase(token: formattedTokenString, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle)
-                                    let sendToken = try await supabaseDBClient.from("push_tokens").insert([pushAndPageData]).select("token, page_data, page_title").execute()
-                                    let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData]).select("page_id").execute()
-                                    
-                                    Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
-                                    Logger().log("push token successfully sent up to Supabase: \(String(describing:(sendToken)))")
-                                }
-                            }
-                        }
+                    } catch {
+                        print("supabse insertion errror ❗️\(error.localizedDescription)")
                     }
                 }
-                try modelContextPage?.save()
+                
+                let fetch = FetchDescriptor<UserPageContent>(predicate: #Predicate {$0.userPageId == pageID})    ///update importedNotes.swift with changed synced text
+                
+                if let existingText = try context.fetch(fetch).first {
+                    existingText.userContentPage = formattedString
+                    
+                } else {
+                    let page = UserPageContent(userContentPage: formattedString, userPageId: pageID)
+                    context.insert(page)
+                    try context.save()
+                }
                 
             } catch {
                 print("url session error:\(error)")

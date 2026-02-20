@@ -8,39 +8,45 @@
 import SwiftUI
 import Foundation
 import SwiftData
-
+import OSLog
 
 struct ImportedNotes: View {
-    var pageID: String
-    var filterPage: [UserPageContent] {
-        guard !pageID.isEmpty else { return [] }
-        return pageContent.filter{($0.userPageId) == pageID }
-    }
+    let pageID: String
     
     var filterTitle: [UserPageTitle] {
         pageTitle.filter{($0.titleID) == pageID }
     }
+    
     @Environment(\.dismiss) var dismissTab
-    @Environment(\.modelContext) var modelContextPage
+    @Environment(\.modelContext) var context
     
-    @Query var pageContent: [UserPageContent]
     @Query var pageTitle: [UserPageTitle]
-    
+
     @Environment(\.colorScheme) var colorScheme
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
-    @State private var loadedPage: [UserPageContent] = []
-
     
-    public func callEndpoint() {
-        ImportUserPage.shared.modelContextPagesStored(pagesContext: modelContextPage)
-        print("page data loaded from cache ✅")
+    enum ErrorDefinition: Error {
+        case emptyContent
+    }
+    
+    @State var pageBlocks: [UserPageContent] = []
+    
+    @MainActor
+    func fetchPageContent(context: ModelContext) throws -> [UserPageContent] {
+        
+        let descriptor = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == pageID }, sortBy: [SortDescriptor(\.id, order: .forward)])
+        let result = try context.fetch(descriptor)
+      
+        guard !result.isEmpty else { throw ErrorDefinition.emptyContent }
+        return result
     }
     
     
     
     var body: some View {
+        
         
         NavigationView {
             
@@ -48,7 +54,7 @@ struct ImportedNotes: View {
                 HStack(spacing: 7) {
                     
                     Button {
-                           dismissTab()
+                        dismissTab()
                     } label: {
                         Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(13)
                     }.glassEffect()
@@ -66,7 +72,7 @@ struct ImportedNotes: View {
                         
                     }
                     Spacer()
-                  
+                    
                 }
                 .frame(maxWidth: 370)
                 .padding(.top, 5)
@@ -78,7 +84,7 @@ struct ImportedNotes: View {
                 
                 VStack {
                     
-                    List(filterPage, id: \.self) { block in
+                    List(pageBlocks, id: \.self) { block in
                         
                         Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
                             .font(.system(size: 16)).lineSpacing(1)
@@ -95,9 +101,12 @@ struct ImportedNotes: View {
             .background(Color.mmBackground)
         }
         .task {
-            //callEndpoint()
-            ImportUserPage.shared.modelContextPagesStored(pagesContext: modelContextPage)
-            loadedPage = pageContent.filter { $0.userPageId == pageID }
+            do {
+                pageBlocks = try fetchPageContent(context: context)
+               
+            } catch {
+                print("function call failure: \(error.localizedDescription)")
+            }
         }
     }
 }

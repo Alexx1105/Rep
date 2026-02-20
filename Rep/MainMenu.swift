@@ -10,41 +10,110 @@ import Foundation
 import SwiftData
 import NotificationCenter
 import KimchiKit
+import BackgroundTasks
 
 
 @MainActor
 struct MainMenu: View {
     
-    @Environment(\.modelContext) var modelContext
+    @Environment(\.modelContext) var context
     @Environment(\.colorScheme) var colorScheme
     
+    @Query(sort: [SortDescriptor(\UserPageTitle.titleID)])
+    var pageTitle: [UserPageTitle]
+    
     @Query var showUserEmail: [UserEmail]
-    @Query var pageTitle: [UserPageTitle]
     
     var pageID: String
-    
-    var filterTabTitle: [UserPageTitle] {
-        pageTitle.filter{($0.titleID == pageID)}
-    }
-
+        
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
     @State private var loading = false
     @State private var didLoad = false
-    
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
     
-
+    @ObservedObject private var AutoSync = SyncController.shared
+    
     private func delete(pageID: [String]) async throws {
-       
+        
         let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
         print("page ids here: \(pageID)")
-   }
-
-
+    }
+    
+    
+    @MainActor
+    public class TaskController: ObservableObject {
+        private var autoSyncTask: Task<Void, Never>?
+        private(set) var isSync: Bool = false
+        
+        private let pages: ModelContext
+        private let context: ModelContext
+        
+        init(pages: ModelContext, context: ModelContext) {
+            self.pages = pages
+            self.context = context
+        }
+        
+//        private func bgAppRefresh(task: BGAppRefreshTask) {
+//            
+//            Task {
+//                try await runSyncWhenReady()
+//            }
+//        }
+//        
+//        @MainActor
+//        func runSyncWhenReady() async throws {
+//            
+//            do {
+//                try await searchPages.shared.userEndpoint(context: pages)
+//                
+//                let description = FetchDescriptor<NotionPageMetaData>()
+//                let pageID = try context.fetch(description)
+//                
+//                for pg in pageID {
+//                    try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
+//                }
+//                
+//                print("sync task ran successfully 🔄")
+//            } catch {
+//                print("auto sync task error: \(error)")
+//            }
+//        }
+        
+//        @MainActor
+//        func startAutoSyncTask() {
+//            
+//            if SyncController.shared.isAutoSync {
+//                
+//                autoSyncTask = Task { @MainActor in
+//                    while !Task.isCancelled {
+//                        do {
+//                            try await runSyncWhenReady()
+//                            try await Task.sleep(nanoseconds: 60_000_000_000)
+//                            
+//                        } catch {
+//                            print("cancellation error: \(error)")
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        
+        @MainActor
+        func stopAutoSyncTask() {
+            
+            autoSyncTask?.cancel()
+            autoSyncTask = nil
+            
+            print("sync task stopped successfully ⏹️")
+        }
+    }
+    
+    @State private var taskController: TaskController?
+    
     var body: some View {
         
         VStack {
@@ -54,7 +123,7 @@ struct MainMenu: View {
                     .frame(width: 35, height: 35)
                     .opacity(0.25)
                     .padding(.leading)
-
+                
                 
                 VStack(spacing: 3) {
                     Text("Workspace email")
@@ -65,8 +134,7 @@ struct MainMenu: View {
                     
                         .onAppear {
                             Task {
-                                searchPages.shared.modelContextTitleStored(context: modelContext)
-                                OAuthTokens.shared.modelContextEmailStored(emailStored: modelContext)
+                                OAuthTokens.shared.modelContextEmailStored(emailStored: context)
                             }
                         }
                     
@@ -82,45 +150,98 @@ struct MainMenu: View {
                 Spacer()
             }.frame(maxWidth: .infinity, maxHeight: 50)
                 .opacity(showUserEmail.first?.personEmail != nil ? 1 : 0)
-        
+            
             
             Spacer()
-            
+            //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
             HStack {
-                
-                //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
-                
-                Text("Your notes from Notion:")
-                    .fontWeight(.semibold)
-                    .opacity(textOpacity)
-            
-                
+                VStack(alignment: .leading, spacing: 5) {
+                    
+                    
+                    if AutoSync.isAutoSync {
+        
+                        ZStack {
+                            
+                            Capsule()
+                                .frame(minWidth: 110,maxWidth: 180, maxHeight: 21)
+                                .glassEffect()
+                            
+                            HStack(spacing: 3) {
+                                
+                                Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
+                                    .resizable()
+                                    .frame(width: 10, height: 8)
+                                    .opacity(textOpacity)
+                                
+                                
+                                Text("Last updated:")
+                                    .font(.system(size: 10)).lineSpacing(3)
+                                    .fontWeight(.semibold)
+                                    .opacity(textOpacity)
+                                    .padding(.trailing, 3)
+                                
+                                
+                                let time: Date = LastEdited.shared.lastEditedAt ?? Date()
+                                
+                                Text(time.formatted(.dateTime.weekday().day().hour().minute()))
+                                    .font(.system(size: 10))
+                                    .fontWeight(.regular)
+                                    .opacity(textOpacity)
+                                
+                            }.frame(alignment: .leading)
+                        }
+                    } else {
+                        EmptyView()
+                    }
+                    
+                    Text("Your notes from Notion:")
+                        .fontWeight(.semibold)
+                        .opacity(textOpacity)
+                        .padding(.bottom)
+                }
                 Spacer()
+                
                 Menu {
                     Button {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) { tabSlideOver = true }
                     } label: {
                         Label("Select tab/s", systemImage: "checkmark.circle")
                     }; Button {
-    
+                        
                         deleteMultipleTabs.removeAll()
                         tabSlideOver = false
                         
                     } label: {
                         Label("Cancel select", systemImage: "xmark.circle")
                     }
-                      Divider()
+                    Divider()
                     Button(role: .destructive) {
                         guard !deleteMultipleTabs.isEmpty else { return }
                         let deleteTabIDs = Set(deleteMultipleTabs)
-               
+                        
                         do {
-                            try modelContext.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
-                            try modelContext.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
-                            try modelContext.save()
+                            try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
+                            try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             
-                             let ids = Array(deleteMultipleTabs)
-                         
+                            let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
+                            for i in try context.fetch(fetchDesc) {
+                                i.isDeleted = true
+                            }
+                            
+                            for id in deleteTabIDs {
+                                let desc = FetchDescriptor<DeletedPage>(
+                                    predicate: #Predicate { $0.pageID == id }
+                                )
+                                
+                                if try context.fetch(desc).isEmpty {
+                                    context.insert(DeletedPage(pageID: id))
+                                }
+                            }
+                            
+                            try context.save()
+                            
+                            let ids = Array(deleteMultipleTabs)
+                            
                             print("stored ids: \(deleteMultipleTabs)")
                             Task {
                                 try await delete(pageID: ids )
@@ -132,22 +253,23 @@ struct MainMenu: View {
                         } catch {
                             print("tab deletion error: \(error)")
                         }
-                      
+                        
                     } label: {
                         Label("Delete selected tab/s", systemImage: "trash")
                     }
                 } label: {
                     Circle()
                     .frame(height: 45)}
-                    .glassEffect()
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    .overlay {
-                        Image(systemName: "ellipsis")
-                    }
+                .glassEffect()
+                .buttonStyle(PlainButtonStyle())
+                
+                .overlay {
+                    Image(systemName: "ellipsis")
+                }
                 
             }
-            .frame(maxWidth: 370, maxHeight: 100 )
+            .frame(maxWidth: .infinity, maxHeight: 100 )
+            .padding(.horizontal)
             Spacer()
             
             VStack {
@@ -207,11 +329,30 @@ struct MainMenu: View {
                 print("user could not register: \(error)")
             }
         }
+    
+
+        .onChange(of: AutoSync.isAutoSync) { _, synced in
+            guard let controller = taskController else { return }
+            
+            if synced {
+                BackgroundRefresh.shared.startAutoSyncTask(pages: context, context: context)
+            } else {
+                controller.stopAutoSyncTask()
+            }
+        }
+        
+        .onAppear {                      ///init task controller after UI renders
+            if taskController == nil {
+                taskController = TaskController(pages: context, context: context)
+            }
+        }
     }
 }
-    
+
 
 
 #Preview {
     MainMenu(pageID: "")
+        .environment(\.sizeCategory, .large)
+    
 }

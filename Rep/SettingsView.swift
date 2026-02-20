@@ -10,12 +10,18 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissSettingsTab
+    
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+   
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
+    @ObservedObject var AutoSync = SyncController.shared
+   
+  
     @Environment(\.modelContext) var modelContext
-     var showUserEmail: [UserEmail] = []
+     
+    var showUserEmail: [UserEmail] = []
     
     @State private var presentPopover: Bool = false
     
@@ -60,8 +66,8 @@ struct SettingsView: View {
                             .opacity(textOpacity)
                             .tint(.blue)
                         
-                    }.frame(maxWidth: 370)
-                        .padding(.leading)
+                    }.frame(maxWidth: .infinity)
+                        .padding(.horizontal)
                     
                     
                     Text("Toggle appearence to have\ndark mode as the standard")
@@ -72,6 +78,39 @@ struct SettingsView: View {
                        
                     
                     Divider()
+                    
+                    HStack(alignment: .top ) {
+                        HStack(spacing: 15) {
+                            
+                            Text("Pro").foregroundStyle(Color.intervalBlue)
+                                .font(.system(size: 16))
+                                .fontWeight(.heavy)
+                                .overlay {
+                                    Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                                        .frame(width: 40, height: 21)
+                                }.padding(.leading, 5)
+                            
+                            Toggle("Auto Sync", isOn: $AutoSync.isAutoSync)
+                                .fontWeight(.semibold)
+                                .opacity(textOpacity)
+                                .tint(.blue)
+                                .onChange(of: AutoSync.isAutoSync) { oldValue, newValue in
+                                    print("auto sync toggled in settings view: \(newValue)")
+                                }
+                            
+                        }.frame(alignment: .leading)
+                        
+                    }.frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                    
+                    Text("Toggle Auto Sync to enable on-demand\nsyncing between your notion and your imported notes")
+                        .font(.system(size: 16)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.25)
+                        .padding(.leading)
+                    
+                    Divider()
+                    
                     
                     HStack(alignment: .top) {
                         
@@ -84,6 +123,7 @@ struct SettingsView: View {
                                     Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
                                         .frame(width: 40, height: 21)
                                 }.padding(.leading, 5)
+                           
                             Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
                                 .fontWeight(.semibold)
                                 .opacity(textOpacity)
@@ -91,15 +131,11 @@ struct SettingsView: View {
                                 .onChange(of: hyperToggleEnabled) { oldValue, newValue in
                                     print("hyper mode toggled in settings view: \(newValue)")
                                 }
-                               
-                            
-                            
-                            
                             
                         }.frame(alignment: .leading)
                         
-                    }.frame(maxWidth: 370)
-                        .padding(.leading)
+                    }.frame(maxWidth: .infinity)
+                        .padding(.horizontal)
                     
                     
                     Text("Toggle Hyper Mode to have a shorter\ninterval selection option set")
@@ -127,9 +163,8 @@ struct SettingsView: View {
                             
                         }
                     }
-                    
-                    
                     Divider()
+                    
                 }
                 Spacer()
                 
@@ -150,4 +185,6 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
+        .environment(\.sizeCategory, .large)
 }
+

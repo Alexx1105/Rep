@@ -70,7 +70,7 @@ struct DynamicRepControlsView: View {
     ]
     
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled = false
-
+    
     @MainActor
     func runSliderOperation() {
         let mode = hyperToggleEnabled ? hyperModeOptions : frequencyOptions
@@ -168,7 +168,7 @@ struct DynamicRepControlsView: View {
     
     @State var localPage: [String: Date] = [:]          ///acts as local per-page base compute
     @State private var currentTask: Task<Void, Never>?
- 
+    
     
     var pageID: String
     var filterTitle: String {
@@ -183,7 +183,7 @@ struct DynamicRepControlsView: View {
     var body: some View {
         VStack(spacing: 70) {
             
-            HStack(alignment: .top, spacing: 68) {
+            HStack(alignment: .top) {
                 
                 Button {
                     dismissControlsTab()
@@ -191,6 +191,8 @@ struct DynamicRepControlsView: View {
                     Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark).padding(13)
                 }.glassEffect()
                 
+                Spacer()
+              
                 VStack(alignment: .trailing ,spacing: 5) {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
@@ -205,7 +207,8 @@ struct DynamicRepControlsView: View {
                     
                     
                 }
-            }.padding(.top, 5)
+            }.frame(maxWidth: .infinity)
+                .padding(.horizontal)
             
             
             VStack(spacing: 5) {
@@ -228,7 +231,7 @@ struct DynamicRepControlsView: View {
                 ZStack(alignment: .top) {
                     
                     if hyperToggleEnabled {
-    
+                        
                         SliderView(sliderOptions: hyperModeOptions, initialSelectedOption: storeSelectedHyperModeOption) { hyperOption in
                             switch hyperOption {
                             case 0:
@@ -244,7 +247,7 @@ struct DynamicRepControlsView: View {
                             }
                             storeSelectedHyperModeOption = hyperOption
                         }
-                   
+                        
                     } else {
                         SliderView(sliderOptions: frequencyOptions, initialSelectedOption: storeSelectedOption) { newOptionIndex in
                             switch newOptionIndex {
@@ -268,10 +271,10 @@ struct DynamicRepControlsView: View {
                     }
                 
                 
-                .padding(.horizontal, 10)
-                .onChange(of: hyperToggleEnabled) { runSliderOperation() }
-                .onChange(of: storeSelectedOption) { runSliderOperation() }    ///defualt mode selected
-                .onChange(of: storeSelectedHyperModeOption) { runSliderOperation() }   ///hyper mode selected
+                    .padding(.horizontal, 10)
+                    .onChange(of: hyperToggleEnabled) { runSliderOperation() }
+                    .onChange(of: storeSelectedOption) { runSliderOperation() }    ///defualt mode selected
+                    .onChange(of: storeSelectedHyperModeOption) { runSliderOperation() }   ///hyper mode selected
                 
                 HStack {
                     ForEach(hyperToggleEnabled ? hyperModeOptions : frequencyOptions, id: \.label) { opt in
