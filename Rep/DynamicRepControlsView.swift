@@ -181,37 +181,42 @@ struct DynamicRepControlsView: View {
     
     
     var body: some View {
-        VStack(spacing: 70) {
+        VStack(spacing: 50) {
             
             HStack(alignment: .top) {
                 
                 Button {
                     dismissControlsTab()
                 } label: {
-                    Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark).padding(13)
+                    Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark).padding(17)
                 }.glassEffect()
                 
                 Spacer()
-              
-                VStack(alignment: .trailing ,spacing: 5) {
+                
+                VStack(alignment: .trailing, spacing: -10) {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
                     
-                    Text(filterTitle)
-                        .font(.system(size: 16)).lineSpacing(3)
-                        .fontWeight(.medium)
-                        .opacity(0.25)
-                        .truncationMode(.tail)
-                        .lineLimit(1)
                     
+                    Text(filterTitle)
+                        .font(.system(size: 14))
+                        .fontWeight(.regular)
+                        .truncationMode(.middle)
+                        .lineLimit(1)
+                        .padding()
+                    
+                        .background(Capsule()
+                            .frame(height: 25)
+                            .glassEffect(.regular))
+                     
                     
                 }
             }.frame(maxWidth: .infinity)
-                .padding(.horizontal)
+             .padding(.horizontal)
             
             
-            VStack(spacing: 5) {
+            VStack(spacing: 10) {
                 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5){
@@ -220,12 +225,12 @@ struct DynamicRepControlsView: View {
                             .opacity(textOpacity)
                         
                         Text("Control how often you receive flashcard\nrepetition notifications containing your notes.")
-                            .font(.system(size: 16)).lineSpacing(3)
+                            .font(.system(size: 14)).lineSpacing(3)
                             .fontWeight(.medium)
-                            .opacity(0.25)
+                            .opacity(0.50)
                             .padding(.trailing, 15)
                         
-                    }
+                    }.padding(.trailing)
                 }
                 
                 ZStack(alignment: .top) {
@@ -280,104 +285,31 @@ struct DynamicRepControlsView: View {
                     ForEach(hyperToggleEnabled ? hyperModeOptions : frequencyOptions, id: \.label) { opt in
                         Text(opt.label)
                             .fontWeight(.medium)
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .opacity(textOpacity)
                             .frame(maxWidth: .infinity)
                     }
-                }.padding(.horizontal, -12)
-            }
+                }.padding(.horizontal, -8)
+                
             
-            ZStack {
-                VStack {
-                    Spacer()
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Auto disable after ")
-                            .fontWeight(.semibold)
-                            .opacity(textOpacity)
-                        
-                        
-                        Text("Rep will reset after a full iteration over this\nnotion page and repeat again unless one of\nthese settings are enabled.")
-                            .font(.system(size: 16)).lineSpacing(3)
-                            .fontWeight(.medium)
-                            .opacity(0.25)
-                        
-                    }.padding(.top, 7)
-                        .frame(maxWidth: .infinity)
-                        .padding(.trailing, 20)
+                VStack(alignment: .center, spacing: 15) {
                     
-                    let autoDisableOptions: [SliderView.SliderOption] = [.init(label: "Off", symbolName: "multiply.circle", interval: DateComponents()),
-                                                                         .init(label: "24hrs", symbolName: "timer", interval: DateComponents()),
-                                                                         .init(label: "48hrs", symbolName: "timer", interval: DateComponents())]    ///add functionality later
-                    SliderView(sliderOptions: autoDisableOptions, initialSelectedOption: storeDisableOption) { disable in
-                        switch disable {
-                        case 0:
-                            storeDisableOption = 0
-                        case 1:
-                            storeDisableOption = 1
-                        case 2:
-                            storeDisableOption = 2
-                        default:
-                            break
-                        }
-                        storeDisableOption = disable
-                    }
+                    Text("Control the orientation of how rep delivers your notes to get the oldest or newest parts sent to\nyou first.")
+                        .font(.system(size: 14)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.50)
+                        .padding(.horizontal)
                     
-                    HStack(alignment: .top, spacing: 130) {
-                        Text("Off")
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .opacity(textOpacity)
-                        
-                        Text("24hrs")
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .opacity(textOpacity)
-                        
-                        Text("48hrs")
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .opacity(textOpacity)
-                        
-                    }.padding(.leading, 15)
+                    OrderMenu(isPresented: .constant(true))
                     
-                    
-                    Spacer()
-                    HStack(alignment: .bottom) {
-                        
-                        Menu {
-                            
-                            Button(action: {}) { Label("Bottom to top", systemImage: "arrow.uturn.up")}
-                            Button(action: {}) { Label("Top to bottom", systemImage: "arrow.uturn.down")}
-                            Text("Iterate page from:")
-                            
-                        } label: {
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width: 122, height: 35)
-                                .opacity(0.06)
-                            
-                                .overlay {
-                                    HStack(spacing: 20) {
-                                        
-                                        Text("Order by")
-                                            .fontWeight(.medium)
-                                            .opacity(textOpacity)
-                                        
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .opacity(textOpacity)
-                                        
-                                    }.padding(.leading, 2)
-                                    
-                                }.glassEffect()
-                                .frame(maxWidth: 170)
-                            
-                            Spacer()
-                            
-                        }.buttonStyle(PlainButtonStyle())
-                        
-                    }.frame(maxHeight: .infinity)
-                        .padding(.top, 5)
-                }
-            }
+                }.padding(.top)
+                    .background(Rectangle().fill(.ultraThickMaterial)
+                        .stroke(Color.mmBackground, lineWidth: 0.3)
+                        .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
+                        .cornerRadius(15)).padding()
+            }.frame(alignment: .center)
+                .padding(.top)
+            
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

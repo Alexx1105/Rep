@@ -71,9 +71,9 @@ struct SettingsView: View {
                     
                     
                     Text("Toggle appearence to have\ndark mode as the standard")
-                        .font(.system(size: 16)).lineSpacing(3)
+                        .font(.system(size: 14)).lineSpacing(3)
                         .fontWeight(.medium)
-                        .opacity(0.25)
+                        .opacity(0.50)
                         .padding(.leading)
                        
                     
@@ -103,10 +103,10 @@ struct SettingsView: View {
                     }.frame(maxWidth: .infinity)
                         .padding(.horizontal)
                     
-                    Text("Toggle Auto Sync to enable on-demand\nsyncing between your notion and your imported notes")
-                        .font(.system(size: 16)).lineSpacing(3)
+                    Text("Toggle Auto Sync to enable on-demand\nsyncing between your notion and your\nimported notes")
+                        .font(.system(size: 14)).lineSpacing(3)
                         .fontWeight(.medium)
-                        .opacity(0.25)
+                        .opacity(0.50)
                         .padding(.leading)
                     
                     Divider()
@@ -139,9 +139,9 @@ struct SettingsView: View {
                     
                     
                     Text("Toggle Hyper Mode to have a shorter\ninterval selection option set")
-                        .font(.system(size: 16)).lineSpacing(3)
+                        .font(.system(size: 14)).lineSpacing(3)
                         .fontWeight(.medium)
-                        .opacity(0.25)
+                        .opacity(0.50)
                         .padding(.leading)
                     
                     ZStack(alignment: .trailing) {
