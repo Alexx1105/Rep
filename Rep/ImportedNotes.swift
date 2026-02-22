@@ -43,7 +43,13 @@ struct ImportedNotes: View {
         return result
     }
     
-    
+    private var bottomBlur: some View {
+        LinearGradient(gradient: Gradient(colors: [Color.mmBackground.opacity(0),
+                        Color.mmBackground.opacity(0.6), Color.mmBackground]),startPoint: .top, endPoint: .bottom
+        )
+        .frame(height: 80)
+        .allowsHitTesting(false)
+    }
     
     var body: some View {
         
@@ -56,13 +62,15 @@ struct ImportedNotes: View {
                     Button {
                         dismissTab()
                     } label: {
-                        Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(13)
+                        Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(17)
                     }.glassEffect()
                     
                     if let emojis = filterTitle.first?.emoji, let title = filterTitle.first?.plain_text {
                         Text("\(emojis)")
                         Text("\(title)")
                             .fontWeight(.semibold)
+                            .truncationMode(.middle)
+                            .lineLimit(1)
                         
                     } else {
                         Rectangle()
@@ -82,20 +90,20 @@ struct ImportedNotes: View {
                 Divider()
                 
                 
-                VStack {
-                    
+                ZStack(alignment: .bottom) {
                     List(pageBlocks, id: \.self) { block in
                         
                         Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
-                            .font(.system(size: 16)).lineSpacing(1)
+                            .font(.system(size: 16)).lineSpacing(4)
                             .listRowBackground(Color.mmBackground)
                             .listRowSeparator(.hidden)
                         
                     }
                     .listStyle(.plain)
-                    
+                    bottomBlur
                 }
-                .fontWeight(.medium)
+                .fontWeight(.regular)
+                .ignoresSafeArea(edges: .bottom)
                
             }
             .background(Color.mmBackground)

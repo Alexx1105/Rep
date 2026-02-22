@@ -39,22 +39,19 @@ struct NotionImportPageView: View {
                         .frame(width: 370, height: 160)
                         .glassEffect(.regular, in: .rect(cornerRadius: 30))
               
-                
-                    
-                   
-                
+
                 HStack(alignment: .top) {
                     VStack(spacing: 5 ) {
                         Text("Import notes from your notion")
-                            .font(.system(size: 18))
+                            .font(.system(size: 16))
                             .fontWeight(.medium)
                             .opacity(textOpacity)
                             .padding(.top)
                         
                         Text("Grant Notion access to your\naccount to import your notes")
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .fontWeight(.medium)
-                            .opacity(0.25)
+                            .opacity(0.50)
                             .padding(.horizontal)
                         Spacer()
                     }.frame(maxHeight: 175)
@@ -82,7 +79,7 @@ struct NotionImportPageView: View {
                         Text("Import page")
                             .foregroundStyle(Color.checkmark)
                             .fontWeight(.medium)
-                            .font(.system(size: 18))
+                            .font(.system(size: 16))
                             .padding(.bottom)
                            
                     }

@@ -32,24 +32,23 @@ struct DynamicRepLiveActivity: Widget {
             VStack(alignment: .leading, spacing: 2) {
                 
                 VStack(alignment: .leading, spacing: 2) {
-                   
+                    
                     ZStack {
                         Text(context.state.plainText).truncationMode(.tail)
+                            .padding(.top, 5)
                             .fontWeight(.medium)
                             .lineLimit(1)
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .foregroundStyle(Color.intervalBlue)
                             .padding(.horizontal)
-                            .padding(.top, 12)
                             .background(Capsule()
-                                .frame(width: .infinity, height: 23)
-                                .foregroundStyle(Color.intervalBlue).opacity(0.3)
-                                .padding(.top)
-                                .padding(.leading, 1))
-
-                    }.padding(.leading, 7)
-                       
-                    
+                                .padding(.horizontal, 7)
+                                .padding(.top, 5)
+                                .frame(height: 23)
+                                .foregroundStyle(Color.intervalBlue).opacity(0.2))
+                        
+                    }.padding(.trailing, 7)
+                        .padding(.top, 5)
                     
                     HStack(alignment: .top) {
                         let contentArray: [String] = context.state.userContentPage
@@ -57,7 +56,7 @@ struct DynamicRepLiveActivity: Widget {
                         let content = array.joined(separator: "\n")
                         Text("\n\(content)")
                             .fontWeight(.semibold)
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .lineSpacing(2)
                             .lineLimit(7)
                             .minimumScaleFactor(0.9)
@@ -90,20 +89,20 @@ struct DynamicRepLiveActivity: Widget {
                 }
                 
                 DynamicIslandExpandedRegion(.center) {
-                   
+                    
                     HStack(alignment: .top) {
+                        
                         Text(context.state.plainText).truncationMode(.tail)
                             .lineLimit(1)
                             .fontWeight(.medium)
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .foregroundStyle(Color.intervalBlue)
                             .background(Capsule()
-                                .frame(width: .infinity, height: 23)
-                                .foregroundStyle(Color.intervalBlue).opacity(0.3))
-                     
+                            .frame(height: 24)
+                            .padding(.horizontal, -5)
+                            .foregroundStyle(Color.intervalBlue).opacity(0.2))
                         
                     }.frame(maxWidth: .infinity, alignment: .leading)
-                     .padding(.top)
                     
                 }
                 
@@ -117,10 +116,11 @@ struct DynamicRepLiveActivity: Widget {
                         let content = array.joined(separator: "\n")
                         Text(content)
                             .fontWeight(.semibold)
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .minimumScaleFactor(0.9)
                             .foregroundStyle(Color.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxHeight: .infinity)
                             .lineLimit(nil)
                         
                         Spacer()

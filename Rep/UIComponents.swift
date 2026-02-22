@@ -56,10 +56,9 @@ struct MainMenuTab: View {
         ZStack(alignment: .center) {
             Rectangle()
                 .fill(.white.opacity(elementOpacityDark))
-                .stroke(Color.mmBackground, lineWidth: 0.2)
+                .stroke(Color.mmBackground, lineWidth: 0.5)
                 .foregroundStyle(Color.mmDark)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.mmDark, lineWidth: 0.2))
-                .opacity(0.8)
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.mmDark, lineWidth: 0.3))
                 .cornerRadius(10)
             
             HStack(spacing: 20) {
@@ -125,10 +124,10 @@ struct SliderView: View {
     
     
     var sliderOptions: [SliderView.SliderOption]
-        
+    
     let initialSelectedOption: Int
     let selectedOptionChanged: ((Int) -> Void)
-
+    
     @State var position: CGFloat = 0
     @State var lastDragPosition: CGFloat = 0
     @State var visualPosition: CGFloat = 0
@@ -167,7 +166,7 @@ struct SliderView: View {
                                         closestStopPosition = stopPositions[i] - circleSize / 2
                                     }
                                 }
-                                                                
+                                
                                 let resistanceDistance = minDistance - (minDistance * resistance * resistance)
                                 withAnimation {
                                     if position < closestStopPosition {
@@ -237,6 +236,7 @@ struct SliderView: View {
                             .offset(x: -8)
                             .offset(x: stopPosition)
                             .foregroundStyle(Color.mmDark)
+                            .opacity(0.50)
                         Spacer()
                     }
                 }
@@ -258,18 +258,18 @@ struct PaymentMenuCard: View {
                     .font(.system(size: 20))
                     .frame(maxWidth: 290, alignment: .leading)
                     .fontWeight(.semibold)
-                 
+                
                 
                 Button("close") {
-                   
-                        withAnimation {
-                            isPresented = false
-                        }
-                            
+                    
+                    withAnimation {
+                        isPresented = false
+                    }
+                    
                 }.buttonStyle(.glass)
                 
             }.padding(.top)
-               
+            
             
             ZStack {
                 Rectangle().foregroundStyle(Color.mmBackground)        ///solid overlay here
@@ -320,10 +320,10 @@ struct PaymentMenuCard: View {
                 }.frame(maxHeight: 630, alignment: .top)
                 
                 ZStack {
-//                    RoundedRectangle(cornerRadius: 25).frame(width: 135, height: 260)
-//                        .foregroundStyle(Color.intervalBlue).opacity(0.2)
-//                        .frame(maxWidth: 325, alignment: .trailing)
-//                        .frame(maxHeight: 500, alignment: .center)
+                    //                    RoundedRectangle(cornerRadius: 25).frame(width: 135, height: 260)
+                    //                        .foregroundStyle(Color.intervalBlue).opacity(0.2)
+                    //                        .frame(maxWidth: 325, alignment: .trailing)
+                    //                        .frame(maxHeight: 500, alignment: .center)
                     
                     VStack(spacing: 20) {
                         HStack(spacing: 80) {
@@ -343,7 +343,7 @@ struct PaymentMenuCard: View {
                             Text("• Hyper mode support").font(.system(size: 12)).fontWeight(.heavy).foregroundStyle(Color.intervalBlue)
                             
                         }.frame(maxWidth: 280, alignment: .leading)
-                    
+                        
                         
                         HStack(spacing: 73) {
                             Text("• Import up to two pages at a time").font(.system(size: 12)).fontWeight(.medium).opacity(0.50)
@@ -369,32 +369,32 @@ struct PaymentMenuCard: View {
                 }
                 
                 
+                
+                VStack {
+                    HStack(alignment: .top) {
+                        Divider().frame(maxHeight: 580)
+                    }
                     
-                    VStack {
-                        HStack(alignment: .top) {
-                            Divider().frame(maxHeight: 580)
+                    
+                    
+                    Button {
+                        Task {
+                            try await PaymentStore().runPaymentFlow()
                         }
+                    } label: {
+                        RoundedRectangle(cornerRadius: 30).glassEffect()
+                            .frame(maxWidth: 350, maxHeight: 48)
+                            .foregroundStyle(Color.intervalBlue)
                         
-                    
-        
-                        Button {
-                            Task {
-                                try await PaymentStore().runPaymentFlow()
-                            }
-                        } label: {
-                            RoundedRectangle(cornerRadius: 30).glassEffect()
-                                .frame(maxWidth: 350, maxHeight: 48)
-                                .foregroundStyle(Color.intervalBlue)
+                        
+                            .overlay {
+                                Text("Coming Soon").foregroundStyle(Color.kimchiLabs)  //change back to "Upgrade" later
+                                    .fontWeight(.heavy)
                                 
-                            
-                                .overlay {
-                                    Text("Coming Soon").foregroundStyle(Color.kimchiLabs)  //change back to "Upgrade" later
-                                        .fontWeight(.heavy)
-                                        
-                                }.padding(.bottom)
-                        }.disabled(true)   //dont forgot to remove 
-                    }.padding(.top, 5)
-              
+                            }.padding(.bottom)
+                    }.disabled(true)   //dont forgot to remove
+                }.padding(.top, 5)
+                
                 
             }
         }
@@ -404,7 +404,80 @@ struct PaymentMenuCard: View {
                 .fill(Color.clear)
                 .frame(maxWidth: .infinity, maxHeight: 800)
                 .glassEffect(.regular, in: .rect(cornerRadius: 35))         ///glass background here
+            
+        }
+    }
+}
+
+
+struct HyperToggleCard: View {
+    
+    @Binding var isPresented: Bool
+    @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
+    @Environment(\.colorScheme) var colorScheme
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+    
+    var body: some View {
+        
+        ZStack {
+            Rectangle().fill(.ultraThickMaterial)
+                .stroke(Color.mmBackground, lineWidth: 0.3)
+                .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
+                .cornerRadius(15).padding(7)
+                .frame(maxHeight: 130)
+            
+            
+            VStack(alignment: .leading) {
                 
+                HStack(spacing: 3) {
+                    Text("Pro").foregroundStyle(Color.intervalBlue)
+                        .font(.system(size: 16))
+                        .fontWeight(.heavy)
+                        .overlay {
+                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                                .frame(width: 40, height: 21)
+                        }
+                    
+                    Spacer()
+                    
+                    Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
+                        .fontWeight(.semibold)
+                        .opacity(textOpacity)
+                        .tint(.blue)
+                        .onChange(of: hyperToggleEnabled) { oldValue, newValue in
+                            print("hyper mode toggled in settings view: \(newValue)")
+                        }
+                    
+                }.padding(.horizontal)
+                
+                
+                VStack(alignment: .leading) {
+                    Text("Toggle Hyper Mode to have a shorter\ninterval selection option set")
+                        .font(.system(size: 14)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.50)
+                    
+                    
+                    ZStack(alignment: .trailing) {
+                        Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                            .frame(width: 120, height: 21)
+                            .offset(x: 7)
+                        
+                        HStack(spacing: 3) {
+                            Text("1hr, 2h30m, 3h40m →  ")
+                                .font(.system(size: 14)).lineSpacing(3)
+                                .fontWeight(.medium)
+                                .opacity(textOpacity)
+                            
+                            
+                            Text("10m, 30m, 45m").foregroundStyle(Color.intervalBlue)
+                                .font(.system(size: 14)).lineSpacing(3)
+                                .fontWeight(.semibold)
+                            
+                        }
+                    }
+                }
+            }.padding(.leading)
         }
     }
 }
@@ -445,4 +518,7 @@ struct PaymentMenuCard: View {
 
 #Preview {
     PaymentMenuCard(isPresented:  .constant(true))
+}
+#Preview {
+    HyperToggleCard(isPresented:  .constant(true))
 }

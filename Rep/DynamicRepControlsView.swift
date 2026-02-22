@@ -181,37 +181,42 @@ struct DynamicRepControlsView: View {
     
     
     var body: some View {
-        VStack(spacing: 70) {
+        VStack(spacing: 50) {
             
             HStack(alignment: .top) {
                 
                 Button {
                     dismissControlsTab()
                 } label: {
-                    Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark).padding(13)
+                    Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark).padding(17)
                 }.glassEffect()
                 
                 Spacer()
-              
-                VStack(alignment: .trailing ,spacing: 5) {
+                
+                VStack(alignment: .trailing, spacing: -5) {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
                     
+                    
                     Text(filterTitle)
-                        .font(.system(size: 16)).lineSpacing(3)
-                        .fontWeight(.medium)
-                        .opacity(0.25)
+                        .font(.system(size: 14))
+                        .fontWeight(.regular)
                         .truncationMode(.tail)
                         .lineLimit(1)
+                        .padding()
                     
+                        .background(Capsule()
+                            .frame(height: 25)
+                            .glassEffect(.regular))
+                     
                     
                 }
             }.frame(maxWidth: .infinity)
-                .padding(.horizontal)
+             .padding(.horizontal)
             
-            
-            VStack(spacing: 5) {
+             .padding(.top)
+            VStack(spacing: 10) {
                 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5){
@@ -220,12 +225,12 @@ struct DynamicRepControlsView: View {
                             .opacity(textOpacity)
                         
                         Text("Control how often you receive flashcard\nrepetition notifications containing your notes.")
-                            .font(.system(size: 16)).lineSpacing(3)
+                            .font(.system(size: 14)).lineSpacing(3)
                             .fontWeight(.medium)
-                            .opacity(0.25)
+                            .opacity(0.50)
                             .padding(.trailing, 15)
                         
-                    }
+                    }.padding(.trailing)
                 }
                 
                 ZStack(alignment: .top) {
@@ -280,104 +285,19 @@ struct DynamicRepControlsView: View {
                     ForEach(hyperToggleEnabled ? hyperModeOptions : frequencyOptions, id: \.label) { opt in
                         Text(opt.label)
                             .fontWeight(.medium)
-                            .font(.system(size: 16))
+                            .font(.system(size: 14))
                             .opacity(textOpacity)
                             .frame(maxWidth: .infinity)
+                           
                     }
-                }.padding(.horizontal, -12)
-            }
+                }.padding(.horizontal, -8)
+                
+                HyperToggleCard(isPresented: .constant(true))
+                    .padding(.top)
+                
+            }.frame(alignment: .center)
+             .padding(.top)
             
-            ZStack {
-                VStack {
-                    Spacer()
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Auto disable after ")
-                            .fontWeight(.semibold)
-                            .opacity(textOpacity)
-                        
-                        
-                        Text("Rep will reset after a full iteration over this\nnotion page and repeat again unless one of\nthese settings are enabled.")
-                            .font(.system(size: 16)).lineSpacing(3)
-                            .fontWeight(.medium)
-                            .opacity(0.25)
-                        
-                    }.padding(.top, 7)
-                        .frame(maxWidth: .infinity)
-                        .padding(.trailing, 20)
-                    
-                    let autoDisableOptions: [SliderView.SliderOption] = [.init(label: "Off", symbolName: "multiply.circle", interval: DateComponents()),
-                                                                         .init(label: "24hrs", symbolName: "timer", interval: DateComponents()),
-                                                                         .init(label: "48hrs", symbolName: "timer", interval: DateComponents())]    ///add functionality later
-                    SliderView(sliderOptions: autoDisableOptions, initialSelectedOption: storeDisableOption) { disable in
-                        switch disable {
-                        case 0:
-                            storeDisableOption = 0
-                        case 1:
-                            storeDisableOption = 1
-                        case 2:
-                            storeDisableOption = 2
-                        default:
-                            break
-                        }
-                        storeDisableOption = disable
-                    }
-                    
-                    HStack(alignment: .top, spacing: 130) {
-                        Text("Off")
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .opacity(textOpacity)
-                        
-                        Text("24hrs")
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .opacity(textOpacity)
-                        
-                        Text("48hrs")
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .opacity(textOpacity)
-                        
-                    }.padding(.leading, 15)
-                    
-                    
-                    Spacer()
-                    HStack(alignment: .bottom) {
-                        
-                        Menu {
-                            
-                            Button(action: {}) { Label("Bottom to top", systemImage: "arrow.uturn.up")}
-                            Button(action: {}) { Label("Top to bottom", systemImage: "arrow.uturn.down")}
-                            Text("Iterate page from:")
-                            
-                        } label: {
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width: 122, height: 35)
-                                .opacity(0.06)
-                            
-                                .overlay {
-                                    HStack(spacing: 20) {
-                                        
-                                        Text("Order by")
-                                            .fontWeight(.medium)
-                                            .opacity(textOpacity)
-                                        
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .opacity(textOpacity)
-                                        
-                                    }.padding(.leading, 2)
-                                    
-                                }.glassEffect()
-                                .frame(maxWidth: 170)
-                            
-                            Spacer()
-                            
-                        }.buttonStyle(PlainButtonStyle())
-                        
-                    }.frame(maxHeight: .infinity)
-                        .padding(.top, 5)
-                }
-            }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
