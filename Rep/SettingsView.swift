@@ -111,60 +111,6 @@ struct SettingsView: View {
                     
                     Divider()
                     
-                    
-                    HStack(alignment: .top) {
-                        
-                        HStack(spacing: 15) {
-                            
-                            Text("Pro").foregroundStyle(Color.intervalBlue)
-                                .font(.system(size: 16))
-                                .fontWeight(.heavy)
-                                .overlay {
-                                    Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-                                        .frame(width: 40, height: 21)
-                                }.padding(.leading, 5)
-                           
-                            Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
-                                .fontWeight(.semibold)
-                                .opacity(textOpacity)
-                                .tint(.blue)
-                                .onChange(of: hyperToggleEnabled) { oldValue, newValue in
-                                    print("hyper mode toggled in settings view: \(newValue)")
-                                }
-                            
-                        }.frame(alignment: .leading)
-                        
-                    }.frame(maxWidth: .infinity)
-                        .padding(.horizontal)
-                    
-                    
-                    Text("Toggle Hyper Mode to have a shorter\ninterval selection option set")
-                        .font(.system(size: 14)).lineSpacing(3)
-                        .fontWeight(.medium)
-                        .opacity(0.50)
-                        .padding(.leading)
-                    
-                    ZStack(alignment: .trailing) {
-                        Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-                            .frame(width: 140, height: 21)
-                            .offset(x: 7)
-                        
-                        HStack(spacing: 3) {
-                            Text("1hr, 2h30m, 3h40m →  ")
-                                .font(.system(size: 16)).lineSpacing(3)
-                                .fontWeight(.semibold)
-                                .opacity(textOpacity)
-                                .padding(.leading)
-                            
-                            Text("10m, 30m, 45m").foregroundStyle(Color.intervalBlue)
-                                .font(.system(size: 16)).lineSpacing(3)
-                                .fontWeight(.heavy)
-                               
-                            
-                        }
-                    }
-                    Divider()
-                    
                 }
                 Spacer()
                 

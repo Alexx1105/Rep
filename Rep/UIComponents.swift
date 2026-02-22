@@ -410,69 +410,75 @@ struct PaymentMenuCard: View {
 }
 
 
-struct OrderMenu: View {
+struct HyperToggleCard: View {
     
-    @State private var order = OrderOptions.topToBottom
     @Binding var isPresented: Bool
-    
-    enum OrderOptions: String, CaseIterable {
-        case topToBottom
-        case bottomToTop
-    }
+    @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
+    @Environment(\.colorScheme) var colorScheme
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
     var body: some View {
         
-        HStack(spacing: 50) {
-           
-            Menu {
-                Text("Order By:")
-                Button(action: { order = .bottomToTop }) { Label("Bottom to top", systemImage: "arrow.uturn.up")}
-                Button(action: { order = .topToBottom }) { Label("Top to bottom", systemImage: "arrow.uturn.down")}
-                
-            } label: {
-                RoundedRectangle(cornerRadius: 50)
-                    .frame(width: 122, height: 35)
-                    .opacity(0.06)
-                
-                    .overlay {
-                        HStack(spacing: 20) {
-                            
-                            Text("Order by")
-                            Image(systemName: "chevron.up.chevron.down")
-                                .opacity(0.50)
-                            
-                        }.padding(.leading, 2)
-                        
-                    }.glassEffect()
-                
-            }.buttonStyle(PlainButtonStyle())
-                .padding(.leading)
+        ZStack {
+            Rectangle().fill(.ultraThickMaterial)
+                .stroke(Color.mmBackground, lineWidth: 0.3)
+                .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
+                .cornerRadius(15).padding(7)
+                .frame(maxHeight: 130)
             
-            if order == .topToBottom {
+            
+            VStack(alignment: .leading) {
                 
-                HStack(spacing: -10) {
-                    Image(systemName: "arrow.uturn.down")
-                    Text("Top to bottom")
+                HStack(spacing: 3) {
+                    Text("Pro").foregroundStyle(Color.intervalBlue)
                         .font(.system(size: 16))
-                        .fontWeight(.regular)
-                        .truncationMode(.middle)
-                        .lineLimit(1)
-                        .padding()
+                        .fontWeight(.heavy)
+                        .overlay {
+                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                                .frame(width: 40, height: 21)
+                        }
+                    
+                    Spacer()
+                    
+                    Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
+                        .fontWeight(.semibold)
+                        .opacity(textOpacity)
+                        .tint(.blue)
+                        .onChange(of: hyperToggleEnabled) { oldValue, newValue in
+                            print("hyper mode toggled in settings view: \(newValue)")
+                        }
+                    
+                }.padding(.horizontal)
                 
-                }.contentTransition(.symbolEffect(.replace))
                 
-            } else {
-                HStack(spacing: -10) {
-                    Image(systemName: "arrow.uturn.up")
-                    Text("Bottom to top")
-                        .font(.system(size: 16))
-                        .fontWeight(.regular)
-                        .truncationMode(.middle)
-                        .lineLimit(1)
-                        .padding()
+                VStack(alignment: .leading) {
+                    Text("Toggle Hyper Mode to have a shorter\ninterval selection option set")
+                        .font(.system(size: 14)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.50)
+                    
+                    
+                    ZStack(alignment: .trailing) {
+                        Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                            .frame(width: 120, height: 21)
+                            .offset(x: 7)
+                        
+                        HStack(spacing: 3) {
+                            Text("1hr, 2h30m, 3h40m →  ")
+                                .font(.system(size: 14)).lineSpacing(3)
+                                .fontWeight(.medium)
+                                .opacity(textOpacity)
+                            
+                            
+                            Text("10m, 30m, 45m").foregroundStyle(Color.intervalBlue)
+                                .font(.system(size: 14)).lineSpacing(3)
+                                .fontWeight(.semibold)
+                            
+                        }
+                    }
                 }
-            }
-        }.padding(.trailing)
+            }.padding(.leading)
+        }
     }
 }
 
@@ -514,5 +520,5 @@ struct OrderMenu: View {
     PaymentMenuCard(isPresented:  .constant(true))
 }
 #Preview {
-    OrderMenu(isPresented:  .constant(true))
+    HyperToggleCard(isPresented:  .constant(true))
 }

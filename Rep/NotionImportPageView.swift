@@ -39,10 +39,7 @@ struct NotionImportPageView: View {
                         .frame(width: 370, height: 160)
                         .glassEffect(.regular, in: .rect(cornerRadius: 30))
               
-                
-                    
-                   
-                
+
                 HStack(alignment: .top) {
                     VStack(spacing: 5 ) {
                         Text("Import notes from your notion")

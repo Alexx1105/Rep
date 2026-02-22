@@ -193,7 +193,7 @@ struct DynamicRepControlsView: View {
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: -10) {
+                VStack(alignment: .trailing, spacing: -5) {
                     Text("DynamicRep flashcard controls")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
@@ -202,7 +202,7 @@ struct DynamicRepControlsView: View {
                     Text(filterTitle)
                         .font(.system(size: 14))
                         .fontWeight(.regular)
-                        .truncationMode(.middle)
+                        .truncationMode(.tail)
                         .lineLimit(1)
                         .padding()
                     
@@ -215,7 +215,7 @@ struct DynamicRepControlsView: View {
             }.frame(maxWidth: .infinity)
              .padding(.horizontal)
             
-            
+             .padding(.top)
             VStack(spacing: 10) {
                 
                 HStack(alignment: .top) {
@@ -288,27 +288,15 @@ struct DynamicRepControlsView: View {
                             .font(.system(size: 14))
                             .opacity(textOpacity)
                             .frame(maxWidth: .infinity)
+                           
                     }
                 }.padding(.horizontal, -8)
                 
-            
-                VStack(alignment: .center, spacing: 15) {
-                    
-                    Text("Control the orientation of how rep delivers your notes to get the oldest or newest parts sent to\nyou first.")
-                        .font(.system(size: 14)).lineSpacing(3)
-                        .fontWeight(.medium)
-                        .opacity(0.50)
-                        .padding(.horizontal)
-                    
-                    OrderMenu(isPresented: .constant(true))
-                    
-                }.padding(.top)
-                    .background(Rectangle().fill(.ultraThickMaterial)
-                        .stroke(Color.mmBackground, lineWidth: 0.3)
-                        .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
-                        .cornerRadius(15)).padding()
+                HyperToggleCard(isPresented: .constant(true))
+                    .padding(.top)
+                
             }.frame(alignment: .center)
-                .padding(.top)
+             .padding(.top)
             
             Spacer()
         }
