@@ -267,7 +267,7 @@ class ImportUserPage: ObservableObject {
             let liveActivityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: { _ in true})
             guard liveActivityToken != nil else { return }
             
-            let formattedTokenString = liveActivityToken?.base64EncodedString()
+            let formattedTokenString = liveActivityToken?.map{String(format: "%02x", $0)}.joined()
             Logger().log("new push token created: \(String(describing: liveActivityToken))")
             
             
