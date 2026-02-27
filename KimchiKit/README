@@ -1,0 +1,140 @@
+KimchiKit
+Internal package for KimchiLabs used by the MuscleMemory app.
+This package centralizes types that must be shared between the iOS app target and the Live Activities (Widget Extension), most importantly the ActivityAttributes used by ActivityKit.
+
+What’s inside
+DynamicRepAttributes — the single source of truth for the app’s Live Activity attributes.
+
+ContentState contains:
+
+plain_text: String?
+
+userContentPage: [String]
+
+No UI is included here. SwiftUI views for the Lock Screen / Dynamic Island live in the Widget Extension.
+
+Requirements
+iOS 16.1+ (ActivityKit minimum).
+Your app can still set a higher minimum (e.g., iOS 17/18) in its own targets.
+
+Xcode 15+ recommended.
+
+In Package.swift you may explicitly declare platforms if you want:
+
+swift
+Copy
+Edit
+```
+// Package.swift
+let package = Package(
+  name: "KimchiKit",
+  platforms: [.iOS(.v17)], // or .iOS(.v16) if you need broader support
+  products: [.library(name: "KimchiKit", targets: ["KimchiKit"])],
+  targets: [.target(name: "KimchiKit")]
+)
+```
+The source file is guarded to build only on iOS:
+
+swift
+Copy
+Edit
+#if os(iOS) && canImport(ActivityKit)
+import ActivityKit
+// DynamicRepAttributes ...
+#endif
+Installation (SPM)
+In Xcode: File → Add Packages…
+
+Enter the repo URL of KimchiKit (internal).
+
+Add the KimchiKit product to:
+
+the MuscleMemory app target
+
+the Widget Extension target
+
+Important: Remove any duplicate copies of DynamicRepAttributes from app/extension targets to avoid type conflicts.
+
+Usage
+Import and reference the attributes
+swift
+Copy
+Edit
+import KimchiKit
+import ActivityKit
+
+```@available(iOS 16.1, *)
+func startLiveActivity() async throws {
+    let initialState = DynamicRepAttributes.ContentState(
+        plain_text: "Hello world",
+        userContentPage: ["A", "B", "C"]
+    )
+
+    // Fixed properties go on the attributes root if/when you add them.
+    let attributes = DynamicRepAttributes()
+
+    let activity = try Activity<DynamicRepAttributes>.request(
+        attributes: attributes,
+        contentState: initialState,
+        pushType: .token // to receive push-to-start/update tokens
+    )
+
+    // Observe push token if needed
+    for await token in Activity<DynamicRepAttributes>.pushToStartTokenUpdates {
+        let tokenHex = token.map { String(format: "%02x", $0) }.joined()
+        print("Live Activity push token:", tokenHex)
+    }
+}
+```
+APNs “push-to-start” payload
+When DynamicRepAttributes lives in this package, the attributes type string is the fully-qualified name:
+
+json
+Copy
+Edit
+"attributes-type": "KimchiKit.DynamicRepAttributes"
+Example curl (sandbox):
+
+bash
+Copy
+Edit
+```
+curl -v --http2 \
+  -H "authorization: bearer <JWT_HERE>" \
+  -H "apns-push-type: liveactivity" \
+  -H "apns-topic: MuscleMemory.KimchiLabs.com.push-type.liveactivity" \
+  -H "apns-priority: 10" \
+  -H "content-type: application/json" \
+  -d '{
+    "aps": { "timestamp": '"$(date +%s)"', "event": "start" },
+    "attributes-type": "KimchiKit.DynamicRepAttributes",
+    "attributes": {},
+    "content-state": {
+      "plain_text": "Hello world",
+      "userContentPage": ["A","B","C"]
+    }
+  }' \
+  https://api.sandbox.push.apple.com/3/device/<TOKEN_HERE>
+  ```
+If you still see "MuscleMemory.DynamicRepAttributes" in logs, it means the type is still being built from the app module. After moving to KimchiKit, update the payload to KimchiKit.DynamicRepAttributes.
+
+Design notes
+Why a package? Keeps the attributes and their serialization in one place that both the app and the extension compile against, eliminating duplicate definitions and signature drift.
+
+Attributes vs. Content State:
+
+Leave "attributes": {} empty for now (fixed, non-changing info).
+
+Put mutable fields in "content-state" (matches ContentState).
+
+UI separation: Keep Live Activity SwiftUI views and widget configuration in the extension only.
+
+Contributing
+Internal only. Submit PRs in the KimchiLabs org. Changes that affect the attributes or ContentState shape should be coordinated with:
+
+the Widget Extension UI
+
+server/Edge functions that generate APNs payloads
+
+License
+Proprietary © KimchiLabs. Internal use for the MuscleMemory app. Do not redistribute.
