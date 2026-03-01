@@ -57,54 +57,9 @@ struct MainMenu: View {
             self.context = context
         }
         
-//        private func bgAppRefresh(task: BGAppRefreshTask) {
-//            
-//            Task {
-//                try await runSyncWhenReady()
-//            }
-//        }
-//        
-//        @MainActor
-//        func runSyncWhenReady() async throws {
-//            
-//            do {
-//                try await searchPages.shared.userEndpoint(context: pages)
-//                
-//                let description = FetchDescriptor<NotionPageMetaData>()
-//                let pageID = try context.fetch(description)
-//                
-//                for pg in pageID {
-//                    try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
-//                }
-//                
-//                print("sync task ran successfully 🔄")
-//            } catch {
-//                print("auto sync task error: \(error)")
-//            }
-//        }
-        
-//        @MainActor
-//        func startAutoSyncTask() {
-//            
-//            if SyncController.shared.isAutoSync {
-//                
-//                autoSyncTask = Task { @MainActor in
-//                    while !Task.isCancelled {
-//                        do {
-//                            try await runSyncWhenReady()
-//                            try await Task.sleep(nanoseconds: 60_000_000_000)
-//                            
-//                        } catch {
-//                            print("cancellation error: \(error)")
-//                        }
-//                    }
-//                }
-//            }
-//        }
         
         @MainActor
         func stopAutoSyncTask() {
-            
             autoSyncTask?.cancel()
             autoSyncTask = nil
             
@@ -344,6 +299,19 @@ struct MainMenu: View {
         .onAppear {                      ///init task controller after UI renders
             if taskController == nil {
                 taskController = TaskController(pages: context, context: context)
+            }
+        }
+        
+        .onAppear {
+            Task {
+                do {
+                    while !Task.isCancelled {
+                        guard SyncController.shared.isAutoSync else { return }
+                        try await BackgroundRefresh.shared.runSyncWhenReady(context: context, pages: context)
+                    }
+                } catch {
+                    print("sync on app-launch error:", error.localizedDescription)
+                }
             }
         }
     }
