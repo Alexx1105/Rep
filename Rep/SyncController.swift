@@ -32,7 +32,7 @@ final class SyncController: ObservableObject {
 final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
     
-    @MainActor
+    
     func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
         
         do {
@@ -61,7 +61,7 @@ final class BackgroundRefresh {
                 while !Task.isCancelled {
                     do {
                         try await runSyncWhenReady(context: context, pages: pages)
-                        try await Task.sleep(nanoseconds: 1_800_000_000_000)    ///30min
+                        try await Task.sleep(for: .seconds(2 * 60))   
                         
                     } catch {
                         print("cancellation error: \(error)")
