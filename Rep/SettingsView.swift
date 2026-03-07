@@ -90,13 +90,13 @@ struct SettingsView: View {
                     HStack(alignment: .top ) {
                         HStack(spacing: 15) {
                             
-                            Text("Pro").foregroundStyle(Color.intervalBlue)
-                                .font(.system(size: 16))
-                                .fontWeight(.heavy)
-                                .overlay {
-                                    Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-                                        .frame(width: 40, height: 21)
-                                }.padding(.leading, 5)
+//                            Text("Pro").foregroundStyle(Color.intervalBlue)
+//                                .font(.system(size: 16))
+//                                .fontWeight(.heavy)
+//                                .overlay {
+//                                    Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+//                                        .frame(width: 40, height: 21)
+//                                }.padding(.leading, 5)
                             
                             Toggle("Auto Sync", isOn: $AutoSync.isAutoSync)
                                 .fontWeight(.semibold)

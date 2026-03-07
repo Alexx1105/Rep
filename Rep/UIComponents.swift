@@ -425,13 +425,13 @@ struct HyperToggleCard: View {
             VStack(alignment: .leading) {
                 
                 HStack(spacing: 3) {
-                    Text("Pro").foregroundStyle(Color.intervalBlue)
-                        .font(.system(size: 16))
-                        .fontWeight(.heavy)
-                        .overlay {
-                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-                                .frame(width: 40, height: 21)
-                        }
+//                    Text("Pro").foregroundStyle(Color.intervalBlue)
+//                        .font(.system(size: 16))
+//                        .fontWeight(.heavy)
+//                        .overlay {
+//                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+//                                .frame(width: 40, height: 21)
+//                        }
                     
                     Spacer()
                     
