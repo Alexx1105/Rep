@@ -30,29 +30,37 @@ struct SettingsView: View {
         NavigationView {
             VStack(alignment: .leading) {
                 
-                HStack(spacing: 13) {
+                HStack(spacing: 3) {
+                    NavigationLink("Terms Of Use", destination: TOSPage())
+                        .font(.system(size: 10)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.gray)
+                        .buttonStyle(.glass)
+                        .padding(.top)
                     
+                }.padding(.leading)
+                
+                HStack(spacing: 13) {
                     
                     Text("Settings")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
                         .padding(.leading)
-                  
                         .frame(maxWidth: .infinity, alignment: .leading)
-                     
                     
-                    Button("Upgrade Plan"){
-                        withAnimation {
-                            presentPopover = true
-                        }
-                    }
-                    .fontWeight(.semibold)
-                    .font(.system(size: 12))
-                    .buttonStyle(.glassProminent)
-                    .padding(.trailing)
+              
+//                    Button("Upgrade Plan") {
+//                        withAnimation {
+//                            presentPopover = true
+//                        }
+//                    }
+//                    .fontWeight(.semibold)
+//                    .font(.system(size: 12))
+//                    .buttonStyle(.glassProminent)
+//                    .padding(.trailing)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(maxHeight: 235)
+                .frame(maxWidth: .infinity, maxHeight: 150)
+                 
               
                
                 

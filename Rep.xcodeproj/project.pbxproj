@@ -13,6 +13,7 @@
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
 		B22E10F82D067E9A003F3D9F /* SearchUserPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F52D067E89003F3D9F /* SearchUserPages.swift */; };
+		B24A69842F57D98100FBB5FB /* tosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* tosPage.swift */; };
 		B24EBC862E463BAC00E7FB01 /* ImportUserPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
@@ -94,6 +95,7 @@
 		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
 		B22E10F52D067E89003F3D9F /* SearchUserPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchUserPages.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B24A69832F57D97D00FBB5FB /* tosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tosPage.swift; sourceTree = "<group>"; };
 		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
 		B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPermissions.swift; sourceTree = "<group>"; };
 		B2575D0C2EE120D900B82793 /* PaymentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStore.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 				B2D362FE2E2C855900C3012C /* .gitignore */,
 				B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */,
 				B2575D102EE269B500B82793 /* Rep pro tier.storekit */,
+				B24A69832F57D97D00FBB5FB /* tosPage.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponents.swift */,
 				B205064F2D98A3CC0082FEA2 /* LocalCache.swift */,
@@ -357,6 +360,7 @@
 				B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */,
 				B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */,
 				B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */,
+				B24A69842F57D98100FBB5FB /* tosPage.swift in Sources */,
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
 				B24EBC862E463BAC00E7FB01 /* ImportUserPage.swift in Sources */,

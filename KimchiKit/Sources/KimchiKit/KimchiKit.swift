@@ -1,22 +1,27 @@
 import ActivityKit
 
-
-import ActivityKit
+private enum DynamicRepError: Error {
+    case activitiesDisabled
+}
 
 @available(iOS 17.0, *)
 public struct DynamicRepAttributes: ActivityAttributes {
     
     public struct ContentState: Codable, Hashable {
-        
         public var plainText: String
         public var userContentPage: [String]
+        
+        enum CodingKeys: String, CodingKey {
+            case plainText = "plain_text"
+            case userContentPage
+        }
         
         public init(plainText: String, userContentPage: [String]) {
             self.plainText = plainText
             self.userContentPage = userContentPage
         }
     }
-    
+
     public var activityID: String   ///future use (maybe)
     
     public init(activityID: String) {
@@ -25,8 +30,7 @@ public struct DynamicRepAttributes: ActivityAttributes {
 }
 
 
-
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 public struct IntervalLiveActivityAttributes: ActivityAttributes {
     
     public struct ContentState: Codable, Hashable {
@@ -44,7 +48,7 @@ public struct IntervalLiveActivityAttributes: ActivityAttributes {
 
 
 
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 public actor LiveActivityUpdateManager {
     
     public static let shared = LiveActivityUpdateManager()
@@ -91,7 +95,7 @@ public func startIntervalActivity(label: String, title: String) {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 18.0, *)
 public func updateIntervalActivity(label: String, title: String) async {
     
     await LiveActivityUpdateManager.shared.update(label: label, title: title)
@@ -103,3 +107,4 @@ public func updateIntervalActivity(label: String, title: String) async {
 public func debugStartIntervalLiveActivity() {          ///for manaully debugging/changing UI
     startIntervalActivity(label: "10m", title: "Debug Mode 🧪")
 }
+

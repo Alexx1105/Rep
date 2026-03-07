@@ -10,7 +10,6 @@ import SwiftUI
 
 
 struct RootTabs: View {
-    
     var body: some View {
         NavigationStack {
             TabView {
@@ -320,10 +319,6 @@ struct PaymentMenuCard: View {
                 }.frame(maxHeight: 630, alignment: .top)
                 
                 ZStack {
-                    //                    RoundedRectangle(cornerRadius: 25).frame(width: 135, height: 260)
-                    //                        .foregroundStyle(Color.intervalBlue).opacity(0.2)
-                    //                        .frame(maxWidth: 325, alignment: .trailing)
-                    //                        .frame(maxHeight: 500, alignment: .center)
                     
                     VStack(spacing: 20) {
                         HStack(spacing: 80) {
@@ -482,6 +477,21 @@ struct HyperToggleCard: View {
     }
 }
 
+
+struct SkeletonLoader: View {
+    @State private var isAnimating: Bool = false
+    
+    var body: some View {
+        Rectangle().frame(maxWidth: .infinity, maxHeight: 37).cornerRadius(10)
+            .opacity(isAnimating ? 0.1 : 0.2)
+            .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: isAnimating)
+            .onAppear { isAnimating = true  }
+            .foregroundStyle(Color.gray)
+            .padding()
+        
+    }
+}
+
 #Preview {
     MainMenuTab(emoji: "emoji", title: "title", pageID: "pageID") ///page tab
 }
@@ -521,4 +531,8 @@ struct HyperToggleCard: View {
 }
 #Preview {
     HyperToggleCard(isPresented:  .constant(true))
+}
+
+#Preview {
+    SkeletonLoader()
 }

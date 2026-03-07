@@ -24,6 +24,12 @@ struct AppLogo: View {
 
 
 struct DynamicRepLiveActivity: Widget {
+    
+    enum CodingKeys: String, CodingKey {
+        case plainText = "plain_text"
+        case userContentPage
+    }
+    
     var body: some WidgetConfiguration {
         
         ActivityConfiguration(for: DynamicRepAttributes.self) { context in

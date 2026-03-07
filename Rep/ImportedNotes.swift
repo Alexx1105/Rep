@@ -91,6 +91,7 @@ struct ImportedNotes: View {
                 
                 
                 ZStack(alignment: .bottom) {
+                    
                     List(pageBlocks, id: \.self) { block in
                         
                         Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
@@ -104,7 +105,7 @@ struct ImportedNotes: View {
                 }
                 .fontWeight(.regular)
                 .ignoresSafeArea(edges: .bottom)
-               
+                
             }
             .background(Color.mmBackground)
         }

@@ -26,6 +26,7 @@ enum NavPathItem: Hashable {
     case importPage
     case logOut
     case importpageUser
+    case tos
 }
 
 

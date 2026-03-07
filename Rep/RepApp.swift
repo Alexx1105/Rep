@@ -31,6 +31,8 @@ import BackgroundTasks
                             SignOutView()
                         case .importpageUser:
                             ImportedNotes(pageID: "")
+                        case .tos:
+                            TOSPage()
                         }
                     }
                 }
