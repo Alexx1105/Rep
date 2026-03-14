@@ -116,25 +116,27 @@ struct DynamicRepControlsView: View {
                 let rows: Int = 5
                 let base = basePerPage
                 
-                for i in stride(from: 0, to: queryID.count, by: rows) {
-                    
-                    if Task.isCancelled { return }
-                    print("prev task cancelled")
-                    
-                    let stagger = (i / rows) + 1
-                    let scaledOffsets = staggerDateComponents(components: selectedOption.interval, multiplier: stagger)
-                    
-                    let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: scaledOffsets, to: base)
-                    
-                    let batch = min(i + rows, queryID.count)
-                    let idsPerBatch = Array(queryID[i..<batch])
-                    
-                    do {
-                        let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [pageID]).execute()
-                        print("OFFSET DATE SENT TO SUPABASE: \(send)")
-                        print("page ids here: \(pageID)")
-                    } catch {
-                        print("failed to send offset timestamps to supabase ❗️: \(error.localizedDescription)")
+                Task.detached(priority: .background) {
+                    for i in stride(from: 0, to: queryID.count, by: rows) {
+                        
+                        if Task.isCancelled { return }
+                        print("prev task cancelled")
+                        
+                        let stagger = (i / rows) + 1
+                        let scaledOffsets = staggerDateComponents(components: selectedOption.interval, multiplier: stagger)
+                        
+                        let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: scaledOffsets, to: base)
+                        
+                        let batch = min(i + rows, queryID.count)
+                        let idsPerBatch = Array(queryID[i..<batch])
+                        
+                        do {
+                            let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [pageID]).execute()
+                            print("OFFSET DATE SENT TO SUPABASE: \(send)")
+                            print("page ids here: \(pageID)")
+                        } catch {
+                            print("failed to send offset timestamps to supabase ❗️: \(error.localizedDescription)")
+                        }
                     }
                 }
             } catch {

@@ -51,7 +51,7 @@ struct MuscleMemoryApp: App {
         }
     }
     
-    let centralContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self, AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self)
+    let centralContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self, AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self, DeletedPage.self)
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
         
@@ -84,6 +84,13 @@ struct MuscleMemoryApp: App {
                                         let pageId = try context!.fetch(desc)
                                         
                                         for pg in pageId {
+                                            
+                                            let deleted = try isPageDeleted(pg.pageID, in: context!)
+                                            if deleted {
+                                                print("deleted")
+                                                continue
+                                            }
+                                            
                                             try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context!)
                                         }
                                     }
@@ -103,6 +110,15 @@ struct MuscleMemoryApp: App {
                                     let pageId = try context!.fetch(desc)
                                     print("page schemas \(pageId.count)")
                                     for pg in pageId {
+                                       
+                                        let deleted = try isPageDeleted(pg.pageID, in: context!)
+                                        if deleted {
+                                            print("deleted")
+                                            continue
+                                        }
+                                          
+                                        
+                                        
                                         try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context!)
                                         print("page id: \(pg.pageID)")
                                     }

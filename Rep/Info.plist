@@ -5,6 +5,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>MuscleMemory.KimchiLabs.com</string>
+		<string>MuscleMemory.KimchiLabs.com.supabase</string>
 	</array>
 	<key>CFBundleURLTypes</key>
 	<array>

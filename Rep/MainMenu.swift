@@ -136,7 +136,7 @@ struct MainMenu: View {
                                     .padding(.trailing, 3)
                                 
                                 
-                                let time: Date = LastEdited.shared.lastEditedAt ?? Date()
+                                let time: Date = LastEdited.shared.lastFetchedAt ?? Date()
                                 
                                 Text(time.formatted(.dateTime.weekday().day().hour().minute()))
                                     .font(.system(size: 10))

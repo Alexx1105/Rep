@@ -44,11 +44,13 @@ final class BackgroundRefresh {
             for pg in pageID {
                 try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
             }
-            
+ 
             print("sync task ran successfully 🔄")
         } catch {
             print("auto sync task error: \(error)")
         }
+        try await Task.sleep(for: .seconds(60))
+        print("...sleeping")
     }
     
     private var autoSyncTask: Task<Void, Never>?
@@ -57,7 +59,7 @@ final class BackgroundRefresh {
     func startAutoSyncTask(pages: ModelContext, context: ModelContext) {
         
         if SyncController.shared.isAutoSync {
-            autoSyncTask = Task { @MainActor in
+            autoSyncTask = Task {
                 while !Task.isCancelled {
                     do {
                         try await runSyncWhenReady(context: context, pages: pages)
@@ -88,11 +90,12 @@ final class BackgroundRefresh {
         }
     }
     
+    enum TaskRegister {         ///add more tasks for future bg capabilities  here
+        static let syncIdentifier: String = "MuscleMemory.KimchiLabs.com"
+    }
     
     static func bgTaskRegister() {
-        
-        let identifier: String = "MuscleMemory.KimchiLabs.com"
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: TaskRegister.syncIdentifier, using: nil) { task in
             guard let task = task as? BGAppRefreshTask else { return }
             
             BackgroundRefresh.shared.bgAppRefresh(task: task)
@@ -100,11 +103,11 @@ final class BackgroundRefresh {
     }
     
     static func bgTaskRequest() {
-        let taskRequest = BGAppRefreshTaskRequest(identifier: "MuscleMemory.KimchiLabs.com")
-        taskRequest.earliestBeginDate = Date(timeIntervalSinceNow: 60)
+        let taskSyncRequest = BGAppRefreshTaskRequest(identifier: "MuscleMemory.KimchiLabs.com")
+        taskSyncRequest.earliestBeginDate = Date(timeIntervalSinceNow: 60)
         
         do {
-            try BGTaskScheduler.shared.submit(taskRequest)
+            try BGTaskScheduler.shared.submit(taskSyncRequest)
         } catch {
             print("task request error ❗️: \(error)")
         }

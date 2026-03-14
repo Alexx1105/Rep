@@ -51,6 +51,7 @@ final class SendTitle {                     ///so page title can be sent to supa
 
 final class LastEdited: ObservableObject {
     @Published var lastEditedAt: Date?
+    @Published var lastFetchedAt: Date?
     static let shared = LastEdited()
 }
 
@@ -64,6 +65,7 @@ final class LastEdited: ObservableObject {
     var isAutoSync: Bool
     var plain_text: String
     
+    
     init(pageID: String, pageTitle: String, lastEditedAt: Date, lastFetchedAt: Date, isAutoSync: Bool, plain_text: String) {
         self.pageID = pageID
         self.pageTitle = pageTitle
@@ -75,16 +77,30 @@ final class LastEdited: ObservableObject {
 }
 
 
+@Model final class DeletedPage {
+    @Attribute(.unique) var pageID: String
+    var deletedAt: Date = Date()
+    init(pageID: String) { self.pageID = pageID }
+}
+
+@MainActor
+func isPageDeleted(_ pageID: String, in context: ModelContext) throws -> Bool {
+    let desc = FetchDescriptor<DeletedPage>(predicate: #Predicate { $0.pageID == pageID })
+    return try context.fetch(desc).first != nil
+    
+}
+
+
 @MainActor
 public class searchPages: ObservableObject {
     
-    public static let shared = searchPages()
+    public static let shared = searchPages(id: "")
     
     @Published var emojis: NotionSearchRequest.Icon?
     @Published var displaying: NotionSearchRequest.TitleItem?
     @Published var userBlocks: NotionSearchRequest.result?
     
-    @Published var id: String?
+    @Published var id: String
     @Published var icon: String?
     @Published var plain_text: String?
     @Published var emoji: String?
@@ -102,37 +118,23 @@ public class searchPages: ObservableObject {
         return token
     }
     
-    func fetchSyncPg(pageID: String, context: ModelContext) throws -> NotionPageMetaData? {          ///query synced page
-        
-        let fetchSyncPg = FetchDescriptor<NotionPageMetaData>(predicate: #Predicate { $0.pageID == pageID })
-        return try context.fetch(fetchSyncPg).first
-    }
-    
-    
-    func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
-        
-        let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.titleID == pageID })
-        return try context.fetch(fetchPg).first
-    }
-    
     let searchEndpoint = URL(string: "https://api.notion.com/v1/search")
-    private init() {}
+    private init(id: String) {
+        self.id = id
+    }
     
-    private func getPageData(text: String?, customType: String?, optionalEmoji: String, pageID: String, accessObject: String?, context: ModelContext) throws {
+    private func getPageData(text: String?, customType: String?, optionalEmoji: String, pageID: String, accessObject: String?, context: ModelContext, existingTab: NotionPageMetaData) throws {
         
-        
-        DispatchQueue.main.async {
-            if let titles = text {
-                
-                self.displaying = NotionSearchRequest.TitleItem(plain_text: titles)
-                print("being passed to main thread: \(titles)")
-            } else {
-                print("plain text is not being run on main")
-            }
+        if let titles = text {
             
-            self.emojis = NotionSearchRequest.Icon(type: customType ?? "", emoji: optionalEmoji)
-            print("emoji has been stored🫡\(optionalEmoji)")
+            self.displaying = NotionSearchRequest.TitleItem(plain_text: titles)
+            print("being passed to main thread: \(titles)")
+        } else {
+            print("plain text is not being run on main")
         }
+        
+        self.emojis = NotionSearchRequest.Icon(type: customType ?? "", emoji: optionalEmoji)
+        print("emoji has been stored🫡\(optionalEmoji)")
         
         
         if let objectBlocks = accessObject, let displayTitle = text {
@@ -142,27 +144,28 @@ public class searchPages: ObservableObject {
             print("emoji from title:\(optionalEmoji)")
             
             
+            let pageTitle = displayTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !pageTitle.isEmpty else { return }
+            
+            SendTitle.shareTitle.displayTitle = pageTitle
+            
             if SyncController.shared.isAutoSync {
-                if let existingTab = try fetchSyncPg(pageID: pageID, context: context) {        ///synced path
-                    
-                    existingTab.pageTitle = displayTitle
-                    existingTab.plain_text = objectBlocks
-                    try context.save()
-                    
-                    let storeSyncTitle = UserPageTitle(titleID: pageID, icon: customType, plain_text: displayTitle, emoji: optionalEmoji)
-                    context.insert(storeSyncTitle)
-                    try context.save()
-                    
-                    SendTitle.shareTitle.displayTitle = displayTitle
-                }
+                existingTab.pageTitle = pageTitle
+                existingTab.plain_text = objectBlocks
+            }
+            
+            if let existingTabSync = try fetchPg(pageID: pageID, context: context) {        ///upsert
+                existingTabSync.plain_text = pageTitle
+                existingTabSync.icon = customType
+                existingTabSync.emoji = optionalEmoji
             } else {
-                if try fetchPg(pageID: pageID, context: context) == nil {                   ///non-syned path
-                    let storedTitle = UserPageTitle(titleID: pageID, icon: customType, plain_text: displayTitle, emoji: optionalEmoji)
-                    context.insert(storedTitle)
-                    try context.save()
-                    
-                    SendTitle.shareTitle.displayTitle = displayTitle
-                }
+                let storedTitle = UserPageTitle(        ///insert
+                    titleID: pageID,
+                    icon: customType,
+                    plain_text: pageTitle,
+                    emoji: optionalEmoji
+                )
+                context.insert(storedTitle)
             }
         } else {
             print("an object is not being stored")
@@ -171,6 +174,19 @@ public class searchPages: ObservableObject {
     
     
     public func userEndpoint(context: ModelContext) async throws {
+        
+        let fetch = FetchDescriptor<NotionPageMetaData>()
+        let page = try context.fetch(fetch)
+        
+        for pg in page {
+            let deleted = try isPageDeleted(pg.pageID, in: context)
+            print("deleted result:", deleted)
+            
+            if deleted {
+                print("skipped!")
+                continue
+            }
+        }
         
         guard let url = searchEndpoint else { return }
         var request = URLRequest(url: url)
@@ -193,12 +209,12 @@ public class searchPages: ObservableObject {
                 throw URLError(.badServerResponse)
             }
             
+            
             if let dataString = String(data: userData, encoding: .utf8) {
                 print("EVERYTHING BELOW HERE IS USER ENDPOINT RESPONSE: \(dataString)")
             } else {
                 print("empty data string")
             }
-            
             
             let decodePageData = JSONDecoder()
             decodePageData.dateDecodingStrategy = .custom { decoder in
@@ -214,19 +230,27 @@ public class searchPages: ObservableObject {
                 format.formatOptions = [.withInternetDateTime]
                 if let dateTime = format.date(from: dateString) { return dateTime }
                 
-                throw DecodingError.typeMismatch(Date.self,
-                                                 DecodingError.Context(codingPath: c.codingPath,
-                                                                       debugDescription: "Date string does not match expected format"))
+                throw DecodingError.typeMismatch(Date.self, DecodingError.Context(codingPath: c.codingPath,
+                                                                                  debugDescription: "Date string does not match expected format"))
             }
             
             let decodedPageStrings = try decodePageData.decode(NotionSearchRequest.self, from: userData)
             
             for page in decodedPageStrings.results {
                 guard let pageID = page.id else { continue }
-                
+  
                 if try isPageDeleted(pageID, in: context) {
+                    if let deleteMeta = try fetchSyncPg(pageID: pageID, context: context) {
+                        context.delete(deleteMeta)
+                    }
+                    
+                    if let deleteMeta = try fetchPg(pageID: pageID, context: context) {
+                        context.delete(deleteMeta)
+                    }
+                    print("deleted page data 🗑️")
                     continue
                 }
+                
                 
                 let lastEdited = page.last_edited_time
                 print("LAST EDITED AT: \(lastEdited ?? Date())")
@@ -236,45 +260,41 @@ public class searchPages: ObservableObject {
                 }
                 
                 let getText = page.properties?.title
-                let text = getText?.title.first?.plain_text
-                let emojis = page.icon?.emoji
-                let customType = page.icon?.type
+                let text: String? = getText?.title.first?.plain_text
+                let emojis: String? = page.icon?.emoji
+                let customType: String? = page.icon?.type
                 let optionalEmoji = emojis ?? ""
                 let syncedPageID = pageID
                 
                 
                 guard let notionLastEditedTime = lastEdited else { continue }
-                
                 if let existingPageSync = try fetchSyncPg(pageID: syncedPageID, context: context) {     ///sync path to update existing page
                     
-                    if notionLastEditedTime > existingPageSync.lastFetchedAt {
-                        print("LAST EDITED: \(existingPageSync.lastEditedAt)", "|", "LAST FETCHED: \(existingPageSync.lastFetchedAt)")
-                        
-                        try getPageData(text: text, customType: customType, optionalEmoji: optionalEmoji, pageID: pageID, accessObject: text, context: context)
-                        
-                    } else {
-                        continue
+                    await MainActor.run {
+                        LastEdited.shared.lastFetchedAt = existingPageSync.lastFetchedAt
                     }
+                    
+                    print("LAST EDITED: \(existingPageSync.lastEditedAt)", "|", "LAST FETCHED: \(existingPageSync.lastFetchedAt)")
+                    try getPageData(text: text, customType: customType, optionalEmoji: optionalEmoji, pageID: pageID, accessObject: text, context: context, existingTab: existingPageSync)
+                    
                     existingPageSync.lastEditedAt = notionLastEditedTime
                     existingPageSync.lastFetchedAt = Date()
-                    try context.save()
                     
                 } else {
                     
-                    let firstTimePageSync = NotionPageMetaData(pageID: pageID, pageTitle: text!, lastEditedAt: notionLastEditedTime, lastFetchedAt: .distantPast, isAutoSync: true, plain_text: text ?? "")     ///sync path for page being imported for the first time
+                    let firstTimePageSync = NotionPageMetaData(pageID: pageID, pageTitle: text ?? "", lastEditedAt: notionLastEditedTime, lastFetchedAt: .distantPast, isAutoSync: true, plain_text: text ?? "")     ///sync path for page being imported for the first time
                     context.insert(firstTimePageSync)
                     
-                    if notionLastEditedTime <= firstTimePageSync.lastFetchedAt { continue }
-                    
-                    try getPageData(text: text, customType: customType, optionalEmoji: optionalEmoji, pageID: pageID, accessObject: text, context: context)
+                    try getPageData(text: text, customType: customType, optionalEmoji: optionalEmoji, pageID: pageID, accessObject: text, context: context, existingTab: firstTimePageSync)
                     print("TEXT TILE FIRST: \(text ?? "EMPTY")")
                     
                     firstTimePageSync.lastEditedAt = notionLastEditedTime
                     firstTimePageSync.lastFetchedAt = Date()
-                    try context.save()
                     
                 }
             }
+            try context.save()
+            
         } catch {
             print("bad response")
             if let decodeBlocksError = error as? DecodingError {
