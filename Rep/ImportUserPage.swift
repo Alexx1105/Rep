@@ -97,18 +97,6 @@ let supabaseDBClient = SupabaseClient(supabaseURL: URL(string: "https://oxgumwqx
     }
 }
 
-@Model final class DeletedPage {
-    @Attribute(.unique) var pageID: String
-    var deletedAt: Date = Date()
-    init(pageID: String) { self.pageID = pageID }
-}
-
-@MainActor
-func isPageDeleted(_ pageID: String, in context: ModelContext) throws -> Bool {
-    let desc = FetchDescriptor<DeletedPage>(predicate: #Predicate { $0.pageID == pageID })
-    return try context.fetch(desc).first != nil
-}
-
 
 @MainActor
 class ImportUserPage: ObservableObject {
@@ -135,8 +123,14 @@ class ImportUserPage: ObservableObject {
     var userPageId: String?
     var storePageIDSets: Set<String> = []
     
-    
+
     public func pageEndpoint(pageID: String, context: ModelContext) async throws {
+        
+        let deleted = try isPageDeleted(pageID, in: context)
+        if deleted {
+            print("deleted")
+            return
+        }
         
         let pageID = pageID
         let pagesEndpoint = "https://api.notion.com/v1/blocks/"
@@ -276,22 +270,24 @@ class ImportUserPage: ObservableObject {
                 let pageID = pageID
                 storePageIDSets.insert(pageID)
                 
-                for row in chunkedRows {
-                    print("did content change?: \(row)")
-                    
-                    let hashContent = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
-                    
-                    do {
-                        guard let token = formattedTokenString else { continue }
-                        guard !row.isEmpty || !pageID.isEmpty else { continue }
+                Task.detached(priority: .background) {
+                    for row in chunkedRows {
+                        print("did content change?: \(row)")
                         
-                        let pushAndPageData = PushToSupabase(token: token, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle, content_hash: hashContent)
-                        let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+                        let hashContent = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
                         
-                        Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
-                        
-                    } catch {
-                        print("supabse insertion errror ❗️\(error.localizedDescription)")
+                        do {
+                            guard let token = formattedTokenString else { continue }
+                            guard !row.isEmpty || !pageID.isEmpty else { continue }
+                            
+                            let pushAndPageData = PushToSupabase(token: token, page_data: row, page_id: pageID, page_title: SendTitle.shareTitle.displayTitle, content_hash: hashContent)
+                            let sendID = try await supabaseDBClient.from("push_tokens").upsert([pushAndPageData], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+                            
+                            Logger().log("page_id successfully sent up to Supabase: \(String(describing:(sendID)))")
+                            
+                        } catch {
+                            print("supabse insertion errror ❗️\(error.localizedDescription)")
+                        }
                     }
                 }
                 
