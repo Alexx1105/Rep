@@ -85,26 +85,35 @@ struct ImportedNotes: View {
                 .frame(maxWidth: 370)
                 .padding(.top, 5)
                 
-                
                 Spacer()
                 Divider()
                 
-                
-                ZStack(alignment: .bottom) {
+                if pageBlocks.isEmpty {
+                    VStack(spacing: -10) {
+                        ForEach(0..<13) { i in
+                            SkeletonLoader()
+                        }
+                    }
+                } else {
                     
-                    List(pageBlocks, id: \.self) { block in
+                    ZStack(alignment: .bottom) {
                         
-                        Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
-                            .font(.system(size: 16)).lineSpacing(4)
-                            .listRowBackground(Color.mmBackground)
-                            .listRowSeparator(.hidden)
+                        List(pageBlocks, id: \.self) { block in
+                            
+                            Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
+                                .font(.system(size: 16)).lineSpacing(4)
+                                .listRowBackground(Color.mmBackground)
+                                .listRowSeparator(.hidden)
+                            
+                        }
+                        .listStyle(.plain)
+                        bottomBlur
                         
                     }
-                    .listStyle(.plain)
-                    bottomBlur
+                    .fontWeight(.regular)
+                    .ignoresSafeArea(edges: .bottom)
+                    
                 }
-                .fontWeight(.regular)
-                .ignoresSafeArea(edges: .bottom)
                 
             }
             .background(Color.mmBackground)
