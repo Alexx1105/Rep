@@ -483,7 +483,7 @@ struct SkeletonLoader: View {
     
     var body: some View {
         Rectangle().frame(maxWidth: .infinity, maxHeight: 37).cornerRadius(10)
-            .opacity(isAnimating ? 0.1 : 0.2)
+            .opacity(isAnimating ? 0.5 : 0.2)
             .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: isAnimating)
             .onAppear { isAnimating = true  }
             .foregroundStyle(Color.gray)
