@@ -198,7 +198,7 @@ public class searchPages: ObservableObject {
         }
         
         request.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
-        request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
+        request.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
         
         
         do {
