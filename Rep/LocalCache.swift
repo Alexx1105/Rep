@@ -62,6 +62,23 @@ import SwiftUI
     }
 }
 
-
+@Model final class NotionPageMetaData {                      ///Notion page metadata schema for on-demand syncing/retrieval feature
+    @Attribute(.unique) public var pageID: String
+    
+    var pageTitle: String
+    var lastEditedAt: Date
+    var lastFetchedAt: Date
+    var isAutoSync: Bool
+    var plain_text: String
+    
+    init(pageID: String, pageTitle: String, lastEditedAt: Date, lastFetchedAt: Date, isAutoSync: Bool, plain_text: String) {
+        self.pageID = pageID
+        self.pageTitle = pageTitle
+        self.lastEditedAt = lastEditedAt
+        self.lastFetchedAt = lastFetchedAt
+        self.isAutoSync = isAutoSync
+        self.plain_text = plain_text
+    }
+}
 
 

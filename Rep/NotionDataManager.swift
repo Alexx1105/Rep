@@ -8,26 +8,6 @@ import Foundation
 import SwiftData
 
 
-//TODO: move this into the cache file
-
-@Model final class NotionPageMetaData {                 ///Notion page metadata schema for on-demand syncing/retrieval feature
-    @Attribute(.unique) public var pageID: String
-    
-    var pageTitle: String
-    var lastEditedAt: Date
-    var lastFetchedAt: Date
-    var isAutoSync: Bool
-    var plain_text: String
-    
-    init(pageID: String, pageTitle: String, lastEditedAt: Date, lastFetchedAt: Date, isAutoSync: Bool, plain_text: String) {
-        self.pageID = pageID
-        self.pageTitle = pageTitle
-        self.lastEditedAt = lastEditedAt
-        self.lastFetchedAt = lastFetchedAt
-        self.isAutoSync = isAutoSync
-        self.plain_text = plain_text
-    }
-}
 
 @MainActor
 public class NotionDataManager: ObservableObject {
@@ -49,6 +29,7 @@ public class NotionDataManager: ObservableObject {
         case encodeError
         case decodeError
         case paginationError
+        case callsiteError
     }
     
     @MainActor
@@ -99,13 +80,19 @@ public class NotionDataManager: ObservableObject {
             
             let decodePage = try decodePageData.decode(NotionSearchRequest.self, from: data)
             for i in decodePage.results {
-                print("Header results ✅: \(i)")
+                guard let resultID = i.id else { continue }
+                print("====================================\n Header results: \(i)")
+                let properties: NotionSearchRequest.TitleDict? = i.properties?.title
+                let text: String? = properties?.title.first?.plain_text
+                print("====================================\n PLAIN TEXT TITLE ✅: \(text ?? "nil")")
+                try await getBlocks(pageID: resultID, context: context)  ///pass pageID to the next function
             }
             
         } catch {
             print("parsing error ❗️: \(ErrorDesc.parsingError)")
         }
     }
+    
     
     var passEndpoint: String
     var userContentPage: String?
@@ -115,9 +102,10 @@ public class NotionDataManager: ObservableObject {
     var paginatedRequest: URL?
     
     @Published var mainBlockBody: [MainBlockBody.Block] = []
+    
+    @MainActor
     public func getBlocks(pageID: String, context: ModelContext) async throws {    ///import acc user's notion page
         
-        let pageID: String = pageID
         let pagesEndpoint: String = "https://api.notion.com/v1/blocks/" + "\(pageID)/children"
         constructedEndpoint = pagesEndpoint
         
@@ -135,84 +123,79 @@ public class NotionDataManager: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw ErrorDesc.urlRequestError }
             
-            guard let encodeString: String = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
+            guard let _ : String = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
             
             let decoder = JSONDecoder()
             let decodeBlocks: MainBlockBody = try decoder.decode(MainBlockBody.self, from: data)
             
             var returnedResults: [MainBlockBody.Block] = decodeBlocks.results
-            var paginatedResults: Bool = decodeBlocks.has_more
-            var cursor = decodeBlocks.next_cursor
+            var hasMore: Bool = decodeBlocks.has_more
+            var nextCursor: String? = decodeBlocks.next_cursor
             
-            while paginatedResults, let nextCursor: String = cursor {
-                if let next: String = decodeBlocks.next_cursor {
-                    
-                    let paginate: String = pagesEndpoint + "?page_size=100&start_cursor=\(cursor ?? "")"
-                    guard let paginateStringToUrl: URL = URL(string: paginate) else { return }
-                    
-                    paginatedRequest = paginateStringToUrl
-                    var paginationRequest: URLRequest = URLRequest(url: paginateStringToUrl)
-                    paginationRequest.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-                    paginationRequest.addValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
-                    
-                    let (paginatedData, _) = try await URLSession.shared.data(for: paginationRequest)
-                    let decodePaginatedData = try JSONDecoder().decode(MainBlockBody.self, from: paginatedData)
-                    
-                    returnedResults.append(contentsOf: decodePaginatedData.results)
-                    paginatedResults = decodePaginatedData.has_more
-                    cursor = decodePaginatedData.next_cursor
-                    
-                    print("paginated successfully ✅")
-                } else {
-                    print("pagination error ⚠️:", ErrorDesc.paginationError)
-                }
+            while hasMore, let cursor = nextCursor {
+                let paginate: String = pagesEndpoint + "?page_size=100&start_cursor=\(cursor)"
+                guard let paginateStringToUrl: URL = URL(string: paginate) else { throw ErrorDesc.paginationError }
                 
-                var returnDecodedResults = returnedResults
-                for i in 0..<returnDecodedResults.count {
-                    var extractedFields: [String] = []
-                    let blockList = returnDecodedResults[i]
-                    
-                    switch blockList.type {
-                    case "numbered_list_item":
-                        if let n = blockList.numbered_list_item?.rich_text {
-                            extractedFields.append(MainBlockBody.joinContent(n))
-                        }
-                    case "bulleted_list_item":
-                        if let b = blockList.bulleted_list_item?.rich_text {
-                            extractedFields.append(MainBlockBody.joinContent(b))
-                        }
-                    case "heading_1":
-                        if let h1 = blockList.heading_1?.rich_text {
-                            extractedFields.append(MainBlockBody.joinContent(h1))
-                        }
-                    case "heading_2":
-                        if let h2 = blockList.heading_2?.rich_text {
-                            extractedFields.append(MainBlockBody.joinContent(h2))
-                        }
-                    case "heading_3":
-                        if let h3 = blockList.heading_3?.rich_text {
-                            extractedFields.append(MainBlockBody.joinContent(h3))
-                        }
-                    default: break
-                    }
-                    
-                    if let paragraph = returnDecodedResults[i].paragraph?.rich_text {
-                        
-                        let joinedContent: String = MainBlockBody.joinContent(paragraph)
-                        extractedFields.append(contentsOf: [joinedContent])
-                        print("ALL LISTS: \(joinedContent)")
-                    }
-                    returnDecodedResults[i].ExtractedFields = extractedFields
-                }
+                paginatedRequest = paginateStringToUrl
+                var paginationRequest: URLRequest = URLRequest(url: paginateStringToUrl)
+                paginationRequest.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
+                paginationRequest.addValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
+                paginationRequest.httpMethod = "GET"
                 
-                await MainActor.run {
-                    self.mainBlockBody = returnDecodedResults
-                }
+                let (paginatedData, _) = try await URLSession.shared.data(for: paginationRequest)
+                let decodePaginatedData = try JSONDecoder().decode(MainBlockBody.self, from: paginatedData)
                 
-                let formattedString: String = returnDecodedResults.flatMap{ $0.ExtractedFields }.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-                let chunkedRows: [String] = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
-                print("formatted & trimmed string: \(chunkedRows)")
+                returnedResults.append(contentsOf: decodePaginatedData.results)
+                hasMore = decodePaginatedData.has_more
+                nextCursor = decodePaginatedData.next_cursor
+                print("paginated successfully ✅")
             }
+            
+            var returnDecodedResults = returnedResults
+            for i in 0..<returnDecodedResults.count {
+                var extractedFields: [String] = []
+                let blockList = returnDecodedResults[i]
+                
+                switch blockList.type {
+                case "numbered_list_item":
+                    if let n = blockList.numbered_list_item?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(n))
+                    }
+                case "bulleted_list_item":
+                    if let b = blockList.bulleted_list_item?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(b))
+                    }
+                case "heading_1":
+                    if let h1 = blockList.heading_1?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(h1))
+                    }
+                case "heading_2":
+                    if let h2 = blockList.heading_2?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(h2))
+                    }
+                case "heading_3":
+                    if let h3 = blockList.heading_3?.rich_text {
+                        extractedFields.append(MainBlockBody.joinContent(h3))
+                    }
+                default: break
+                }
+                
+                if let paragraph = returnDecodedResults[i].paragraph?.rich_text {
+                    
+                    let joinedContent: String = MainBlockBody.joinContent(paragraph)
+                    extractedFields.append(contentsOf: [joinedContent])
+                    print("ALL LISTS ✅: \(joinedContent)")
+                }
+                returnDecodedResults[i].ExtractedFields = extractedFields
+            }
+            
+            await MainActor.run {
+                self.mainBlockBody = returnDecodedResults
+            }
+            
+            let formattedString: String = returnDecodedResults.flatMap{ $0.ExtractedFields }.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            let chunkedRows: [String] = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
+            print("formatted & trimmed string ✅: \(chunkedRows)")
             
         } catch {
             print("error returning page blocks ❗️", ErrorDesc.parsingError)
