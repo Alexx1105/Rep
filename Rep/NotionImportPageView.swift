@@ -6,12 +6,23 @@
 //
 
 import SwiftUI
+import SafariServices
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+    
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
+    }
+    
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+}
 
 struct NotionImportPageView: View {
     
     @State private var maskHeight: CGFloat = 0
     @State private var borderOpacity: Double = 1.0
-    @Environment(\.openURL) private var openURLRedirect
+    @State private var showOathWebView = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
@@ -64,11 +75,7 @@ struct NotionImportPageView: View {
                     Spacer()
                     ZStack {
                         Button {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                if let redirect = URL(string: "https://api.notion.com/v1/oauth/authorize?client_id=138d872b-594c-8050-b985-0037723b58e0&response_type=code&owner=user&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge") {
-                                    openURLRedirect(redirect)
-                                }
-                            }
+                            showOathWebView = true
                         } label: {
                             RoundedRectangle(cornerRadius: 30)
                                 .fill(Color.mmDark)
@@ -94,6 +101,12 @@ struct NotionImportPageView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.mmBackground)
         .navigationBarBackButtonHidden()
+        .sheet(isPresented: $showOathWebView) {
+            if let url = URL(string: "https://api.notion.com/v1/oauth/authorize?client_id=138d872b-594c-8050-b985-0037723b58e0&response_type=code&owner=user&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge") {
+                SafariView(url: url)
+                    .ignoresSafeArea()
+            }
+        }
         
     }
 }
