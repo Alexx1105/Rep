@@ -51,7 +51,7 @@ struct MuscleMemoryApp: App {
         }
     }
     
-    let centralContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self, AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self, DeletedPage.self)
+    let centralContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self, AuthToken.self, NotionPageMetaData.self) //re-add: SyncUserContentPage.self, DeletedPage.self, NotionPageMetaData.self
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
         
@@ -68,7 +68,7 @@ struct MuscleMemoryApp: App {
                             print("code Query recieved and parsed\(parseCodeQuery)")
                             
                             let context = OAuthTokens.shared.modelContextEmail
-    
+                            
                             
                             Task {
                                 do {
@@ -78,21 +78,25 @@ struct MuscleMemoryApp: App {
                                         
                                     } else {
                                         try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
-                                        try await searchPages.shared.userEndpoint(context: context!)
+                                        //try await searchPages.shared.userEndpoint(context: context!)
+                                        try await NotionDataManager.shared.getHeaders(context: context!) //⚠️ currently testing
+                                      
                                         
-                                        let desc = FetchDescriptor<NotionPageMetaData>()
-                                        let pageId = try context!.fetch(desc)
+                                            
                                         
-                                        for pg in pageId {
-                                            
-                                            let deleted = try isPageDeleted(pg.pageID, in: context!)
-                                            if deleted {
-                                                print("deleted")
-                                                continue
-                                            }
-                                            
-                                            try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context!)
-                                        }
+//                                        let desc = FetchDescriptor<NotionPageMetaData>()
+//                                        let pageId = try context!.fetch(desc)
+                                        
+//                                        for pg in pageId {
+//                                            
+//                                            let deleted = try isPageDeleted(pg.pageID, in: context!)
+//                                            if deleted {
+//                                                print("deleted")
+//                                                continue
+//                                            }
+//                                            
+//                                            try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context!)
+//                                        }
                                     }
                                 } catch {
                                     print("failed async operation(s):\(error)")
@@ -104,24 +108,24 @@ struct MuscleMemoryApp: App {
                                 
                                 do {
                                     try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
-                                    try await searchPages.shared.userEndpoint(context: context!)
+                                    //try await searchPages.shared.userEndpoint(context: context!)
                                     
-                                    let desc = FetchDescriptor<NotionPageMetaData>()
-                                    let pageId = try context!.fetch(desc)
-                                    print("page schemas \(pageId.count)")
-                                    for pg in pageId {
-                                       
-                                        let deleted = try isPageDeleted(pg.pageID, in: context!)
-                                        if deleted {
-                                            print("deleted")
-                                            continue
-                                        }
+//                                    let desc = FetchDescriptor<NotionPageMetaData>()
+//                                    let pageId = try context!.fetch(desc)
+//                                    print("page schemas \(pageId.count)")
+//                                    for pg in pageId {
+//                                       
+                                        //let deleted = try isPageDeleted(pg.pageID, in: context!)
+//                                        if deleted {
+//                                            print("deleted")
+//                                            continue
+//                                        }
                                           
                                         
                                         
-                                        try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context!)
-                                        print("page id: \(pg.pageID)")
-                                    }
+//                                        try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context!)
+//                                        print("page id: \(pg.pageID)")
+                                    //}
                                     
                                     print("one time start-up for sync ran 🔄")
                                 } catch {
