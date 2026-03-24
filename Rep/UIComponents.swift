@@ -46,8 +46,8 @@ struct MainMenuTab: View {
     @Environment(\.colorScheme) var colorScheme
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-    let emoji: String?
     let title: String?
+    let emoji: String?
     let pageID: String
     
     var body: some View {
@@ -493,7 +493,7 @@ struct SkeletonLoader: View {
 }
 
 #Preview {
-    MainMenuTab(emoji: "emoji", title: "title", pageID: "pageID") ///page tab
+    MainMenuTab(title: "title", emoji: "emoji 😄", pageID: "pageID") ///page tab
 }
 
 

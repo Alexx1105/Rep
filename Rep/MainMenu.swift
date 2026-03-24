@@ -20,7 +20,7 @@ struct MainMenu: View {
     @Environment(\.colorScheme) var colorScheme
     
     @Query(sort: [SortDescriptor(\UserPageTitle.titleID)])
-    var pageTitle: [UserPageTitle]
+    var pageTitles: [UserPageTitle]
     
     @Query var showUserEmail: [UserEmail]
     
@@ -38,7 +38,6 @@ struct MainMenu: View {
     @ObservedObject private var AutoSync = SyncController.shared
     
     private func delete(pageID: [String]) async throws {
-        
         let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
         print("page ids here: \(pageID)")
     }
@@ -231,12 +230,11 @@ struct MainMenu: View {
                 ScrollView {
                     
                     Spacer()
-                    ForEach(pageTitle, id: \.titleID) { isolatedContent in
+                    ForEach(pageTitles, id: \.titleID) { context in
                         
-                        let tabContent = isolatedContent.plain_text ?? ""
-                        let tabEmoji = isolatedContent.emoji ?? ""
+                        let tabContent = context.plain_text ?? ""
                         
-                        let insertID = isolatedContent.titleID
+                        let insertID = context.titleID
                         let selectedTab = deleteMultipleTabs.contains(insertID)
                         
                         HStack(spacing: 20) {
@@ -255,13 +253,13 @@ struct MainMenu: View {
                                 }
                             }
                             
-                            if !tabContent.isEmpty || !tabEmoji.isEmpty {
+                            if !tabContent.isEmpty {
                                 NavigationLink {
-                                    ImportedNotes(pageID: isolatedContent.titleID)
+                                    ImportedNotes(pageID: context.titleID)
                                         .navigationBarBackButtonHidden(true)
                                     
                                 } label: {
-                                    MainMenuTab(emoji: tabEmoji, title: tabContent, pageID: isolatedContent.titleID)
+                                    MainMenuTab(title: tabContent, emoji: context.emoji ?? "", pageID: context.titleID)
                                 }.allowsHitTesting(!tabSlideOver)
                             }
                         }

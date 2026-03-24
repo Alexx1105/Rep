@@ -6,7 +6,7 @@
 //
 import Foundation
 import SwiftData
-
+import AuthenticationServices
 
 
 @MainActor
@@ -14,6 +14,7 @@ public class NotionDataManager: ObservableObject {
     static let shared: NotionDataManager = NotionDataManager(id: "", passEndpoint: "", userPageId: "")
     
     @Published var plain_text: String?
+    @Published var emoji: String?
     @Published var id: String
     
     init(id: String, passEndpoint: String, userPageId: String) {
@@ -30,6 +31,7 @@ public class NotionDataManager: ObservableObject {
         case decodeError
         case paginationError
         case callsiteError
+        case persistenceError
     }
     
     @MainActor
@@ -80,12 +82,18 @@ public class NotionDataManager: ObservableObject {
             
             let decodePage = try decodePageData.decode(NotionSearchRequest.self, from: data)
             for i in decodePage.results {
-                guard let resultID = i.id else { continue }
+                guard let pageID = i.id else { continue }
+                
                 print("====================================\n Header results: \(i)")
                 let properties: NotionSearchRequest.TitleDict? = i.properties?.title
+                let emoji: String? = i.icon?.emoji
                 let text: String? = properties?.title.first?.plain_text
                 print("====================================\n PLAIN TEXT TITLE ✅: \(text ?? "nil")")
-                try await getBlocks(pageID: resultID, context: context)  ///pass pageID to the next function
+                
+                let title = UserPageTitle(titleID: pageID, plain_text: text, emoji: emoji)
+                context.insert(title)
+                
+                try await getBlocks(pageID: pageID, context: context)  ///pass pageID to the next function
             }
             
         } catch {
@@ -148,7 +156,7 @@ public class NotionDataManager: ObservableObject {
                 returnedResults.append(contentsOf: decodePaginatedData.results)
                 hasMore = decodePaginatedData.has_more
                 nextCursor = decodePaginatedData.next_cursor
-                print("paginated successfully ✅")
+                print("paginated successfully ✅\n====================================")
             }
             
             var returnDecodedResults = returnedResults
@@ -185,6 +193,7 @@ public class NotionDataManager: ObservableObject {
                     let joinedContent: String = MainBlockBody.joinContent(paragraph)
                     extractedFields.append(contentsOf: [joinedContent])
                     print("ALL LISTS ✅: \(joinedContent)")
+                    
                 }
                 returnDecodedResults[i].ExtractedFields = extractedFields
             }
@@ -197,10 +206,30 @@ public class NotionDataManager: ObservableObject {
             let chunkedRows: [String] = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
             print("formatted & trimmed string ✅: \(chunkedRows)")
             
+            do {
+                let content = UserPageContent(userContentPage: formattedString, userPageId: pageID)
+                context.insert(content)
+                try context.save()
+            } catch {
+                print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError)
+            }
+            
         } catch {
             print("error returning page blocks ❗️", ErrorDesc.parsingError)
         }
     }
+    
+    
+//     func mainCaller(context: ModelContext, pageID: String) async throws {
+//        do {
+//            try await NotionDataManager.shared.getHeaders(context: context)
+//            try await NotionDataManager.shared.getBlocks(pageID: pageID, context: context)
+//            
+//            print("headers and blocks fetched successfully")
+//        } catch {
+//            print("function call failure ❗️", ErrorDesc.callsiteError)
+//        }
+//    }
 }
 
 

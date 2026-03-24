@@ -65,9 +65,9 @@ struct ImportedNotes: View {
                         Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(17)
                     }.glassEffect()
                     
-                    if let emojis = filterTitle.first?.emoji, let title = filterTitle.first?.plain_text {
-                        Text("\(emojis)")
-                        Text("\(title)")
+                    if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.plain_text {
+                        Text("\(emojis ?? "")")
+                        Text("\(title ?? "")")
                             .fontWeight(.semibold)
                             .truncationMode(.middle)
                             .lineLimit(1)

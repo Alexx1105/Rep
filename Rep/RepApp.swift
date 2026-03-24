@@ -78,12 +78,9 @@ struct MuscleMemoryApp: App {
                                         
                                     } else {
                                         try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
-                                        //try await searchPages.shared.userEndpoint(context: context!)
-                                        try await NotionDataManager.shared.getHeaders(context: context!) //⚠️ currently testing
+                                        try await NotionDataManager.shared.getHeaders(context: context!)
                                       
-                                        
-                                            
-                                        
+                
 //                                        let desc = FetchDescriptor<NotionPageMetaData>()
 //                                        let pageId = try context!.fetch(desc)
                                         
@@ -107,7 +104,7 @@ struct MuscleMemoryApp: App {
                             func bootstrapSync() async throws {
                                 
                                 do {
-                                    try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
+                                    //try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
                                     //try await searchPages.shared.userEndpoint(context: context!)
                                     
 //                                    let desc = FetchDescriptor<NotionPageMetaData>()
