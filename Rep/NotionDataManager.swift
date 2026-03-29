@@ -214,6 +214,8 @@ public class NotionDataManager: ObservableObject {
                 print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError)
             }
             
+            
+            
         } catch {
             print("error returning page blocks ❗️", ErrorDesc.parsingError)
         }

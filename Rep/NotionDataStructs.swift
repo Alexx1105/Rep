@@ -87,10 +87,4 @@ public struct MainBlockBody: Codable, Identifiable {       ///follow-up struct f
     }
 }
 
-public struct PushToSupabase: Encodable {
-    var token: String
-    var page_data: String
-    var page_id: String
-    var page_title: String
-    var content_hash: String
-}
+
