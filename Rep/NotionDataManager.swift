@@ -7,20 +7,25 @@
 import Foundation
 import SwiftData
 import AuthenticationServices
+import KimchiKit
+import ActivityKit
+import CryptoKit
 
 
 @MainActor
 public class NotionDataManager: ObservableObject {
-    static let shared: NotionDataManager = NotionDataManager(id: "", passEndpoint: "", userPageId: "")
+    static let shared: NotionDataManager = NotionDataManager(id: "", passEndpoint: "", userPageId: "", title: "")
     
     @Published var plain_text: String?
     @Published var emoji: String?
     @Published var id: String
+    @Published var title: String
     
-    init(id: String, passEndpoint: String, userPageId: String) {
+    init(id: String, passEndpoint: String, userPageId: String, title: String) {
         self.id = id
         self.passEndpoint = passEndpoint
         self.userPageId = userPageId
+        self.title = title
     }
     
     enum ErrorDesc: LocalizedError {        ///start using this for logging local errors
@@ -32,6 +37,7 @@ public class NotionDataManager: ObservableObject {
         case paginationError
         case callsiteError
         case persistenceError
+        case nilValue
     }
     
     @MainActor
@@ -97,7 +103,7 @@ public class NotionDataManager: ObservableObject {
             }
             
         } catch {
-            print("parsing error ❗️: \(ErrorDesc.parsingError)")
+            print("parsing error ❗️: \(ErrorDesc.parsingError) : \(error)")
         }
     }
     
@@ -211,27 +217,22 @@ public class NotionDataManager: ObservableObject {
                 context.insert(content)
                 try context.save()
             } catch {
-                print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError)
+                print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError, error)
             }
             
+            let token: String = await PushTokenManager.shared.generatePushToken()
+            guard !chunkedRows.isEmpty || !token.isEmpty else { throw ErrorDesc.nilValue }
             
+            for row in chunkedRows {
+                let contentHash: String = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
+                await SupabaseClientManager.shared.supabaseUpsert(token: token, pageID: pageID, row: row, pageTitle: title, content_hash: contentHash)
+                print("==========================\nsplit rows for supaabse upsert ✅: \(row) \nhash: \(contentHash)")
+            }
             
         } catch {
-            print("error returning page blocks ❗️", ErrorDesc.parsingError)
+            print("error returning page blocks ❗️", ErrorDesc.parsingError, error)
         }
     }
-    
-    
-//     func mainCaller(context: ModelContext, pageID: String) async throws {
-//        do {
-//            try await NotionDataManager.shared.getHeaders(context: context)
-//            try await NotionDataManager.shared.getBlocks(pageID: pageID, context: context)
-//            
-//            print("headers and blocks fetched successfully")
-//        } catch {
-//            print("function call failure ❗️", ErrorDesc.callsiteError)
-//        }
-//    }
 }
 
 

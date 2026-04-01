@@ -31,14 +31,17 @@ public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTit
 }
 
 
-public func generatePushToken() async -> String {
+public final class PushTokenManager: ObservableObject {
+    public static let shared = PushTokenManager()
     
-    let liveActvityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: {_ in true })
-    guard let token = liveActvityToken else { return "" }
-    
-    let tokenHex: String? = liveActvityToken?.map{String(format: "%02x", $0)}.joined()
-    print("push token hex: \(tokenHex ?? "")")
-    
-    guard let pushToken: String = tokenHex else { return "" }
-    return pushToken
+    public func generatePushToken() async -> String {
+        
+        let liveActvityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: {_ in true })
+        guard liveActvityToken != nil else { return "" }
+        
+        let tokenHex: String = liveActvityToken!.map{String(format: "%02x", $0)}.joined()
+        print("push token hex: \(tokenHex)")
+        
+        return tokenHex
+    }
 }
