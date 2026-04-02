@@ -95,7 +95,7 @@ public class NotionDataManager: ObservableObject {
                 let emoji: String? = i.icon?.emoji
                 let text: String? = properties?.title.first?.plain_text
                 print("====================================\n PLAIN TEXT TITLE ✅: \(text ?? "nil")")
-                
+                self.title = text ?? ""
                 let title = UserPageTitle(titleID: pageID, plain_text: text, emoji: emoji)
                 context.insert(title)
                 
