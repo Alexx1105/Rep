@@ -46,9 +46,8 @@ struct MainMenuTab: View {
     @Environment(\.colorScheme) var colorScheme
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-    let title: String?
-    let emoji: String?
-    let pageID: String
+    
+    let userPageTitle: UserPageTitle
     
     var body: some View {
         
@@ -68,7 +67,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: pageID)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle.pageID)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
@@ -81,24 +80,17 @@ struct MainMenuTab: View {
                         .padding(5)
                 }
                 
-                HStack(alignment: .center) {
-                    
-                    if emoji != nil || title != nil {
-                        Text(String("\(emoji ?? "")"))
-                        Text(String("\(title ?? "")"))
-                            .fontWeight(.medium)
-                            .foregroundStyle(Color.mmDark)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                        
-                    } else {
-                        Rectangle()
-                            .cornerRadius(5)
-                            .frame(width: 150, height: 20)
-                            .opacity(0.1)
+                HStack {
+                    if let emoji = userPageTitle.emoji {
+                        Text(emoji)
                     }
+                    Text(userPageTitle.text)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.mmDark)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Spacer()
                 }
-                .frame(alignment: .leading)
                 
                 Spacer()
                 Image("arrowChevron")
@@ -493,7 +485,7 @@ struct SkeletonLoader: View {
 }
 
 #Preview {
-    MainMenuTab(title: "title", emoji: "emoji 😄", pageID: "pageID") ///page tab
+    MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄")) ///page tab
 }
 
 

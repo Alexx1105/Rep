@@ -39,16 +39,13 @@ import SwiftUI
 }
 
 @Model public class UserPageTitle {                             ///tab title + optional emojis
-    @Attribute(.unique) var titleID: String
-    //@Attribute public var icon: String?
-    @Attribute public var plain_text: String?
+    @Attribute(.unique) var pageID: String
+    @Attribute public var text: String
     @Attribute public var emoji: String?
-    var isDeleted: Bool = false
     
-    public init(titleID: String, plain_text: String?, isDeleted: Bool = false, emoji: String? = nil) {
-        self.titleID = titleID
-        self.plain_text = plain_text
-        self.isDeleted = isDeleted
+    public init(pageID: String, text: String, emoji: String? = nil) {
+        self.pageID = pageID
+        self.text = text
         self.emoji = emoji
     }
 }

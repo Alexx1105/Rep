@@ -10,14 +10,14 @@ import Foundation
 
 
 
-public struct NotionSearchRequest: Codable {        ///struct for getting first pass headers
-    public let results: [result]
+public struct NotionSearchResponse: Codable {        ///struct for getting first pass headers
+    public let results: [Result]
     public let object: String?
     
-    public struct result: Codable {
-        public let id: String?
+    public struct Result: Codable {
+        public let id: String
         public let object: String?
-        public let properties: properties?
+        public let properties: Properties?
         public let icon: Icon?
         public let last_edited_time: Date?
         public let created_time: Date?
@@ -28,7 +28,7 @@ public struct NotionSearchRequest: Codable {        ///struct for getting first 
         public let emoji: String?
     }
     
-    public struct properties: Codable {
+    public struct Properties: Codable {
         public let title: TitleDict?
     }
     
@@ -40,17 +40,10 @@ public struct NotionSearchRequest: Codable {        ///struct for getting first 
     }
 }
 
-public struct MainBlockBody: Codable, Identifiable {       ///follow-up struct for importing selected page
-    public let id = UUID()
+public struct PageChildrenResponse: Codable {       ///follow-up struct for importing selected page
     let results: [Block]
-    public let next_cursor: String?
-    public let has_more: Bool
-    
-    private enum CodingKeys: CodingKey {
-        case results
-        case next_cursor
-        case has_more
-    }
+    let next_cursor: String?
+    let has_more: Bool
     
     public struct Block: Codable {
         let id: String
@@ -62,7 +55,7 @@ public struct MainBlockBody: Codable, Identifiable {       ///follow-up struct f
         let heading_2: Paragraph?
         let heading_3: Paragraph?
         
-        var ExtractedFields: [String] = []
+        var extractedFields: [String] = []
         
         private enum CodingKeys: CodingKey {
             case id

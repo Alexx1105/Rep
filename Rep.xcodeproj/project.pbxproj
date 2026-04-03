@@ -40,6 +40,7 @@
 		B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */; };
 		B2D362FF2E2C856400C3012C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B2D362FE2E2C855900C3012C /* .gitignore */; };
 		B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */; };
+		B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E40A932F7E130100D32ECE /* ErrorDesc.swift */; };
 		B2EC7FCE2E80C86100613126 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCD2E80C86100613126 /* Supabase */; };
 		B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponents.swift */; };
 		B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */; };
@@ -125,6 +126,7 @@
 		B2D220DD2BD981B800E55834 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		B2D362FE2E2C855900C3012C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClientManager.swift; sourceTree = "<group>"; };
+		B2E40A932F7E130100D32ECE /* ErrorDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDesc.swift; sourceTree = "<group>"; };
 		B2F82DAB2E9F32F400006533 /* UIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIComponents.swift; sourceTree = "<group>"; };
 		B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionImportPageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -217,6 +219,7 @@
 				B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */,
 				B25A0A472D91D9E300420892 /* DynamicRepTest.swift */,
 				B21427D82F38FB9200D86624 /* SyncController.swift */,
+				B2E40A932F7E130100D32ECE /* ErrorDesc.swift */,
 				B254B0F72D6A1D2F00A0541F /* Rep.entitlements */,
 				B248E14F2CE052DF005B9649 /* Info.plist */,
 				B2B837CA2BCB103000BBC748 /* Assets.xcassets */,
@@ -373,6 +376,7 @@
 				B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */,
 				B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */,
 				B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */,
+				B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */,
 				B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */,
 				B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */,
 				B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */,

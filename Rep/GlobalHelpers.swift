@@ -10,13 +10,6 @@ import SwiftData
 import ActivityKit
 import KimchiKit
 
-
-extension MainBlockBody {
-    static func joinContent(_ c: [MainBlockBody.RichText]) -> String {
-        c.map{ $0.text?.content ?? "" }.joined()
-    }
-}
-
 //@MainActor
 // func fetchSyncPg(pageID: String, context: ModelContext) throws -> NotionPageMetaData? {          ///query synced page
 //   let fetchSyncPg = FetchDescriptor<NotionPageMetaData>(predicate: #Predicate {$0.pageID == pageID})
@@ -24,17 +17,29 @@ extension MainBlockBody {
 //   return try context.fetch(fetchSyncPg).first
 //}
 
-@MainActor
-public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
-   let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.titleID == pageID })
-   return try context.fetch(fetchPg).first
+
+final class GlobalHelpers {
+    
+    
+    static public func fetchAuthToken() throws -> String {
+        let context = OAuthTokens.shared.modelContext
+        let fetchDescriptor = FetchDescriptor<AuthToken>()
+        let authToken = try context?.fetch(fetchDescriptor)
+        
+        guard let token = authToken?.first?.accessToken else { throw ErrorDesc.authTokenError }
+        return token
+    }
+    
+    static public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
+       let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == pageID })
+       return try context.fetch(fetchPg).first
+    }
 }
 
 
-public final class PushTokenManager: ObservableObject {
-    public static let shared = PushTokenManager()
+public final class PushTokenManager {
     
-    public func generatePushToken() async -> String {
+    public static func generatePushToken() async -> String {
         
         let liveActvityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: {_ in true })
         guard liveActvityToken != nil else { return "" }

@@ -14,7 +14,7 @@ struct ImportedNotes: View {
     let pageID: String
     
     var filterTitle: [UserPageTitle] {
-        pageTitle.filter{($0.titleID) == pageID }
+        pageTitle.filter{($0.pageID) == pageID }
     }
     
     @Environment(\.dismiss) var dismissTab
@@ -65,7 +65,7 @@ struct ImportedNotes: View {
                         Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(17)
                     }.glassEffect()
                     
-                    if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.plain_text {
+                    if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.text {
                         Text("\(emojis ?? "")")
                         Text("\(title ?? "")")
                             .fontWeight(.semibold)

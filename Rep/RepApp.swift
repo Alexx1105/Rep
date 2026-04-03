@@ -66,19 +66,14 @@ struct MuscleMemoryApp: App {
                     if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true) {
                         if let codeParse = parseCodeQuery.queryItems?.first(where: {$0.name == "code" })?.value {
                             print("code Query recieved and parsed\(parseCodeQuery)")
-                            
-                            let context = OAuthTokens.shared.modelContextEmail
-                            
-                            
+                                                        
                             Task {
                                 do {
-                                    
                                     if SyncController.shared.isAutoSync {
                                         try await bootstrapSync()
-                                        
                                     } else {
-                                        try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
-                                        try await NotionDataManager.shared.getHeaders(context: context!)
+                                        try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
+                                        NotionDataManager.shared.handlePageImported()
                                        
                                             
 //                                        let desc = FetchDescriptor<NotionPageMetaData>()

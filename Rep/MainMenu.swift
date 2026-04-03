@@ -19,7 +19,7 @@ struct MainMenu: View {
     @Environment(\.modelContext) var context
     @Environment(\.colorScheme) var colorScheme
     
-    @Query(sort: [SortDescriptor(\UserPageTitle.titleID)])
+    @Query(sort: [SortDescriptor(\UserPageTitle.pageID)])
     var pageTitles: [UserPageTitle]
     
     @Query var showUserEmail: [UserEmail]
@@ -88,7 +88,7 @@ struct MainMenu: View {
                     
                         .onAppear {
                             Task {
-                                OAuthTokens.shared.modelContextEmailStored(emailStored: context)
+                                OAuthTokens.shared.storeModelContext(context)
                             }
                         }
                     
@@ -174,7 +174,7 @@ struct MainMenu: View {
                         let deleteTabIDs = Set(deleteMultipleTabs)
                         
                         do {
-                            try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
+                            try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             
 //                            let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
@@ -230,41 +230,37 @@ struct MainMenu: View {
                 ScrollView {
                     
                     Spacer()
-                    ForEach(pageTitles, id: \.titleID) { context in
-                        
-                        let tabContent = context.plain_text ?? ""
-                        
-                        let insertID = context.titleID
-                        let selectedTab = deleteMultipleTabs.contains(insertID)
-                        
+                    ForEach(pageTitles) { pageTitle in
                         HStack(spacing: 20) {
                             if tabSlideOver {
-                                
                                 Button {
                                     print("ALL PAGE IDs: \(deleteMultipleTabs)")
-                                    if selectedTab { deleteMultipleTabs.remove(insertID)
+                                    if deleteMultipleTabs.contains(pageTitle.pageID) {
+                                        deleteMultipleTabs.remove(pageTitle.pageID)
                                     } else {
-                                        deleteMultipleTabs.insert(insertID)
+                                        deleteMultipleTabs.insert(pageTitle.pageID)
                                     }
                                     
                                 } label: {
                                     
-                                    TabSelectionCircle(selectedTab: selectedTab)
+                                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
                                 }
                             }
                             
-                            if !tabContent.isEmpty {
+                            if !pageTitle.text.isEmpty {
                                 NavigationLink {
-                                    ImportedNotes(pageID: context.titleID)
+                                    ImportedNotes(pageID: pageTitle.pageID)
                                         .navigationBarBackButtonHidden(true)
                                     
                                 } label: {
-                                    MainMenuTab(title: tabContent, emoji: context.emoji ?? "", pageID: context.titleID)
-                                }.allowsHitTesting(!tabSlideOver)
+                                    MainMenuTab(userPageTitle: pageTitle)
+                                }
+                                .allowsHitTesting(!tabSlideOver)
                             }
                         }
                     }
-                }.padding()
+                }
+                .padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))
             

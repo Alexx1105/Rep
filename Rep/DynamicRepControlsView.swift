@@ -174,11 +174,11 @@ struct DynamicRepControlsView: View {
     
     var pageID: String
     var filterTitle: String {
-        return pageTitle.first(where: { $0.titleID == pageID})?.plain_text ?? ""
+        return pageTitle.first(where: { $0.pageID == pageID})?.text ?? ""
     }
     
     var filterPageID: String {
-        return pageTitle.first(where: { $0.titleID == pageID})?.titleID ?? ""
+        return pageTitle.first(where: { $0.pageID == pageID})?.text ?? ""
     }
     
     
