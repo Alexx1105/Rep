@@ -17,4 +17,6 @@ enum ErrorDesc: LocalizedError {        ///start using this for logging local er
     case callsiteError
     case persistenceError
     case nilValue
+    case supabaseQueryError
+    
 }

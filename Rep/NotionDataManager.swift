@@ -18,16 +18,20 @@ public final class NotionDataManager: ObservableObject {
     public static let shared: NotionDataManager = NotionDataManager()
     private init() {}
     
-    public func handlePageImported() {
+    public func handlePageImported() {      ///main runner function
         Task {
             let importedPageTitles = try await fetchImportedPageTitles()
-            //TODO: isDeleted logic
-            // check supabase
-            // if supabase has pageTitleIDs which are not in importedPageTitles, delete them
-            // also delete from local cache too
-            for importedPageTitle in importedPageTitles {
-                let blocks = try await getBlocks(pageID: importedPageTitle.pageID)
-                extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
+            for queriedPageIds in importedPageTitles {
+                let fetchPageIDs: String = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
+                let exisitng: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
+                print("does page id exist in db?: \(exisitng ? "yes" : "no")")
+            
+                guard !exisitng else { continue }
+                
+                for importedPageTitle in importedPageTitles {
+                    let blocks = try await getBlocks(pageID: importedPageTitle.pageID)
+                    extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
+                }
             }
         }
     }

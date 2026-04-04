@@ -9,6 +9,7 @@ import Foundation
 import SwiftData
 import ActivityKit
 import KimchiKit
+import Supabase
 
 //@MainActor
 // func fetchSyncPg(pageID: String, context: ModelContext) throws -> NotionPageMetaData? {          ///query synced page
@@ -18,8 +19,7 @@ import KimchiKit
 //}
 
 
-final class GlobalHelpers {
-    
+final class GlobalHelpers {  //TODO: change naming
     
     static public func fetchAuthToken() throws -> String {
         let context = OAuthTokens.shared.modelContext
@@ -38,9 +38,7 @@ final class GlobalHelpers {
 
 
 public final class PushTokenManager {
-    
     public static func generatePushToken() async -> String {
-        
         let liveActvityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: {_ in true })
         guard liveActvityToken != nil else { return "" }
         
@@ -48,5 +46,28 @@ public final class PushTokenManager {
         print("push token hex: \(tokenHex)")
         
         return tokenHex
+    }
+}
+
+public struct QueryExisting: Codable {
+    let page_id: String
+}
+
+public final class PageDeletionManager {
+    public static func checkExistingPageIDs(pageID: String) async -> String {
+        await withTaskGroup(of: Void.self) {
+            $0.addTask {
+                do {
+                    let queryExistingIds: PostgrestResponse<[QueryExisting]> = try await supabaseDBClient.from("push_tokens").select("page_id").eq("page_id", value: pageID).execute()
+                    let result = queryExistingIds.value
+                    let ids = result.map{String($0.page_id)}
+                    print("IDs from query: \(ids)")
+                    
+                } catch {
+                    print("page deletion error ❗️:", ErrorDesc.supabaseQueryError, error)
+                }
+            }
+        }
+        return pageID
     }
 }
