@@ -63,15 +63,13 @@ import SwiftUI
     
     var pageTitle: String
     var lastEditedAt: Date
-    var lastFetchedAt: Date
     var isAutoSync: Bool
     var plain_text: String
     
-    init(pageID: String, pageTitle: String, lastEditedAt: Date, lastFetchedAt: Date, isAutoSync: Bool, plain_text: String) {
+    init(pageID: String, pageTitle: String, lastEditedAt: Date, isAutoSync: Bool, plain_text: String) {
         self.pageID = pageID
         self.pageTitle = pageTitle
         self.lastEditedAt = lastEditedAt
-        self.lastFetchedAt = lastFetchedAt
         self.isAutoSync = isAutoSync
         self.plain_text = plain_text
     }

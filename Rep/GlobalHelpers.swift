@@ -11,12 +11,13 @@ import Supabase
 
 
 
-//@MainActor
-// func fetchSyncPg(pageID: String, context: ModelContext) throws -> NotionPageMetaData? {                       ///query synced page
-//   let fetchSyncPg = FetchDescriptor<NotionPageMetaData>(predicate: #Predicate {$0.pageID == pageID})
-//   print("all ids: \(pageID)")
-//   return try context.fetch(fetchSyncPg).first
-//}
+final class FetchPageMeta {
+    static func fetchPageMetadata(pageID: String, context: ModelContext) throws -> [NotionPageMetaData?] {             ///query synced page
+        let fetchSyncPg = FetchDescriptor<NotionPageMetaData>(predicate: #Predicate {$0.pageID == pageID})
+        print("all ids: \(pageID)")
+        return try context.fetch(fetchSyncPg)
+    }
+}
 
 
 final class FetchAuth {
@@ -31,12 +32,12 @@ final class FetchAuth {
 }
 
 
-final class QueryUnsyncedPage {
-    static public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
-        let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == pageID })
-        return try context.fetch(fetchPg).first
-    }
-}
+//final class QueryUnsyncedPage {
+//    static public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
+//        let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == pageID })
+//        return try context.fetch(fetchPg).first
+//    }
+//}
 
 
 public final class PushTokenManager {
@@ -67,7 +68,7 @@ public final class PageDeletionManager {
             
         } catch {
             print("page deletion error ❗️:", ErrorDesc.supabaseQueryError, error)
-            return []
+            return ["no eixsting ids that match the incoming page"]
         }
     }
 }

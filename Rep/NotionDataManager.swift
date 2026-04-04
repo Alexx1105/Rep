@@ -74,24 +74,28 @@ public final class NotionDataManager: ObservableObject {
             
             let searchResponse = try jsonDecoder.decode(NotionSearchResponse.self, from: data)
             for i in searchResponse.results {
-                print("====================================\n Search Imported Page IDs result \(i):")
+                print("====================================\n Search Imported Page IDs result: \(i)")
                 let titleDictionary: NotionSearchResponse.TitleDict? = i.properties?.title
                 let emoji: String? = i.icon?.emoji
+                let lastEditedAt: Date? = i.last_edited_time
+                
                 if let titleText: String = titleDictionary?.title.first?.plain_text {
                     print("====================================\n PLAIN TEXT TITLE ✅: \(titleText)")
                     let context = OAuthTokens.shared.modelContext
                     let userPageTitle = UserPageTitle(pageID: i.id, text: titleText, emoji: emoji)
+                    let pageMetaData = NotionPageMetaData(pageID: i.id, pageTitle: titleText, lastEditedAt: lastEditedAt!, isAutoSync: true, plain_text: titleText)
                     context?.insert(userPageTitle)
+                    context?.insert(pageMetaData)
                     pageIDsImported.append(userPageTitle)
                 }
             }
             return pageIDsImported
         } catch {
-            print("parsing error ❗️: \(ErrorDesc.parsingError) : \(error)")
+            print("parsing error ❗️:", ErrorDesc.parsingError, error)
             return []
         }
     }
-    
+    //TODO: call metadata schema with conditional isAutoSync gate here
     private func getBlocks(pageID: String) async throws -> [PageChildrenResponse.Block] {    ///import acc user's notion page
         
         let pagesEndpoint: String = "https://api.notion.com/v1/blocks/\(pageID)/children"
