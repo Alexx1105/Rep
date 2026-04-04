@@ -22,7 +22,7 @@ public final class NotionDataManager: ObservableObject {
         Task {
             let importedPageTitles = try await fetchImportedPageTitles()
             for queriedPageIds in importedPageTitles {
-                let fetchPageIDs: String = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
+                let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
                 let exisitng: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
                 print("does page id exist in db?: \(exisitng ? "yes" : "no")")
             
@@ -37,7 +37,7 @@ public final class NotionDataManager: ObservableObject {
     }
     
     private func fetchImportedPageTitles() async throws -> [UserPageTitle] {
-        let passToken = try GlobalHelpers.fetchAuthToken()
+        let passToken = try FetchAuth.fetchAuthToken()
         guard !passToken.isEmpty else { throw ErrorDesc.authTokenError }
         
         let searchEndpoint: URL = URL(string: "https://api.notion.com/v1/search")!
@@ -99,7 +99,7 @@ public final class NotionDataManager: ObservableObject {
         guard let stringToUrl: URL = URL(string: pagesEndpoint) else { return [] }
         var request: URLRequest = URLRequest(url: stringToUrl)
         
-        let auth = try GlobalHelpers.fetchAuthToken()
+        let auth = try FetchAuth.fetchAuthToken()
         guard !auth.isEmpty else { throw ErrorDesc.authTokenError }
         
         request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")

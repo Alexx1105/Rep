@@ -186,11 +186,11 @@ struct MainMenu: View {
 //                                let desc = FetchDescriptor<DeletedPage>(
 //                                    predicate: #Predicate { $0.pageID == id }
 //                                )
-                                
+//                                
 //                                if try context.fetch(desc).isEmpty {
 //                                    context.insert(DeletedPage(pageID: id))
 //                                }
-                            //}
+//                            }
                             
                             try context.save()
                             
