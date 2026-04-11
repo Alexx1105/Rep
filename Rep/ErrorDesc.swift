@@ -18,5 +18,9 @@ enum ErrorDesc: LocalizedError {        ///start using this for logging local er
     case persistenceError
     case nilValue
     case supabaseQueryError
-    
+    case supabaseUpsertError
+}
+
+enum ErrorDefinition: Error {
+    case emptyContent
 }

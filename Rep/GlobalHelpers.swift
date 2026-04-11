@@ -11,15 +11,6 @@ import Supabase
 
 
 
-final class FetchPageMeta {
-    static func fetchPageMetadata(pageID: String, context: ModelContext) throws -> [NotionPageMetaData?] {             ///query synced page
-        let fetchSyncPg = FetchDescriptor<NotionPageMetaData>(predicate: #Predicate {$0.pageID == pageID})
-        print("all ids: \(pageID)")
-        return try context.fetch(fetchSyncPg)
-    }
-}
-
-
 final class FetchAuth {
     static public func fetchAuthToken() throws -> String {
         let context = OAuthTokens.shared.modelContext
@@ -32,12 +23,25 @@ final class FetchAuth {
 }
 
 
-//final class QueryUnsyncedPage {
-//    static public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
-//        let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == pageID })
-//        return try context.fetch(fetchPg).first
-//    }
-//}
+final class FetchSynced {
+    static func fetchSyncPg(pageID: String, context: ModelContext) throws -> NotionPageMetaData? {             ///query synced page
+        let fetchSyncPg = FetchDescriptor<NotionPageMetaData>(predicate: #Predicate {$0.pageID == pageID})
+        print("all ids: \(pageID)")
+        return try context.fetch(fetchSyncPg).first
+    }
+}
+
+final class LastEdited: ObservableObject {
+    @Published public var lastEdited: Date?
+    static let shared = LastEdited()
+}
+
+final class FetchUnsynced {
+    static public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
+        let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == pageID })
+        return try context.fetch(fetchPg).first
+    }
+}
 
 
 public final class PushTokenManager {
@@ -58,7 +62,7 @@ public struct QueryExisting: Codable {
 }
 
 public final class PageDeletionManager {
-    public static func checkExistingPageIDs(pageID: String) async -> [String] {
+    public static func checkExistingPageIDs(pageID: String) async -> [String] {                             ///deletion from the db 
         do {
             let queryExistingIds: PostgrestResponse<[QueryExisting]> = try await supabaseDBClient.from("push_tokens").select("page_id").eq("page_id", value: pageID).execute()
             let result = queryExistingIds.value
@@ -68,7 +72,15 @@ public final class PageDeletionManager {
             
         } catch {
             print("page deletion error ❗️:", ErrorDesc.supabaseQueryError, error)
-            return ["no eixsting ids that match the incoming page"]
+            return ["no existing ids that match the incoming page"]
         }
+    }
+}
+
+
+final class CheckDeletion {
+    public static func isPageDeleted(_ pageID: String, in context: ModelContext) throws -> Bool {           ///track deleted pages
+        let fetch = FetchDescriptor<DeletedPage>(predicate: #Predicate { $0.pageID == pageID })
+        return try context.fetch(fetch).first != nil
     }
 }

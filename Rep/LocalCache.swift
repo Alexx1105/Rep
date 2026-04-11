@@ -19,6 +19,12 @@ import SwiftUI
     }
 }
 
+@Model public final class DeletedPage {                                    ///page that is deleted
+    @Attribute(.unique) var pageID: String
+    var deletedAt: Date = Date()
+    init(pageID: String) { self.pageID = pageID }
+}
+
 @Model public class UserPageContent {                               ///imported notion body
     @Attribute(.unique) public var id: UUID
     @Attribute public var userContentPage: String?
@@ -75,4 +81,16 @@ import SwiftUI
     }
 }
 
+@Model final class SyncUserContentPage {                       
+    @Attribute(.unique) var hashed: String
 
+    var content: String
+    var pageID: String
+    var isDeleted: Bool = false
+
+    init(hashed: String, content: String, pageID: String) {
+        self.content = content
+        self.pageID = pageID
+        self.hashed = hashed
+    }
+}

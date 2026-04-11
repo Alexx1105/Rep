@@ -21,15 +21,10 @@ struct ImportedNotes: View {
     @Environment(\.modelContext) var context
     
     @Query var pageTitle: [UserPageTitle]
-
+    
     @Environment(\.colorScheme) var colorScheme
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-    
-    
-    enum ErrorDefinition: Error {
-        case emptyContent
-    }
     
     @State var pageBlocks: [UserPageContent] = []
     
@@ -38,14 +33,14 @@ struct ImportedNotes: View {
         
         let descriptor = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == pageID }, sortBy: [SortDescriptor(\.id, order: .forward)])
         let result = try context.fetch(descriptor)
-      
+        
         guard !result.isEmpty else { throw ErrorDefinition.emptyContent }
         return result
     }
     
     private var bottomBlur: some View {
         LinearGradient(gradient: Gradient(colors: [Color.mmBackground.opacity(0),
-                        Color.mmBackground.opacity(0.6), Color.mmBackground]),startPoint: .top, endPoint: .bottom
+                                                   Color.mmBackground.opacity(0.6), Color.mmBackground]),startPoint: .top, endPoint: .bottom
         )
         .frame(height: 80)
         .allowsHitTesting(false)
@@ -104,7 +99,6 @@ struct ImportedNotes: View {
                                 .font(.system(size: 16)).lineSpacing(4)
                                 .listRowBackground(Color.mmBackground)
                                 .listRowSeparator(.hidden)
-                            
                         }
                         .listStyle(.plain)
                         bottomBlur
@@ -112,16 +106,14 @@ struct ImportedNotes: View {
                     }
                     .fontWeight(.regular)
                     .ignoresSafeArea(edges: .bottom)
-                    
                 }
-                
             }
             .background(Color.mmBackground)
         }
         .task {
             do {
                 pageBlocks = try fetchPageContent(context: context)
-               
+                
             } catch {
                 print("function call failure: \(error.localizedDescription)")
             }

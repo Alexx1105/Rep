@@ -14,92 +14,134 @@ import CryptoKit
 
 @MainActor
 public final class NotionDataManager: ObservableObject {
-    
     public static let shared: NotionDataManager = NotionDataManager()
     private init() {}
     
-    public func handlePageImported() {      ///main runner function
+    public func handlePageImported(context: ModelContext) {      ///main runner function
         Task {
-            let importedPageTitles = try await fetchImportedPageTitles()
+            let importedPageTitles = try await fetchImportedPageTitles(context: context)
             for queriedPageIds in importedPageTitles {
                 let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
                 let exisitng: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
                 print("does page id exist in db?: \(exisitng ? "yes" : "no")")
-            
+                
                 guard !exisitng else { continue }
                 
                 for importedPageTitle in importedPageTitles {
-                    let blocks = try await getBlocks(pageID: importedPageTitle.pageID)
+                    let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
                     extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
                 }
             }
         }
     }
     
-    private func fetchImportedPageTitles() async throws -> [UserPageTitle] {
-        let passToken = try FetchAuth.fetchAuthToken()
-        guard !passToken.isEmpty else { throw ErrorDesc.authTokenError }
+    private func fetchImportedPageTitles(context: ModelContext) async throws -> [UserPageTitle] {
         
-        let searchEndpoint: URL = URL(string: "https://api.notion.com/v1/search")!
-        var urlRequest = URLRequest(url: searchEndpoint)
-        urlRequest.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
-        urlRequest.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
-        urlRequest.httpMethod = "POST"
+        let fetch = FetchDescriptor<NotionPageMetaData>()
+        let page = try context.fetch(fetch)
         
-        do {
-            let (data, response) = try await URLSession.shared.data(for: urlRequest)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let nonDeletedPages = try page.filter { pg in
+            let deleted = try CheckDeletion.isPageDeleted(pg.pageID, in: context)
+            print("deleted result:", deleted)
             
-            guard let encodeData = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
-            print("encoded data: \(encodeData)")
-            
-            let jsonDecoder = JSONDecoder()
-            jsonDecoder.dateDecodingStrategy = .custom { decoder in
-                let c = try decoder.singleValueContainer()
-                let dateString = try c.decode(String.self)
-                
-                let format = ISO8601DateFormatter()
-                format.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
-                
-                if let date = format.date(from: dateString) { return date }
-                
-                format.formatOptions = [.withInternetDateTime]
-                if let dateTime = format.date(from: dateString) { return dateTime }
-                
-                throw DecodingError.typeMismatch(Date.self, DecodingError.Context(codingPath: c.codingPath,
-                                                                                  debugDescription: "Date string does not match expected format"))
-            }
-            
-            var pageIDsImported: [UserPageTitle] = []
-            
-            let searchResponse = try jsonDecoder.decode(NotionSearchResponse.self, from: data)
-            for i in searchResponse.results {
-                print("====================================\n Search Imported Page IDs result: \(i)")
-                let titleDictionary: NotionSearchResponse.TitleDict? = i.properties?.title
-                let emoji: String? = i.icon?.emoji
-                let lastEditedAt: Date? = i.last_edited_time
-                
-                if let titleText: String = titleDictionary?.title.first?.plain_text {
-                    print("====================================\n PLAIN TEXT TITLE ✅: \(titleText)")
-                    let context = OAuthTokens.shared.modelContext
-                    let userPageTitle = UserPageTitle(pageID: i.id, text: titleText, emoji: emoji)
-                    let pageMetaData = NotionPageMetaData(pageID: i.id, pageTitle: titleText, lastEditedAt: lastEditedAt!, isAutoSync: true, plain_text: titleText)
-                    context?.insert(userPageTitle)
-                    context?.insert(pageMetaData)
-                    pageIDsImported.append(userPageTitle)
-                }
-            }
-            return pageIDsImported
-        } catch {
-            print("parsing error ❗️:", ErrorDesc.parsingError, error)
-            return []
+            return !deleted
         }
+        var pageIDsImported: [UserPageTitle] = []
+        for unDeletedPage in nonDeletedPages {          ///iterate over non-deleted pageIDs only, prevents ressurrection when sync is enabled
+            
+            let passToken = try FetchAuth.fetchAuthToken()
+            guard !passToken.isEmpty else { throw ErrorDesc.authTokenError }
+            
+            let searchEndpoint: URL = URL(string: "https://api.notion.com/v1/search")!
+            var urlRequest = URLRequest(url: searchEndpoint)
+            urlRequest.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
+            urlRequest.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
+            urlRequest.httpMethod = "POST"
+            
+            do {
+                let (data, response) = try await URLSession.shared.data(for: urlRequest)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw URLError(.badServerResponse) }
+                
+                guard let encodeData = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
+                print("encoded data: \(encodeData)")
+                
+                let jsonDecoder = JSONDecoder()
+                jsonDecoder.dateDecodingStrategy = .custom { decoder in
+                    let c = try decoder.singleValueContainer()
+                    let dateString = try c.decode(String.self)
+                    
+                    let format = ISO8601DateFormatter()
+                    format.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
+                    
+                    if let date = format.date(from: dateString) { return date }
+                    
+                    format.formatOptions = [.withInternetDateTime]
+                    if let dateTime = format.date(from: dateString) { return dateTime }
+                    
+                    throw DecodingError.typeMismatch(Date.self, DecodingError.Context(codingPath: c.codingPath,
+                                                                                      debugDescription: "Date string does not match expected format"))
+                }
+                
+                let searchResponse = try jsonDecoder.decode(NotionSearchResponse.self, from: data)
+                for i in searchResponse.results {
+                    guard !i.id.isEmpty else { continue }
+                    
+                    print("====================================\n Search Imported Page IDs result: \(i)")
+                    let titleDictionary: NotionSearchResponse.TitleDict? = i.properties?.title
+                    let emoji: String? = i.icon?.emoji
+                    let lastEditedAt: Date? = i.last_edited_time
+                    
+                    let context = OAuthTokens.shared.modelContext
+                    if let titleText: String = titleDictionary?.title.first?.plain_text {
+                        print("====================================\n PLAIN TEXT TITLE ✅: \(titleText)")
+                        
+                        let fetch = FetchDescriptor<UserPageTitle>(predicate: #Predicate{ $0.pageID == i.id })
+                        let fetchExistingPageTitle = try context?.fetch(fetch)
+                        
+                        if let existingTab = fetchExistingPageTitle?.first {                                       ///upsert tab
+                            existingTab.text = titleText
+                            existingTab.emoji = emoji
+                        } else {
+                            let firstTimeTab = UserPageTitle(pageID: i.id, text: titleText, emoji: emoji)          ///insert tab
+                            pageIDsImported.append(firstTimeTab)
+                        }
+                        
+                        if let existingMeta = try? FetchSynced.fetchSyncPg(pageID: i.id, context: context!) {     ///update existing sync
+                            existingMeta.pageTitle = titleText
+                            existingMeta.lastEditedAt = lastEditedAt ?? Date()
+                            existingMeta.plain_text = titleText
+                            existingMeta.isAutoSync = true
+                        } else {
+                            let newMeta = NotionPageMetaData(pageID: i.id, pageTitle: titleText, lastEditedAt: lastEditedAt ?? Date(), isAutoSync: true, plain_text: titleText)             ///insert first time sync
+                            context?.insert(newMeta)
+                        }
+                    }
+                }
+                return pageIDsImported
+                
+            } catch {
+                print("parsing error ❗️:", ErrorDesc.parsingError, error)
+                return []
+            }
+        }
+        return pageIDsImported
     }
-    //TODO: call metadata schema with conditional isAutoSync gate here
-    private func getBlocks(pageID: String) async throws -> [PageChildrenResponse.Block] {    ///import acc user's notion page
+    
+    
+    private func getBlocks(pageID: String, context: ModelContext) async throws -> [PageChildrenResponse.Block] {
+        
+        let desc = FetchDescriptor<NotionPageMetaData>()
+        let pageId = try context.fetch(desc)
+        
+        for pg in pageId {
+            let deleted = try CheckDeletion.isPageDeleted(pg.pageID, in: context)
+            if deleted {
+                print("deleted")
+                continue
+            }
+        }
         
         let pagesEndpoint: String = "https://api.notion.com/v1/blocks/\(pageID)/children"
-        
         guard let stringToUrl: URL = URL(string: pagesEndpoint) else { return [] }
         var request: URLRequest = URLRequest(url: stringToUrl)
         
@@ -109,11 +151,11 @@ public final class NotionDataManager: ObservableObject {
         request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
         request.addValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
-
+        
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw ErrorDesc.urlRequestError }
-                        
+            
             let decoder = JSONDecoder()
             let pageChildrenResponse: PageChildrenResponse = try decoder.decode(PageChildrenResponse.self, from: data)
             
@@ -194,9 +236,18 @@ public final class NotionDataManager: ObservableObject {
         Task {
             do {
                 let context = OAuthTokens.shared.modelContext
-                let content = UserPageContent(userContentPage: formattedString, userPageId: userPageTitle.pageID)
-                context?.insert(content)
-                try context?.save()
+                let pageID: String = userPageTitle.pageID
+                let fetch = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == pageID })
+                
+                if let contentExists = try context?.fetch(fetch).first {                                         ///existing saved tab (synced)
+                    contentExists.userContentPage = formattedString
+                } else {
+                    let content = UserPageContent(userContentPage: formattedString, userPageId: userPageTitle.pageID)     ///first time import
+                    let title = UserPageTitle(pageID: pageID, text: userPageTitle.text, emoji: userPageTitle.emoji)
+                    context?.insert(content)
+                    context?.insert(title)
+                    try context?.save()
+                }
             } catch {
                 print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError, error)
             }

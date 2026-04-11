@@ -35,20 +35,9 @@ final class BackgroundRefresh {
     
     func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
         
-//        do {
-//            try await searchPages.shared.userEndpoint(context: pages)
-//            
-//            let description = FetchDescriptor<NotionPageMetaData>()
-//            let pageID = try context.fetch(description)
-//            
-//            for pg in pageID {
-//                try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
-//            }
-// 
-//            print("sync task ran successfully 🔄")
-//        } catch {
-//            print("auto sync task error: \(error)")
-//        }
+        await NotionDataManager.shared.handlePageImported(context: pages)
+        print("sync task ran successfully 🔄")
+        
         try await Task.sleep(for: .seconds(60))
         print("...sleeping")
     }
@@ -76,18 +65,18 @@ final class BackgroundRefresh {
     
     private func bgAppRefresh(task: BGAppRefreshTask) {
         
-//        do {
-//            let container = try ModelContainer(for: NotionPageMetaData.self)
-//            let pages = ModelContext(container)
-//            let context = ModelContext(container)
-//            
-//            Task {
-//                try await runSyncWhenReady(context: context, pages: pages)
-//            }
-//            
-//        } catch {
-//            print("background fetch from model container failure ❗️\(error)")
-//        }
+        do {
+            let container = try ModelContainer(for: NotionPageMetaData.self)
+            let pages = ModelContext(container)
+            let context = ModelContext(container)
+            
+            Task {
+                try await runSyncWhenReady(context: context, pages: pages)
+            }
+            
+        } catch {
+            print("background fetch from model container failure ❗️\(error)")
+        }
     }
     
     enum TaskRegister {         ///add more tasks for future bg capabilities  here

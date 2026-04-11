@@ -135,12 +135,12 @@ struct MainMenu: View {
                                     .padding(.trailing, 3)
                                 
                                 
-//                                let time: Date = LastEdited.shared.lastFetchedAt ?? Date()
-//                                
-//                                Text(time.formatted(.dateTime.weekday().day().hour().minute()))
-//                                    .font(.system(size: 10))
-//                                    .fontWeight(.regular)
-//                                    .opacity(textOpacity)
+                                let time: Date = LastEdited.shared.lastEdited ?? Date()
+                                
+                                Text(time.formatted(.dateTime.weekday().day().hour().minute()))
+                                    .font(.system(size: 10))
+                                    .fontWeight(.regular)
+                                    .opacity(textOpacity)
                                 
                             }.frame(alignment: .leading)
                         }
@@ -177,20 +177,20 @@ struct MainMenu: View {
                             try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             
-//                            let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
-//                            for i in try context.fetch(fetchDesc) {
-//                                i.isDeleted = true
-//                            }
+                            let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
+                            for i in try context.fetch(fetchDesc) {
+                                i.isDeleted = true
+                            }
                             
-//                            for id in deleteTabIDs {
-//                                let desc = FetchDescriptor<DeletedPage>(
-//                                    predicate: #Predicate { $0.pageID == id }
-//                                )
-//                                
-//                                if try context.fetch(desc).isEmpty {
-//                                    context.insert(DeletedPage(pageID: id))
-//                                }
-//                            }
+                            for id in deleteTabIDs {
+                                let desc = FetchDescriptor<DeletedPage>(
+                                    predicate: #Predicate { $0.pageID == id }
+                                )
+                                
+                                if try context.fetch(desc).isEmpty {
+                                    context.insert(DeletedPage(pageID: id))
+                                }
+                            }
                             
                             try context.save()
                             

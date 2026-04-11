@@ -4,12 +4,12 @@
 //
 //  Created by alex haidar on 12/8/24.
 //
-
-import Foundation
-import SwiftData
-import OSLog
-
-
+//
+//import Foundation
+//import SwiftData
+//import OSLog
+//
+//
 //public struct NotionSearchRequest: Codable {
 //    public let results: [result]
 //    public let object: String?
@@ -303,7 +303,7 @@ import OSLog
 //        }
 //    }
 //}
-
+//
 
 
 
