@@ -23,10 +23,10 @@ public final class NotionDataManager: ObservableObject {
             let importedPageTitles = try await fetchImportedPageTitles(context: context)
             for queriedPageIds in importedPageTitles {
                 let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
-                let exisitng: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
-                print("does page id exist in db?: \(exisitng ? "yes" : "no")")
+                let existing: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
+                print("does page id exist in db?: \(existing ? "yes" : "no")")
                 
-                guard !exisitng else { continue }
+                guard !existing else { continue }
                 
                 for importedPageTitle in importedPageTitles {
                     let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
@@ -94,11 +94,11 @@ public final class NotionDataManager: ObservableObject {
                     let fetch = FetchDescriptor<UserPageTitle>(predicate: #Predicate{ $0.pageID == i.id })
                     let fetchExistingPageTitle = try context?.fetch(fetch)
                     
-                    if let existingTab = fetchExistingPageTitle?.first {                                       ///upsert tab
+                    if let existingTab = fetchExistingPageTitle?.first {                                       ///upsert tab title
                         existingTab.text = titleText
                         existingTab.emoji = emoji
                     } else {
-                        let firstTimeTab = UserPageTitle(pageID: i.id, text: titleText, emoji: emoji)          ///insert tab
+                        let firstTimeTab = UserPageTitle(pageID: i.id, text: titleText, emoji: emoji)          ///insert tab title
                         pageIDsImported.append(firstTimeTab)
                     }
                     

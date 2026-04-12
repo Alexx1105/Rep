@@ -77,7 +77,7 @@ struct MuscleMemoryApp: App {
                                         NotionDataManager.shared.handlePageImported(context: context!)
                                     }
                                 } catch {
-                                    print("failed async operation(s):\(error)")
+                                    print("failed async operation(s):", ErrorDesc.concurrencyError, error)
                                 }
                             }
                             
@@ -89,12 +89,12 @@ struct MuscleMemoryApp: App {
                                     
                                     print("one time start-up for sync ran 🔄")
                                 } catch {
-                                    print("one time start-up for sync failed: \(error)")
+                                    print("one time start-up for sync failed:", ErrorDesc.syncError, error)
                                 }
                             }
                             
                         } else {
-                            print("code query is nil:\(parseCodeQuery)")
+                            print("code query is nil:", ErrorDesc.oauthError, parseCodeQuery)
                         }
                     }
                 }

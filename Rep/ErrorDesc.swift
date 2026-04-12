@@ -19,6 +19,10 @@ enum ErrorDesc: LocalizedError {        ///start using this for logging local er
     case nilValue
     case supabaseQueryError
     case supabaseUpsertError
+    case syncError
+    case concurrencyError
+    case oauthError
+    case swiftDataQueryError
 }
 
 enum ErrorDefinition: Error {

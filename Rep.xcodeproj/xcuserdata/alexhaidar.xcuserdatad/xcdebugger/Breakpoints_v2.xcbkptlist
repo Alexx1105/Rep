@@ -3,4 +3,52 @@
    uuid = "4C9F19C6-67F6-42E1-BC15-F2D4AB1DE72D"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "35EA7B6F-ED09-40DD-8427-33DA437E41B6"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Rep/NotionDataManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "225"
+            endingLineNumber = "225"
+            landmarkName = "extractFieldsFromBlocks(_:forUserPageTitle:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "35EA7B6F-ED09-40DD-8427-33DA437E41B6 - 5bfac06b616f43ad"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for closure #9 () async throws -&gt; () in Rep.NotionDataManager.extractFieldsFromBlocks(_: Swift.Array&lt;Rep.PageChildrenResponse.Block&gt;, forUserPageTitle: Rep.UserPageTitle) -&gt; ()"
+                  moduleName = "Rep.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alexhaidar/Documents/Developer/MuscleMemory/Rep/NotionDataManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "225"
+                  endingLineNumber = "225">
+               </Location>
+               <Location
+                  uuid = "35EA7B6F-ED09-40DD-8427-33DA437E41B6 - 5bfac06b616f43ad"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for closure #9 () async throws -&gt; () in Rep.NotionDataManager.extractFieldsFromBlocks(_: Swift.Array&lt;Rep.PageChildrenResponse.Block&gt;, forUserPageTitle: Rep.UserPageTitle) -&gt; ()"
+                  moduleName = "Rep.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alexhaidar/Documents/Developer/MuscleMemory/Rep/NotionDataManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "225"
+                  endingLineNumber = "225">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
