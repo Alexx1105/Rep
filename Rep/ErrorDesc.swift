@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ErrorDesc: LocalizedError {        ///start using this for logging local errors
+enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
     case authTokenError
     case urlRequestError
     case parsingError

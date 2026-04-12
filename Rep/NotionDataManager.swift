@@ -20,17 +20,26 @@ public final class NotionDataManager: ObservableObject {
     
     public func handlePageImported(context: ModelContext) {      ///main runner function
         Task {
-            let importedPageTitles = try await fetchImportedPageTitles(context: context)
-            for queriedPageIds in importedPageTitles {
-                let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
-                let existing: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
-                print("does page id exist in db?: \(existing ? "yes" : "no")")
+            if SyncController.shared.isAutoSync {
+                let syncedPageTitles = try await fetchImportedPageTitles(context: context)
+                for syncedPageIds in syncedPageTitles {
+                    let syncedBlocks = try await getBlocks(pageID: syncedPageIds.pageID, context: context)
+                    extractFieldsFromBlocks(syncedBlocks, forUserPageTitle: syncedPageIds)
+                }
                 
-                guard !existing else { continue }
-                
-                for importedPageTitle in importedPageTitles {
-                    let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
-                    extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
+            } else {
+                let importedPageTitles = try await fetchImportedPageTitles(context: context)
+                for queriedPageIds in importedPageTitles {
+                    let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
+                    let pageIdExists: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
+                    print("does page id exist in db?: \(pageIdExists ? "yes" : "no")")
+                    
+                    guard !pageIdExists else { continue }
+                    
+                    for importedPageTitle in importedPageTitles {
+                        let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
+                        extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
+                    }
                 }
             }
         }
@@ -40,7 +49,7 @@ public final class NotionDataManager: ObservableObject {
         
         let fetch = FetchDescriptor<DeletedPage>()
         let deletedPages = try context.fetch(fetch)
-        let deletedPageIDs = Set(deletedPages.map{ $0.pageID })
+        let deletedPageIDs: Set = Set(deletedPages.map{ $0.pageID })
         
         var pageIDsImported: [UserPageTitle] = []
         
@@ -48,16 +57,16 @@ public final class NotionDataManager: ObservableObject {
         guard !passToken.isEmpty else { throw ErrorDesc.authTokenError }
         
         let searchEndpoint: URL = URL(string: "https://api.notion.com/v1/search")!
-        var urlRequest = URLRequest(url: searchEndpoint)
+        var urlRequest: URLRequest = URLRequest(url: searchEndpoint)
         urlRequest.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
         urlRequest.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
         urlRequest.httpMethod = "POST"
         
         do {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw URLError(.badServerResponse) }
+            guard let httpResponse: HTTPURLResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw URLError(.badServerResponse) }
             
-            guard let encodeData = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
+            guard let encodeData: String = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
             print("encoded data: \(encodeData)")
             
             let jsonDecoder = JSONDecoder()
@@ -68,7 +77,7 @@ public final class NotionDataManager: ObservableObject {
                 let format = ISO8601DateFormatter()
                 format.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
                 
-                if let date = format.date(from: dateString) { return date }
+                if let date: Date = format.date(from: dateString) { return date }
                 
                 format.formatOptions = [.withInternetDateTime]
                 if let dateTime = format.date(from: dateString) { return dateTime }
@@ -97,6 +106,8 @@ public final class NotionDataManager: ObservableObject {
                     if let existingTab = fetchExistingPageTitle?.first {                                       ///upsert tab title
                         existingTab.text = titleText
                         existingTab.emoji = emoji
+                        pageIDsImported.append(UserPageTitle(pageID: i.id, text: titleText, emoji: existingTab.emoji))
+                        
                     } else {
                         let firstTimeTab = UserPageTitle(pageID: i.id, text: titleText, emoji: emoji)          ///insert tab title
                         pageIDsImported.append(firstTimeTab)
@@ -225,8 +236,8 @@ public final class NotionDataManager: ObservableObject {
                 if let contentExists = try context?.fetch(fetch).first {                                         ///existing saved tab (synced)
                     contentExists.userContentPage = formattedString
                 } else {
-                    let content = UserPageContent(userContentPage: formattedString, userPageId: userPageTitle.pageID)     ///first time import
-                    let title = UserPageTitle(pageID: pageID, text: userPageTitle.text, emoji: userPageTitle.emoji)
+                    let content: UserPageContent = UserPageContent(userContentPage: formattedString, userPageId: userPageTitle.pageID)     ///first time import
+                    let title: UserPageTitle = UserPageTitle(pageID: pageID, text: userPageTitle.text, emoji: userPageTitle.emoji)
                     context?.insert(content)
                     context?.insert(title)
                     try context?.save()
