@@ -62,7 +62,7 @@ public struct QueryExisting: Codable {
 }
 
 public final class PageDeletionManager {
-    public static func checkExistingPageIDs(pageID: String) async -> [String] {                             ///deletion from the db 
+    public static func checkExistingPageIDs(pageID: String) async -> [String] {                             ///deletion from the db, 
         do {
             let queryExistingIds: PostgrestResponse<[QueryExisting]> = try await supabaseDBClient.from("push_tokens").select("page_id").eq("page_id", value: pageID).execute()
             let result = queryExistingIds.value
@@ -74,13 +74,5 @@ public final class PageDeletionManager {
             print("page deletion error ❗️:", ErrorDesc.supabaseQueryError, error)
             return ["no existing ids that match the incoming page"]
         }
-    }
-}
-
-
-final class CheckDeletion {
-    public static func isPageDeleted(_ pageID: String, in context: ModelContext) throws -> Bool {           ///track deleted pages
-        let fetch = FetchDescriptor<DeletedPage>(predicate: #Predicate { $0.pageID == pageID })
-        return try context.fetch(fetch).first != nil
     }
 }

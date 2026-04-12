@@ -74,19 +74,6 @@ struct MuscleMemoryApp: App {
                                     } else {
                                         let context = OAuthTokens.shared.modelContext
                                         try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                        
-                                        let desc = FetchDescriptor<NotionPageMetaData>()
-                                        let pageId = try context!.fetch(desc)
-                                        
-                                        for pg in pageId {
-                                            
-                                            let deleted = try CheckDeletion.isPageDeleted(pg.pageID, in: context!)
-                                            if deleted {
-                                                print("deleted")
-                                                continue
-                                            }
-                                        }
-                                        
                                         NotionDataManager.shared.handlePageImported(context: context!)
                                     }
                                 } catch {
@@ -98,19 +85,6 @@ struct MuscleMemoryApp: App {
                             func bootstrapSync(context: ModelContext) async throws {
                                 do {
                                     try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                    
-                                    let desc = FetchDescriptor<NotionPageMetaData>()
-                                    let pageId = try context.fetch(desc)
-                                    
-                                    for pg in pageId {
-                                        
-                                        let deleted = try CheckDeletion.isPageDeleted(pg.pageID, in: context)
-                                        if deleted {
-                                            print("deleted")
-                                            continue
-                                        }
-                                    }
-                                    
                                     NotionDataManager.shared.handlePageImported(context: context)
                                     
                                     print("one time start-up for sync ran 🔄")
@@ -128,7 +102,6 @@ struct MuscleMemoryApp: App {
         }
         .modelContainer(centralContainer)
         .environmentObject(paymentStore)
-        
     }
 }
 
