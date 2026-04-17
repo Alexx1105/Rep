@@ -242,7 +242,6 @@ struct MainMenu: View {
                                     }
                                     
                                 } label: {
-                                    
                                     TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
                                 }
                             }
@@ -278,8 +277,8 @@ struct MainMenu: View {
                 print("user could not register: \(error)")
             }
         }
-    
-
+        
+        
         .onChange(of: AutoSync.isAutoSync) { _, synced in
             guard let controller = taskController else { return }
             

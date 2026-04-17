@@ -7,27 +7,71 @@
 ///Store all SwiftUI struct components here from now on
 
 import SwiftUI
+import SwiftData
 
-
-struct RootTabs: View {
-    var body: some View {
-        NavigationStack {
-            TabView {
-                Tab("Menu", systemImage: "list.bullet") {
-                    MainMenu(pageID: "pageID")
-                }
-                Tab("Settings", systemImage: "gear") {
-                    SettingsView()
-                }
-                Tab("Import", systemImage: "plus.app") {
-                    NotionImportPageView()
-                }
-                
-            }.tabBarMinimizeBehavior(.never)
-                .background(Color.clear)
+@MainActor
+public final class Toast: ObservableObject {
+    public static let shared = Toast()
+    
+    public func callToastOnPageLoad(_ bind: Binding<Bool>) async {
+        bind.wrappedValue = true
+        
+        Task { @MainActor in
+            let haptic = UINotificationFeedbackGenerator()
+            haptic.notificationOccurred(.success)
+            
+            try? await Task.sleep(for: .seconds(3.5))
+            withAnimation(.easeInOut(duration: 0.2)) {
+                bind.wrappedValue = false
+            }
         }
     }
 }
+
+struct RootTabs: View {
+    @State private var showImportToast: Bool = false
+    @StateObject private var toastManager = NotionDataManager.shared
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                TabView {
+                    Tab("Menu", systemImage: "list.bullet") {
+                        MainMenu(pageID: "pageID")
+                    }
+                    Tab("Settings", systemImage: "gear") {
+                        SettingsView()
+                    }
+                    Tab("Import", systemImage: "plus.app") {
+                        NotionImportPageView()
+                    }
+                    
+                }.tabBarMinimizeBehavior(.never)
+                    .background(Color.clear)
+                
+                    .overlay(alignment: .top) {
+                        if showImportToast {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                ToastNotification()
+                                    .transition(.move(edge: .top).combined(with: .blurReplace))
+                                    .allowsHitTesting(false)
+                                    .fixedSize(horizontal: false, vertical: false)
+                                    .ignoresSafeArea(edges: .top).padding(.top, 1)
+                        }
+                    }
+                }
+            }
+        }
+        
+        .task(id: toastManager.isPageImportedNotification) {
+            Task { @MainActor in
+                guard self.toastManager.isPageImportedNotification else { return }
+                await Toast.shared.callToastOnPageLoad($showImportToast)
+            }
+        }
+    }
+}
+
 
 struct TabSelectionCircle: View {
     var selectedTab: Bool
@@ -484,6 +528,39 @@ struct SkeletonLoader: View {
     }
 }
 
+
+struct ToastNotification: View {
+    var body: some View {
+        
+        ZStack {
+            Capsule()
+                .frame(maxWidth: 248, maxHeight: 43)
+                .glassEffect(.regular)
+            
+            HStack(alignment: .center, spacing: 15) {
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Page/s Successfully Imported")
+                        .font(Font.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(Color.mmDark)
+                        .padding(.leading)
+                    
+                    Text("Close Out The Import Dialog")
+                        .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
+                        .padding(.leading)
+                }
+                
+                ZStack {
+                    Circle()
+                        .frame(maxWidth: 35, maxHeight: 35)
+                        .foregroundStyle(Color.intervalBlue)
+                    
+                    Image(systemName: "checkmark.circle").font(.system(size: 17)).foregroundStyle(Color.kimchiLabs)
+                }
+            }
+        }
+    }
+}
+
 #Preview {
     MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄")) ///page tab
 }
@@ -527,4 +604,8 @@ struct SkeletonLoader: View {
 
 #Preview {
     SkeletonLoader()
+}
+
+#Preview {
+    ToastNotification()
 }

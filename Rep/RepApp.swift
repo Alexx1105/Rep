@@ -35,9 +35,9 @@ struct ContainerView: View {
                         TOSPage()
                     }
                 }
+            }
         }
     }
-}
 
 
 @main

@@ -15,6 +15,7 @@ import CryptoKit
 
 @MainActor
 public final class NotionDataManager: ObservableObject {
+    @Published public private(set) var isPageImportedNotification: Bool = false
     public static let shared: NotionDataManager = NotionDataManager()
     private init() {}
     
@@ -43,10 +44,10 @@ public final class NotionDataManager: ObservableObject {
                 }
             }
         }
+        self.isPageImportedNotification = true
     }
     
     private func fetchImportedPageTitles(context: ModelContext) async throws -> [UserPageTitle] {
-        
         let fetch = FetchDescriptor<DeletedPage>()
         let deletedPages = try context.fetch(fetch)
         let deletedPageIDs: Set = Set(deletedPages.map{ $0.pageID })

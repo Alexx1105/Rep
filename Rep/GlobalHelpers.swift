@@ -10,7 +10,6 @@ import KimchiKit
 import Supabase
 
 
-
 final class FetchAuth {
     static public func fetchAuthToken() throws -> String {
         let context = OAuthTokens.shared.modelContext
