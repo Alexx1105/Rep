@@ -90,11 +90,10 @@ struct DynamicRepControlsView: View {
             currentTask?.cancel()
             
             localPage[filterPageID] = Date()
-            
-            let basePerPage = localPage[filterPageID]!
-            let selectedOption = mode[selectedIndex]
-            let pageID = filterPageID
-            let pageContentID = pageContent.first?.userPageId ?? ""
+            let basePerPage: Date = localPage[filterPageID]!
+            let selectedOption: SliderView.SliderOption = mode[selectedIndex]
+            let pageID: String = filterPageID
+            let pageContentID: String = pageContent.first?.userPageId ?? ""
             
             currentTask = Task {
                 await scheduleTask(selectedOption: selectedOption, pageID: pageID, pageContentID: pageContentID, basePerPage: basePerPage)
@@ -105,7 +104,7 @@ struct DynamicRepControlsView: View {
             
             do {
                 let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
-                let result = selectQuery.value
+                let result: [QueryIDs] = selectQuery.value
                 let queryID = result.map{String($0.id)}
                 print("ID HERE: \(queryID)")
                 
@@ -114,7 +113,7 @@ struct DynamicRepControlsView: View {
                 }
                 
                 let rows: Int = 5
-                let base = basePerPage
+                let base: Date = basePerPage
                 
                 Task.detached(priority: .background) {
                     for i in stride(from: 0, to: queryID.count, by: rows) {
@@ -178,7 +177,7 @@ struct DynamicRepControlsView: View {
     }
     
     var filterPageID: String {
-        return pageTitle.first(where: { $0.pageID == pageID})?.text ?? ""
+        return pageTitle.first(where: { $0.pageID == pageID})?.pageID ?? ""
     }
     
     
