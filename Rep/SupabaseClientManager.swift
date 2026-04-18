@@ -3,7 +3,7 @@
 //  Rep
 //
 //  Created by alex haidar on 3/28/26.
-///Supabase db client lives here now, all future supabase ops from the client should be managed here
+
 
 import Foundation
 import Supabase
