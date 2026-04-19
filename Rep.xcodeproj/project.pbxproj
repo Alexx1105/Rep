@@ -13,7 +13,7 @@
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
 		B22E10F82D067E9A003F3D9F /* SearchUserPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F52D067E89003F3D9F /* SearchUserPages.swift */; };
-		B24A69842F57D98100FBB5FB /* tosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* tosPage.swift */; };
+		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
 		B24EBC862E463BAC00E7FB01 /* ImportUserPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
@@ -28,7 +28,9 @@
 		B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B271C18F2CD1CEBB00710E70 /* NavPath.swift */; };
 		B286AF3B2F5148CC0014AC64 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B286AF3A2F5148CC0014AC64 /* KimchiKit */; };
 		B286AF3D2F5149580014AC64 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B286AF3C2F5149580014AC64 /* KimchiKit */; };
-		B2A0EFC52DC7D8F60076DBC0 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
+		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
+		B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
+		B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */; };
 		B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C62BCB102F00BBC748 /* RepApp.swift */; };
 		B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */; };
 		B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2B837CA2BCB103000BBC748 /* Assets.xcassets */; };
@@ -37,6 +39,8 @@
 		B2C2A9AE2E88911A00816A0B /* DynamicRepExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */; };
 		B2D362FF2E2C856400C3012C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B2D362FE2E2C855900C3012C /* .gitignore */; };
+		B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */; };
+		B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E40A932F7E130100D32ECE /* ErrorDesc.swift */; };
 		B2EC7FCE2E80C86100613126 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCD2E80C86100613126 /* Supabase */; };
 		B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponents.swift */; };
 		B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */; };
@@ -96,7 +100,7 @@
 		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
 		B22E10F52D067E89003F3D9F /* SearchUserPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchUserPages.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B24A69832F57D97D00FBB5FB /* tosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tosPage.swift; sourceTree = "<group>"; };
+		B24A69832F57D97D00FBB5FB /* TosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosPage.swift; sourceTree = "<group>"; };
 		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
 		B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPermissions.swift; sourceTree = "<group>"; };
 		B2575D0C2EE120D900B82793 /* PaymentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStore.swift; sourceTree = "<group>"; };
@@ -112,13 +116,17 @@
 		B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = StoreKitTestCertificate.cer; sourceTree = "<group>"; };
 		B271C18F2CD1CEBB00710E70 /* NavPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavPath.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
+		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
 		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2B837C62BCB102F00BBC748 /* RepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepApp.swift; sourceTree = "<group>"; };
 		B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedNotes.swift; sourceTree = "<group>"; };
 		B2B837CA2BCB103000BBC748 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHelpers.swift; sourceTree = "<group>"; };
+		B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataManager.swift; sourceTree = "<group>"; };
 		B2D220DD2BD981B800E55834 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		B2D362FE2E2C855900C3012C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClientManager.swift; sourceTree = "<group>"; };
+		B2E40A932F7E130100D32ECE /* ErrorDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDesc.swift; sourceTree = "<group>"; };
 		B2F82DAB2E9F32F400006533 /* UIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIComponents.swift; sourceTree = "<group>"; };
 		B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionImportPageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -186,12 +194,15 @@
 				B2D362FE2E2C855900C3012C /* .gitignore */,
 				B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */,
 				B2575D102EE269B500B82793 /* Rep pro tier.storekit */,
-				B24A69832F57D97D00FBB5FB /* tosPage.swift */,
+				B24A69832F57D97D00FBB5FB /* TosPage.swift */,
+				B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */,
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponents.swift */,
 				B205064F2D98A3CC0082FEA2 /* LocalCache.swift */,
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
+				B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */,
+				B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */,
 				B22E10F52D067E89003F3D9F /* SearchUserPages.swift */,
 				B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */,
 				B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */,
@@ -208,6 +219,7 @@
 				B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */,
 				B25A0A472D91D9E300420892 /* DynamicRepTest.swift */,
 				B21427D82F38FB9200D86624 /* SyncController.swift */,
+				B2E40A932F7E130100D32ECE /* ErrorDesc.swift */,
 				B254B0F72D6A1D2F00A0541F /* Rep.entitlements */,
 				B248E14F2CE052DF005B9649 /* Info.plist */,
 				B2B837CA2BCB103000BBC748 /* Assets.xcassets */,
@@ -349,22 +361,26 @@
 			files = (
 				B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */,
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
-				B2A0EFC52DC7D8F60076DBC0 /* DynamicRepControlsView.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
+				B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */,
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
+				B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */,
 				B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */,
+				B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */,
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,
+				B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */,
 				B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,
 				B26A46672CD04C210064AF46 /* SignOutView.swift in Sources */,
 				B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */,
 				B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */,
 				B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */,
+				B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */,
 				B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */,
 				B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */,
 				B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */,
-				B24A69842F57D98100FBB5FB /* tosPage.swift in Sources */,
+				B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */,
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
 				B24EBC862E463BAC00E7FB01 /* ImportUserPage.swift in Sources */,
@@ -628,7 +644,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -668,7 +684,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

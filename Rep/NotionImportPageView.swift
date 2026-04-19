@@ -28,7 +28,7 @@ struct NotionImportPageView: View {
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     @State private var closeView = false
-    
+
     var body: some View {
         
         VStack {
@@ -39,18 +39,16 @@ struct NotionImportPageView: View {
             }
             .frame(maxWidth: 370)
             
-            
-            
             Spacer()
             ZStack(alignment: .center) {
                 
-             
+                
                 Rectangle()
-                        .fill(Color.clear)
-                        .frame(width: 370, height: 160)
-                        .glassEffect(.regular, in: .rect(cornerRadius: 30))
-              
-
+                    .fill(Color.clear)
+                    .frame(width: 370, height: 160)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 30))
+                
+                
                 HStack(alignment: .top) {
                     VStack(spacing: 5 ) {
                         Text("Import notes from your notion")
@@ -88,7 +86,7 @@ struct NotionImportPageView: View {
                             .fontWeight(.medium)
                             .font(.system(size: 16))
                             .padding(.bottom)
-                           
+                        
                     }
                 }.frame(maxHeight: 165)
                     .padding()
@@ -104,12 +102,13 @@ struct NotionImportPageView: View {
         .sheet(isPresented: $showOathWebView) {
             if let url = URL(string: "https://api.notion.com/v1/oauth/authorize?client_id=138d872b-594c-8050-b985-0037723b58e0&response_type=code&owner=user&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge") {
                 SafariView(url: url)
+                    .presentationDetents([.fraction(0.9)])
                     .ignoresSafeArea()
             }
         }
-        
     }
 }
+
 
 #Preview {
     NotionImportPageView()

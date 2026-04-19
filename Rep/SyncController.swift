@@ -32,23 +32,10 @@ final class SyncController: ObservableObject {
 final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
     
-    
     func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
+        await NotionDataManager.shared.handlePageImported(context: pages)
+        print("sync task ran successfully 🔄")
         
-        do {
-            try await searchPages.shared.userEndpoint(context: pages)
-            
-            let description = FetchDescriptor<NotionPageMetaData>()
-            let pageID = try context.fetch(description)
-            
-            for pg in pageID {
-                try await ImportUserPage.shared.pageEndpoint(pageID: pg.pageID, context: context)
-            }
- 
-            print("sync task ran successfully 🔄")
-        } catch {
-            print("auto sync task error: \(error)")
-        }
         try await Task.sleep(for: .seconds(60))
         print("...sleeping")
     }
@@ -57,16 +44,15 @@ final class BackgroundRefresh {
     
     @MainActor
     func startAutoSyncTask(pages: ModelContext, context: ModelContext) {
-        
         if SyncController.shared.isAutoSync {
             autoSyncTask = Task {
                 while !Task.isCancelled {
                     do {
                         try await runSyncWhenReady(context: context, pages: pages)
-                        try await Task.sleep(for: .seconds(2 * 60))   
+                        try await Task.sleep(for: .seconds(2 * 60))
                         
                     } catch {
-                        print("cancellation error: \(error)")
+                        print("cancellation error:", ErrorDesc.syncError, error)
                     }
                 }
             }
@@ -86,7 +72,7 @@ final class BackgroundRefresh {
             }
             
         } catch {
-            print("background fetch from model container failure ❗️\(error)")
+            print("background fetch from model container failure ❗️", ErrorDesc.swiftDataQueryError, error)
         }
     }
     
@@ -97,7 +83,6 @@ final class BackgroundRefresh {
     static func bgTaskRegister() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: TaskRegister.syncIdentifier, using: nil) { task in
             guard let task = task as? BGAppRefreshTask else { return }
-            
             BackgroundRefresh.shared.bgAppRefresh(task: task)
         }
     }
@@ -109,7 +94,7 @@ final class BackgroundRefresh {
         do {
             try BGTaskScheduler.shared.submit(taskSyncRequest)
         } catch {
-            print("task request error ❗️: \(error)")
+            print("task request error ❗️", ErrorDesc.syncError, error)
         }
     }
 }

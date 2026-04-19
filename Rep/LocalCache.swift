@@ -19,6 +19,12 @@ import SwiftUI
     }
 }
 
+@Model public final class DeletedPage {                                    ///page that is deleted
+    @Attribute(.unique) var pageID: String
+    var deletedAt: Date = Date()
+    init(pageID: String) { self.pageID = pageID }
+}
+
 @Model public class UserPageContent {                               ///imported notion body
     @Attribute(.unique) public var id: UUID
     @Attribute public var userContentPage: String?
@@ -39,18 +45,14 @@ import SwiftUI
 }
 
 @Model public class UserPageTitle {                             ///tab title + optional emojis
-    @Attribute(.unique) var titleID: String
-    @Attribute public var icon: String?
-    @Attribute public var plain_text: String?
+    @Attribute(.unique) var pageID: String
+    @Attribute public var text: String
     @Attribute public var emoji: String?
-    var isDeleted: Bool = false
     
-    public init(titleID: String, icon: String?, plain_text: String?, emoji: String?, isDeleted: Bool = false) {
-        self.titleID = titleID
-        self.icon = icon
-        self.plain_text = plain_text
+    public init(pageID: String, text: String, emoji: String? = nil) {
+        self.pageID = pageID
+        self.text = text
         self.emoji = emoji
-        self.isDeleted = isDeleted
     }
 }
 
@@ -62,6 +64,33 @@ import SwiftUI
     }
 }
 
+@Model final class NotionPageMetaData {                      ///Notion page metadata schema for on-demand syncing/retrieval feature
+    @Attribute(.unique) public var pageID: String
+    
+    var pageTitle: String
+    var lastEditedAt: Date
+    var isAutoSync: Bool
+    var plain_text: String
+    
+    init(pageID: String, pageTitle: String, lastEditedAt: Date, isAutoSync: Bool, plain_text: String) {
+        self.pageID = pageID
+        self.pageTitle = pageTitle
+        self.lastEditedAt = lastEditedAt
+        self.isAutoSync = isAutoSync
+        self.plain_text = plain_text
+    }
+}
 
+@Model final class SyncUserContentPage {                       
+    @Attribute(.unique) var hashed: String
 
+    var content: String
+    var pageID: String
+    var isDeleted: Bool = false
 
+    init(hashed: String, content: String, pageID: String) {
+        self.content = content
+        self.pageID = pageID
+        self.hashed = hashed
+    }
+}

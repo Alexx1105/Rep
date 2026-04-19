@@ -19,8 +19,8 @@ struct MainMenu: View {
     @Environment(\.modelContext) var context
     @Environment(\.colorScheme) var colorScheme
     
-    @Query(sort: [SortDescriptor(\UserPageTitle.titleID)])
-    var pageTitle: [UserPageTitle]
+    @Query(sort: [SortDescriptor(\UserPageTitle.pageID)])
+    var pageTitles: [UserPageTitle]
     
     @Query var showUserEmail: [UserEmail]
     
@@ -38,7 +38,6 @@ struct MainMenu: View {
     @ObservedObject private var AutoSync = SyncController.shared
     
     private func delete(pageID: [String]) async throws {
-        
         let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
         print("page ids here: \(pageID)")
     }
@@ -89,7 +88,7 @@ struct MainMenu: View {
                     
                         .onAppear {
                             Task {
-                                OAuthTokens.shared.modelContextEmailStored(emailStored: context)
+                                OAuthTokens.shared.storeModelContext(context)
                             }
                         }
                     
@@ -136,7 +135,7 @@ struct MainMenu: View {
                                     .padding(.trailing, 3)
                                 
                                 
-                                let time: Date = LastEdited.shared.lastFetchedAt ?? Date()
+                                let time: Date = LastEdited.shared.lastEdited ?? Date()
                                 
                                 Text(time.formatted(.dateTime.weekday().day().hour().minute()))
                                     .font(.system(size: 10))
@@ -175,7 +174,7 @@ struct MainMenu: View {
                         let deleteTabIDs = Set(deleteMultipleTabs)
                         
                         do {
-                            try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.titleID)})
+                            try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             
                             let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
@@ -231,42 +230,36 @@ struct MainMenu: View {
                 ScrollView {
                     
                     Spacer()
-                    ForEach(pageTitle, id: \.titleID) { isolatedContent in
-                        
-                        let tabContent = isolatedContent.plain_text ?? ""
-                        let tabEmoji = isolatedContent.emoji ?? ""
-                        
-                        let insertID = isolatedContent.titleID
-                        let selectedTab = deleteMultipleTabs.contains(insertID)
-                        
+                    ForEach(pageTitles) { pageTitle in
                         HStack(spacing: 20) {
                             if tabSlideOver {
-                                
                                 Button {
                                     print("ALL PAGE IDs: \(deleteMultipleTabs)")
-                                    if selectedTab { deleteMultipleTabs.remove(insertID)
+                                    if deleteMultipleTabs.contains(pageTitle.pageID) {
+                                        deleteMultipleTabs.remove(pageTitle.pageID)
                                     } else {
-                                        deleteMultipleTabs.insert(insertID)
+                                        deleteMultipleTabs.insert(pageTitle.pageID)
                                     }
                                     
                                 } label: {
-                                    
-                                    TabSelectionCircle(selectedTab: selectedTab)
+                                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
                                 }
                             }
                             
-                            if !tabContent.isEmpty || !tabEmoji.isEmpty {
+                            if !pageTitle.text.isEmpty {
                                 NavigationLink {
-                                    ImportedNotes(pageID: isolatedContent.titleID)
+                                    ImportedNotes(pageID: pageTitle.pageID)
                                         .navigationBarBackButtonHidden(true)
                                     
                                 } label: {
-                                    MainMenuTab(emoji: tabEmoji, title: tabContent, pageID: isolatedContent.titleID)
-                                }.allowsHitTesting(!tabSlideOver)
+                                    MainMenuTab(userPageTitle: pageTitle)
+                                }
+                                .allowsHitTesting(!tabSlideOver)
                             }
                         }
                     }
-                }.padding()
+                }
+                .padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))
             
@@ -284,8 +277,8 @@ struct MainMenu: View {
                 print("user could not register: \(error)")
             }
         }
-    
-
+        
+        
         .onChange(of: AutoSync.isAutoSync) { _, synced in
             guard let controller = taskController else { return }
             
