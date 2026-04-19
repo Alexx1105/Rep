@@ -12,9 +12,7 @@
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
-		B22E10F82D067E9A003F3D9F /* SearchUserPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F52D067E89003F3D9F /* SearchUserPages.swift */; };
 		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
-		B24EBC862E463BAC00E7FB01 /* ImportUserPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
 		B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2575D0C2EE120D900B82793 /* PaymentStore.swift */; };
@@ -98,7 +96,6 @@
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
 		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
-		B22E10F52D067E89003F3D9F /* SearchUserPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchUserPages.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B24A69832F57D97D00FBB5FB /* TosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosPage.swift; sourceTree = "<group>"; };
 		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
@@ -108,7 +105,6 @@
 		B2575D102EE269B500B82793 /* Rep pro tier.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep pro tier.storekit"; sourceTree = "<group>"; };
 		B25A0A472D91D9E300420892 /* DynamicRepTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepTest.swift; sourceTree = "<group>"; };
 		B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DynamicRepExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportUserPage.swift; sourceTree = "<group>"; };
 		B26842CE2CC704DB00471001 /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		B26842D22CC9F5FC00471001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B26A46622CCFC4250064AF46 /* LaunchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreen.swift; sourceTree = "<group>"; };
@@ -203,8 +199,6 @@
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
 				B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */,
 				B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */,
-				B22E10F52D067E89003F3D9F /* SearchUserPages.swift */,
-				B25FEAD82D18E17100BF4FC7 /* ImportUserPage.swift */,
 				B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */,
 				B26842D22CC9F5FC00471001 /* SettingsView.swift */,
 				B271C18F2CD1CEBB00710E70 /* NavPath.swift */,
@@ -383,8 +377,6 @@
 				B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */,
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
-				B24EBC862E463BAC00E7FB01 /* ImportUserPage.swift in Sources */,
-				B22E10F82D067E9A003F3D9F /* SearchUserPages.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
