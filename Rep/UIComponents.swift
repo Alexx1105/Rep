@@ -595,6 +595,167 @@ struct ToastNotification: View {
     }
 }
 
+
+struct ChatView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var closeChatSheet
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+    private var messagePlaceholder: String = "Upload notes or Ask..."
+    @State var chat: String = ""
+    
+    
+    private func sendChatMessage() {
+        let trimInput = chat.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimInput.isEmpty else { return }
+        print("sending chat \(trimInput)")
+        
+        chat = ""
+    }
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 30).frame(maxWidth: .infinity, maxHeight: .infinity).foregroundStyle(Color.mmBackground)
+            ScrollView {
+                VStack {
+                    ForEach(0..<40) { _ in
+                        Text("manroop is the jatt and rehan is the jatt alex is the jatt")
+                            .fontWeight(.medium)
+                            .lineLimit(nil)
+                            .opacity(textOpacity)
+                    }
+                }.frame(maxWidth: .infinity)
+                    .padding(.horizontal)
+                
+            }.clipShape(RoundedRectangle(cornerRadius: 30))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            
+            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(1.00), location: 0.00),
+                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
+                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.05),
+                                                      .init(color: Color.mmBackground.opacity(0.05), location: 0.10),]), startPoint: .top, endPoint: .bottom)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .cornerRadius(30)
+            .allowsHitTesting(false)
+            
+            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(1.00), location: 0.00),
+                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.05),
+                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.10),
+                                                      .init(color: Color.mmBackground.opacity(0.05), location: 0.15),]), startPoint: .bottom, endPoint: .top)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .cornerRadius(30)
+            .allowsHitTesting(false)
+            
+            VStack {
+                
+                HStack(alignment: .top) {
+                    
+                    Button {
+                        withAnimation { closeChatSheet() }
+                    } label: {
+                        ZStack {
+                            Circle().fill(Color.clear).glassEffect(.regular)
+                                .frame(width: 45, height: 45)
+                            
+                            Image(systemName: "xmark")
+                                .foregroundStyle(Color.mmDark)
+                                .font(.system(size: 20))
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 25))
+                            .frame(width: 110, height: 45)
+                        
+                        HStack {
+                            
+                            Menu {
+                                Button {
+                                    
+                                } label: {
+                                    Label("GPT-5.4", image: "")
+                                }
+                                
+                            } label: {
+                                Image(systemName: "ellipsis")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(Color.mmDark)
+                                    .padding()
+                                
+                            }
+                            
+                            
+                            Button {
+                                
+                            } label: {
+                                
+                                Image(systemName: "pencil.line")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(Color.mmDark)
+                                    .padding()
+                            }
+                        }
+                    }
+                    
+                }.padding(.top)
+                    .padding(.horizontal)
+                
+                
+                Spacer()
+                VStack(alignment: .leading, spacing: 20) {
+                    TextField(messagePlaceholder, text: $chat, axis: .vertical)
+                        .lineLimit(1...10)
+                        .autocorrectionDisabled(true)
+                        .padding(.horizontal)
+                        .fontWeight(.medium)
+                        .onSubmit {
+                            sendChatMessage()
+                        }
+                    
+                    HStack(alignment: .bottom) {
+                        Button {
+                            
+                        } label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.1)
+                                
+                                HStack(spacing: 2) {
+                                    Image(systemName: "plus.app")
+                                    Text("Upload")
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .foregroundStyle(Color.blue)
+                                }
+                            }
+                        }
+                        
+                        Spacer()
+                        Button {
+                            sendChatMessage()
+                        } label: {
+                            ZStack {
+                                Circle().fill(Color.mmDark)
+                                    .frame(maxWidth: 30, maxHeight: 30)
+                                
+                                Image(systemName: "arrow.up").foregroundStyle(Color.checkmark)
+                                
+                            }
+                        }.padding(.trailing)
+                    }
+                }.padding(.leading)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 30))
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal))
+                    .padding(.bottom)
+                
+            }
+        }
+    }
+}
+
+
 #Preview {
     PaymentMenuCard(isPresented:  .constant(true))
 }
@@ -608,4 +769,8 @@ struct ToastNotification: View {
 
 #Preview {
     ToastNotification()
+}
+
+#Preview {
+    ChatView()
 }
