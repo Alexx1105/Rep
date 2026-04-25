@@ -98,13 +98,16 @@ struct NotionImportPageView: View {
                         RoundedRectangle(cornerRadius: 30)
                             .fill(Color.clear)
                             .glassEffect(.regular, in: .rect(cornerRadius: 30))
-                            .frame(maxWidth: .infinity, maxHeight: 54)
+                            .frame(maxWidth: .infinity, maxHeight: 50)
                             .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.regular))
                         
-                        HStack(spacing: 5) {
+                        HStack(spacing: 10) {
                             Image(systemName: "list.bullet.circle.fill")
+                                .resizable()
+                                .frame(width: 25, height: 25)
                                 .foregroundStyle(Color.mmDark)
                                 .opacity(textOpacity)
+                               
                             
                             Text("Generate With AI")
                                 .foregroundStyle(Color.mmDark)
@@ -112,7 +115,7 @@ struct NotionImportPageView: View {
                                 .font(.system(size: 16))
                                 .fontWeight(.medium)
                             Spacer()
-                        }.padding(.leading)
+                        }.padding(.horizontal)
                     }
                 }.sheet(isPresented: $showChatView) {
                     if showChatView {

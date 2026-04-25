@@ -8,6 +8,9 @@
 
 import SwiftUI
 import SwiftData
+import PhotosUI
+import AVFoundation
+
 
 @MainActor
 public final class Toast: ObservableObject {
@@ -57,9 +60,9 @@ struct RootTabs: View {
                                     .allowsHitTesting(false)
                                     .fixedSize(horizontal: false, vertical: false)
                                     .ignoresSafeArea(edges: .top).padding(.top, 1)
+                            }
                         }
                     }
-                }
             }
         }
         
@@ -307,7 +310,7 @@ struct PaymentMenuCard: View {
             
             
             ZStack {
-                Rectangle().foregroundStyle(Color.mmBackground)        ///solid overlay here
+                Rectangle().foregroundStyle(Color.mmBackground).ignoresSafeArea()        ///solid overlay here
                     .frame(maxWidth: .infinity, maxHeight: 700)
                     .cornerRadius(25)
                     .padding()
@@ -461,13 +464,13 @@ struct HyperToggleCard: View {
             VStack(alignment: .leading) {
                 
                 HStack(spacing: 3) {
-//                    Text("Pro").foregroundStyle(Color.intervalBlue)
-//                        .font(.system(size: 16))
-//                        .fontWeight(.heavy)
-//                        .overlay {
-//                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-//                                .frame(width: 40, height: 21)
-//                        }
+                    //                    Text("Pro").foregroundStyle(Color.intervalBlue)
+                    //                        .font(.system(size: 16))
+                    //                        .fontWeight(.heavy)
+                    //                        .overlay {
+                    //                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                    //                                .frame(width: 40, height: 21)
+                    //                        }
                     
                     Spacer()
                     
@@ -601,24 +604,21 @@ struct ChatView: View {
     @Environment(\.dismiss) var closeChatSheet
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     private var messagePlaceholder: String = "Upload notes or Ask..."
-    @State var chat: String = ""
-    
-    
-    private func sendChatMessage() {
-        let trimInput = chat.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimInput.isEmpty else { return }
-        print("sending chat \(trimInput)")
-        
-        chat = ""
-    }
+    @StateObject private var chatState = Chat.shared
+    @State var showFilePicker: Bool = false
+    @State var showCameraPicker: Bool = false
+    @State var selectedPhoto: [PhotosPickerItem] = []
+    @State var showPhotoPicker: Bool = false
+    @State private var imageCaptured: UIImage?
+    @State var fileUrls: [URL] = []
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 30).frame(maxWidth: .infinity, maxHeight: .infinity).foregroundStyle(Color.mmBackground)
+            Color.mmBackground.ignoresSafeArea()
             ScrollView {
                 VStack {
                     ForEach(0..<40) { _ in
-                        Text("manroop is the jatt and rehan is the jatt alex is the jatt")
+                        Text("Testing chat text flow completion and how it fills up")
                             .fontWeight(.medium)
                             .lineLimit(nil)
                             .opacity(textOpacity)
@@ -626,28 +626,27 @@ struct ChatView: View {
                 }.frame(maxWidth: .infinity)
                     .padding(.horizontal)
                 
-            }.clipShape(RoundedRectangle(cornerRadius: 30))
-                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
             
             
-            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(1.00), location: 0.00),
+            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
                                                       .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
-                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.05),
-                                                      .init(color: Color.mmBackground.opacity(0.05), location: 0.10),]), startPoint: .top, endPoint: .bottom)
+                                                      .init(color: Color.mmBackground.opacity(0.50), location: 0.05),
+                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.10),]), startPoint: .top, endPoint: .bottom)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .cornerRadius(30)
             .allowsHitTesting(false)
+            .ignoresSafeArea()
             
             LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(1.00), location: 0.00),
-                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.05),
+                                                      .init(color: Color.mmBackground.opacity(1.00), location: 0.05),
                                                       .init(color: Color.mmBackground.opacity(0.30), location: 0.10),
                                                       .init(color: Color.mmBackground.opacity(0.05), location: 0.15),]), startPoint: .bottom, endPoint: .top)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .cornerRadius(30)
             .allowsHitTesting(false)
+            .ignoresSafeArea()
             
             VStack {
-                
                 HStack(alignment: .top) {
                     
                     Button {
@@ -670,7 +669,6 @@ struct ChatView: View {
                             .frame(width: 110, height: 45)
                         
                         HStack {
-                            
                             Menu {
                                 Button {
                                     
@@ -683,10 +681,7 @@ struct ChatView: View {
                                     .font(.system(size: 20))
                                     .foregroundStyle(Color.mmDark)
                                     .padding()
-                                
                             }
-                            
-                            
                             Button {
                                 
                             } label: {
@@ -705,34 +700,60 @@ struct ChatView: View {
                 
                 Spacer()
                 VStack(alignment: .leading, spacing: 20) {
-                    TextField(messagePlaceholder, text: $chat, axis: .vertical)
+                    TextField(messagePlaceholder, text: $chatState.chat, axis: .vertical)
                         .lineLimit(1...10)
                         .autocorrectionDisabled(true)
                         .padding(.horizontal)
                         .fontWeight(.medium)
                         .onSubmit {
-                            sendChatMessage()
+                            Chat.sendChatMessage()
                         }
                     
                     HStack(alignment: .bottom) {
-                        Button {
+                        Menu {
+                            Button {
+                                
+                            } label: {
+                                Label("Take Photo", systemImage: "camera.fill")
+                            }
+                            Button {
+                                showPhotoPicker = true
+                            } label: {
+                                Label("Upload Photo", systemImage: "photo")
+                            }.onChange(of: selectedPhoto) {_, newValueItem in
+                                //do {
+                                Task {
+                                    for item in newValueItem {
+                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
+                                        let _ = UIImage(data: rawImageData ?? Data())
+                                    }
+                                }
+                                //                                } catch {
+                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
+                                //                                }
+                            }
                             
+                            Button {
+                                showFilePicker = true
+                            } label: {
+                                Label("Upload File(s)", systemImage: "folder.fill")
+                            }
                         } label: {
                             ZStack {
-                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.1)
+                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.2).foregroundStyle(Color.intervalBlue)
                                 
                                 HStack(spacing: 2) {
-                                    Image(systemName: "plus.app")
+                                    Image(systemName: "plus.app").foregroundStyle(Color.intervalBlue)
                                     Text("Upload")
                                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Color.blue)
+                                        .foregroundStyle(Color.intervalBlue)
                                 }
                             }
                         }
                         
                         Spacer()
                         Button {
-                            sendChatMessage()
+                            Chat.sendChatMessage()
                         } label: {
                             ZStack {
                                 Circle().fill(Color.mmDark)
@@ -749,9 +770,26 @@ struct ChatView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal))
                     .padding(.bottom)
-                
             }
-        }
+        }.sheet(isPresented: $showCameraPicker) {
+            CameraPicker(onImagePicked: { image in
+                imageCaptured = image
+                showCameraPicker = false
+            },
+                         onCancel: {
+                showCameraPicker = false
+            }
+            )
+        }.sheet(isPresented: $showFilePicker) {
+            DocPicker(contentType: [.item, .image, .folder, .fileURL], allowMultipleFileSelect: true) { url in
+                fileUrls = url
+            }
+            
+            List(fileUrls, id: \.self) { url in
+                Text(url.lastPathComponent)
+            }
+        }.photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, maxSelectionCount: 10, matching: .images)
+        
     }
 }
 
@@ -774,3 +812,4 @@ struct ChatView: View {
 #Preview {
     ChatView()
 }
+
