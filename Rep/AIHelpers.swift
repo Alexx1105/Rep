@@ -3,7 +3,7 @@
 //  Rep
 //
 //  Created by alex haidar on 4/20/26.
-//helper functions, methods, and classes for the AI Chat view and voice transcription here,
+//helper functions, methods, and classes for the AI Chat view and voice transcription and accessing system level APIs/view controllers here,
 
 import Foundation
 import SwiftUI
@@ -32,13 +32,27 @@ public class Chat: ObservableObject {
     
     static let shared = Chat()
     @Published var chat: String = ""
+    @Published var responseMessage: String = ""
     
     public static func sendChatMessage() {
-        let trimInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimInput.isEmpty else { return }
-        print("sending chat \(trimInput)")
+        let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimUserInput.isEmpty else { return }
+        print("sending chat \(trimUserInput)")
         
         Chat.shared.chat = ""
+        
+        Task {
+            do {
+                let aiResponse = try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini")
+                
+                await MainActor.run {
+                    shared.responseMessage = aiResponse
+                }
+                print("returned response from openAI ✅ \(aiResponse)")
+            } catch {
+                print("failed to return response from openAI ❗️", ErrorDesc.serverError, error)
+            }
+        }
     }
 }
 

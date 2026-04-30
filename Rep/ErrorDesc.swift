@@ -24,6 +24,7 @@ enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
     case oauthError
     case swiftDataQueryError
     case photoUploadError
+    case serverError
 }
 
 enum ErrorDefinition: Error {

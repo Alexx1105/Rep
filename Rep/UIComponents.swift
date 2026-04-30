@@ -673,7 +673,13 @@ struct ChatView: View {
                                 Button {
                                     
                                 } label: {
-                                    Label("GPT-5.4", image: "")
+                                    Label("GPT-5.4 mini", image: "")  //TODO: explain that its faster
+                                }
+                                
+                                Button {
+                                    
+                                } label: {
+                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed
                                 }
                                 
                             } label: {
