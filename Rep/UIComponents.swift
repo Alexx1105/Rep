@@ -617,12 +617,12 @@ struct ChatView: View {
             Color.mmBackground.ignoresSafeArea()
             ScrollView {
                 VStack {
-                    ForEach(0..<40) { _ in
-                        Text("Testing chat text flow completion and how it fills up")
+                    ForEach(Chat.shared.responseMessage, id: \.id) { response in
+                        Text(response.text)
                             .fontWeight(.medium)
                             .lineLimit(nil)
                             .opacity(textOpacity)
-                    }
+                    }.padding(.top, 2)
                 }.frame(maxWidth: .infinity)
                     .padding(.horizontal)
                 

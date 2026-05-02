@@ -32,7 +32,12 @@ public class Chat: ObservableObject {
     
     static let shared = Chat()
     @Published var chat: String = ""
-    @Published var responseMessage: String = ""
+    @Published var responseMessage: [messageModel] = []
+    
+    public struct messageModel: Identifiable {
+        public let id: String
+        public let text: String
+    }
     
     public static func sendChatMessage() {
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -42,19 +47,18 @@ public class Chat: ObservableObject {
         Chat.shared.chat = ""
         
         Task {
-            do {
-                let aiResponse = try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini")
-                
-                await MainActor.run {
-                    shared.responseMessage = aiResponse
-                }
-                print("returned response from openAI ✅ \(aiResponse)")
-            } catch {
-                print("failed to return response from openAI ❗️", ErrorDesc.serverError, error)
+            let aiResponse: Parent = try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini")
+            let extractedContent: String = try AIRequestManager.shared.extractAIResponseContent(aiResponse: aiResponse)
+            
+            await MainActor.run {
+                shared.responseMessage.append(messageModel(id: UUID().uuidString, text: extractedContent))
             }
+            print("returned response from openAI ✅ \(aiResponse)")
         }
     }
 }
+
+
 
 
 struct DocPicker: UIViewControllerRepresentable {
