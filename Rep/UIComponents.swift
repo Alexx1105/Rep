@@ -616,18 +616,20 @@ struct ChatView: View {
         ZStack {
             Color.mmBackground.ignoresSafeArea()
             ScrollView {
-                VStack {
+                VStack() {
+                    Spacer(minLength: 65)
                     ForEach(Chat.shared.responseMessage, id: \.id) { response in
                         Text(response.text)
                             .fontWeight(.medium)
                             .lineLimit(nil)
                             .opacity(textOpacity)
-                    }.padding(.top, 2)
+                    }
                 }.frame(maxWidth: .infinity)
                     .padding(.horizontal)
                 
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 135)
+            }.frame(maxWidth: .infinity, alignment: .leading)
+             
             
             
             LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
@@ -704,7 +706,7 @@ struct ChatView: View {
                     .padding(.horizontal)
                 
                 
-                Spacer()
+                Spacer(minLength: 60)
                 VStack(alignment: .leading, spacing: 20) {
                     TextField(messagePlaceholder, text: $chatState.chat, axis: .vertical)
                         .lineLimit(1...10)

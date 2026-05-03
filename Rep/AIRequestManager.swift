@@ -80,7 +80,7 @@ public final class AIRequestManager: ObservableObject {
             let decodedTitlesAndBullets = try decodeParentResponse.decode(DecodedParentResponse.self, from: data)
             
             let formatContent: String = decodedTitlesAndBullets.sections.map { line in
-                "\(line.title)\n" + line.bullets.map {" •\($0) "}.joined(separator: "\n") }.joined(separator: "\n")
+                "\(line.title)\n" + line.bullets.map {" • \($0) "}.joined(separator: "\n") }.joined(separator: "\n")
             
             print("formatted titles and bullets: \(formatContent)")
             return formatContent
