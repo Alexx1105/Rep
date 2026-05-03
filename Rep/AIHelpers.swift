@@ -39,26 +39,26 @@ public class Chat: ObservableObject {
         public let text: String
     }
     
+    
     public static func sendChatMessage() {
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
-        print("sending chat \(trimUserInput)")
+        print("sending chat: \(trimUserInput)")
         
         Chat.shared.chat = ""
         
         Task {
             let aiResponse: Parent = try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini")
-            let extractedContent: String = try AIRequestManager.shared.extractAIResponseContent(aiResponse: aiResponse)
+            let extractedContent: String = try AIRequestManager.shared.extractChatMetadata(aiResponse: aiResponse)
+            let extractedText: String = try AIRequestManager.shared.extractChatContent(extractedContent: extractedContent)
             
             await MainActor.run {
-                shared.responseMessage.append(messageModel(id: UUID().uuidString, text: extractedContent))
+                shared.responseMessage.append(messageModel(id: UUID().uuidString, text: extractedText))
             }
             print("returned response from openAI ✅ \(aiResponse)")
         }
     }
 }
-
-
 
 
 struct DocPicker: UIViewControllerRepresentable {

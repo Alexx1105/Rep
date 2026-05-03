@@ -8,11 +8,12 @@
 
 typealias OpenAIOutput = Parent.OpenAIResponse.Output
 typealias OpenAIContent = Parent.OpenAIResponse.Output.Content
+typealias TitleAndBulletContent = DecodedParentResponse
 
 public struct Parent: Codable {
     public let openAIResponse: OpenAIResponse
     
-    public struct OpenAIResponse: Codable, Identifiable {
+    public struct OpenAIResponse: Codable, Identifiable {   
         public let id: String
         public let status: String
         public let model: String
@@ -30,3 +31,13 @@ public struct Parent: Codable {
         }
     }
 }
+
+public struct DecodedParentResponse: Codable {        ///get titles and bullet lists from the json response body
+    public let sections: [Section]
+    
+    public struct Section: Codable {
+        public let title: String
+        public let bullets: [String]
+    }
+}
+

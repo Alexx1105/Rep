@@ -35,7 +35,7 @@ public final class AIRequestManager: ObservableObject {
         urlRequest.httpBody = try JSONSerialization.data(withJSONObject: messageBody)
         
         do {
-            let (data, _) = try await URLSession.shared.data(for: urlRequest)       //TODO: add response if we acc need it
+            let (data, _) = try await URLSession.shared.data(for: urlRequest)
             print("EDGE FUNCTION OPENAI RESPONSE: \(data)")
             
             guard !data.isEmpty else { throw ErrorDesc.responseError }
@@ -55,8 +55,7 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func extractAIResponseContent(aiResponse: Parent) throws -> String {
-        
+    public func extractChatMetadata(aiResponse: Parent) throws -> String {
         do {
             guard let accessParent: OpenAIOutput = aiResponse.openAIResponse.output.first else { throw ErrorDesc.nilValue }
             guard let aiText: OpenAIContent = accessParent.content.first else { throw ErrorDesc.nilValue }
@@ -68,9 +67,29 @@ public final class AIRequestManager: ObservableObject {
             print("extracted AI id: \(responseID) | status: \(responseStatus) | ai model: \(responseAIModel)")
             return aiText.text
         } catch {
-            print("failed to extract content ❗️", ErrorDesc.parsingError, error)
+            print("failed to extract chat metadata❗️", ErrorDesc.parsingError, error)
         }
         throw ErrorDesc.parsingError
     }
+    
+    
+    public func extractChatContent(extractedContent: String) throws -> String {      ///get titles and bullet lists from the json response body
+        do {
+            let data: Data = Data(extractedContent.utf8)
+            let decodeParentResponse = JSONDecoder()
+            let decodedTitlesAndBullets = try decodeParentResponse.decode(DecodedParentResponse.self, from: data)
+            
+            let formatContent: String = decodedTitlesAndBullets.sections.map { line in
+                "\(line.title)\n" + line.bullets.map {" •\($0) "}.joined(separator: "\n") }.joined(separator: "\n")
+            
+            print("formatted titles and bullets: \(formatContent)")
+            return formatContent
+        } catch {
+            print("failed to extract chat content ❗️", ErrorDesc.parsingError, error)
+            throw ErrorDesc.nilValue
+        }
+    }
 }
+
+
 
