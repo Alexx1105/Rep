@@ -25,7 +25,7 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, gptModel: String = "mini") async throws -> Parent {           ///openAI API accessed via supabase edge function
+    public func openAIRequest(userMessage: String, gptModel: String = "mini", onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -35,19 +35,28 @@ public final class AIRequestManager: ObservableObject {
         urlRequest.httpBody = try JSONSerialization.data(withJSONObject: messageBody)
         
         do {
-            let (data, _) = try await URLSession.shared.data(for: urlRequest)
-            print("EDGE FUNCTION OPENAI RESPONSE: \(data)")
+            let (bytes, _) = try await URLSession.shared.bytes(for: urlRequest)
+            print("EDGE FUNCTION OPENAI RESPONSE: \(bytes)")
             
-            guard !data.isEmpty else { throw ErrorDesc.responseError }
+            for try await stream in bytes.lines {
+                
+                guard stream.hasPrefix("data:") else { continue }
+                print(stream)
+                let ssePayload = String(stream.dropFirst(6))    ///strip the "data:" field from the sse paylaod line
+                if ssePayload == "[DONE]" { break }
+                
+                guard let streamData = ssePayload.data(using: .utf8) else { continue }
+                let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
+                
+                if streamDecoder.response != nil {
+                    let meta = try await AIRequestManager.shared.extractChatMetadata(aiResponse: streamDecoder)
+                    onMeta(meta)
+                }
+                
+                guard streamDecoder.type == "response.output_text.delta", let delta = streamDecoder.delta else { continue }
+                onChunk(delta)
+            }
             
-            guard let encodeData: String = String(data: data, encoding: .utf8) else { throw ErrorDesc.encodeError }
-            print("encoded data from edge function \(encodeData)")
-            
-            let decodeRespose: JSONDecoder = JSONDecoder()
-            let aiResponse: Parent = try decodeRespose.decode(Parent.self, from: data)
-            
-            print("returned decoded openAI response: \(aiResponse)")
-            return aiResponse
         } catch {
             print("failed to decode request from supabase", ErrorDesc.decodeError, error)
             throw ErrorDesc.decodeError
@@ -55,21 +64,12 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func extractChatMetadata(aiResponse: Parent) throws -> String {
-        do {
-            guard let accessParent: OpenAIOutput = aiResponse.openAIResponse.output.first else { throw ErrorDesc.nilValue }
-            guard let aiText: OpenAIContent = accessParent.content.first else { throw ErrorDesc.nilValue }
-            
-            let responseID: String = aiResponse.openAIResponse.id
-            let responseStatus: String = aiResponse.openAIResponse.status
-            let responseAIModel: String = aiResponse.openAIResponse.model
-            
-            print("extracted AI id: \(responseID) | status: \(responseStatus) | ai model: \(responseAIModel)")
-            return aiText.text
-        } catch {
-            print("failed to extract chat metadata❗️", ErrorDesc.parsingError, error)
-        }
-        throw ErrorDesc.parsingError
+    public func extractChatMetadata(aiResponse: OpenAIStreamMeta) async throws -> String {
+        let responseID: String = aiResponse.response?.id ?? "missing chat id"
+        let responseStatus: String = aiResponse.response?.status ?? "missing status"
+        let responseAIModel: String = aiResponse.response?.model ?? "missing ai model"
+        
+        return "extracted AI id: \(responseID) | status: \(responseStatus) | ai model: \(responseAIModel) ✅"
     }
     
     

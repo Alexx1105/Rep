@@ -611,6 +611,7 @@ struct ChatView: View {
     @State var showPhotoPicker: Bool = false
     @State private var imageCaptured: UIImage?
     @State var fileUrls: [URL] = []
+    @State public var isNewChat: Bool = false
     
     var body: some View {
         ZStack {
@@ -620,16 +621,20 @@ struct ChatView: View {
                     Spacer(minLength: 65)
                     ForEach(Chat.shared.responseMessage, id: \.id) { response in
                         Text(response.text)
-                            .fontWeight(.medium)
+                            .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium)
+                            .listRowBackground(Color.mmBackground)
                             .lineLimit(nil)
                             .opacity(textOpacity)
+                            .animation(.easeOut(duration: 0.25), value: response.text)
+                            .transition(.opacity.combined(with: .blurReplace))
+                    
                     }
+                    
                 }.frame(maxWidth: .infinity)
                     .padding(.horizontal)
                 
                 Spacer(minLength: 135)
             }.frame(maxWidth: .infinity, alignment: .leading)
-             
             
             
             LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
@@ -675,14 +680,14 @@ struct ChatView: View {
                                 Button {
                                     
                                 } label: {
-                                    Label("GPT-5.4 mini", image: "")  //TODO: explain that its faster
+                                    Label("GPT-5.4 mini", image: "openaiLogo")  //TODO: explain that its faster
                                 }
                                 
-                                Button {
-                                    
-                                } label: {
-                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed
-                                }
+//                                Button {
+//                                    
+//                                } label: {
+//                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed, will add support for this model later
+//                                }
                                 
                             } label: {
                                 Image(systemName: "ellipsis")
@@ -691,9 +696,9 @@ struct ChatView: View {
                                     .padding()
                             }
                             Button {
-                                
+                                isNewChat = true
+                                Chat.shared.responseMessage.removeAll()
                             } label: {
-                                
                                 Image(systemName: "pencil.line")
                                     .font(.system(size: 20))
                                     .foregroundStyle(Color.mmDark)
@@ -719,27 +724,27 @@ struct ChatView: View {
                     
                     HStack(alignment: .bottom) {
                         Menu {
-                            Button {
-                                
-                            } label: {
-                                Label("Take Photo", systemImage: "camera.fill")
-                            }
-                            Button {
-                                showPhotoPicker = true
-                            } label: {
-                                Label("Upload Photo", systemImage: "photo")
-                            }.onChange(of: selectedPhoto) {_, newValueItem in
-                                //do {
-                                Task {
-                                    for item in newValueItem {
-                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
-                                        let _ = UIImage(data: rawImageData ?? Data())
-                                    }
-                                }
-                                //                                } catch {
-                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
-                                //                                }
-                            }
+//                            Button {
+//                                
+//                            } label: {
+//                                Label("Take Photo", systemImage: "camera.fill")
+//                            }
+//                            Button {
+//                                showPhotoPicker = true
+//                            } label: {
+//                                Label("Upload Photo", systemImage: "photo")
+//                            }.onChange(of: selectedPhoto) {_, newValueItem in
+//                                //do {
+//                                Task {
+//                                    for item in newValueItem {
+//                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
+//                                        let _ = UIImage(data: rawImageData ?? Data())
+//                                    }
+//                                }
+//                                //                                } catch {
+//                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
+//                                //                                }
+//                            }
                             
                             Button {
                                 showFilePicker = true

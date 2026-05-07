@@ -36,7 +36,7 @@ public class Chat: ObservableObject {
     
     public struct messageModel: Identifiable {
         public let id: String
-        public let text: String
+        public var text: String
     }
     
     
@@ -48,14 +48,36 @@ public class Chat: ObservableObject {
         Chat.shared.chat = ""
         
         Task {
-            let aiResponse: Parent = try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini")
-            let extractedContent: String = try AIRequestManager.shared.extractChatMetadata(aiResponse: aiResponse)
-            let extractedText: String = try AIRequestManager.shared.extractChatContent(extractedContent: extractedContent)
+            await MainActor.run {
+                shared.responseMessage.append(messageModel(id: UUID().uuidString, text: ""))
+            }
+            
+            var formattedText: String = ""
+            var metadataText: String = ""
+            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini") { chunk in
+                formattedText += chunk
+                
+                Task { @MainActor in
+                    if let addLastRawChunk = shared.responseMessage.indices.last {
+                        shared.responseMessage[addLastRawChunk].text = formattedText
+                    }
+                }
+            }
+            onMeta: { meta in
+                    metadataText = meta
+                    print("metadata:", metadataText)
+                }
+          
+           
+            
+            
+            let formatted = try AIRequestManager.shared.extractChatContent(extractedContent: formattedText)
             
             await MainActor.run {
-                shared.responseMessage.append(messageModel(id: UUID().uuidString, text: extractedText))
+                if let addLastFormattedChunk = shared.responseMessage.indices.last {
+                    shared.responseMessage[addLastFormattedChunk].text = formatted
+                }
             }
-            print("returned response from openAI ✅ \(aiResponse)")
         }
     }
 }

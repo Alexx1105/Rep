@@ -6,29 +6,20 @@
 //structs and types for all the AI features defined here
 
 
-typealias OpenAIOutput = Parent.OpenAIResponse.Output
-typealias OpenAIContent = Parent.OpenAIResponse.Output.Content
+
+public typealias OpenAIStreamMeta = StreamEvent
 typealias TitleAndBulletContent = DecodedParentResponse
 
-public struct Parent: Codable {
-    public let openAIResponse: OpenAIResponse
+
+public struct StreamEvent: Decodable {
+    public let type: String
+    public let delta: String?
+    public let response: StreamResponse?
     
-    public struct OpenAIResponse: Codable, Identifiable {   
+    public struct StreamResponse: Decodable {
         public let id: String
         public let status: String
         public let model: String
-        public let output: [Output]
-        
-        public struct Output: Codable {
-            public let type: String
-            public let role: String
-            public let content: [Content]
-            
-            public struct Content: Codable {
-                public let type: String
-                public let text: String
-            }
-        }
     }
 }
 
