@@ -627,7 +627,6 @@ struct ChatView: View {
                             .opacity(textOpacity)
                             .animation(.easeOut(duration: 0.25), value: response.text)
                             .transition(.opacity.combined(with: .blurReplace))
-                    
                     }
                     
                 }.frame(maxWidth: .infinity)
@@ -722,6 +721,30 @@ struct ChatView: View {
                             Chat.sendChatMessage()
                         }
                     
+                    ForEach(fileUrls, id: \.self) { file in
+                        ZStack {
+                            Capsule()
+                                .frame(maxWidth: .infinity, maxHeight: 28)
+                                .glassEffect(.regular)
+                           
+                            HStack(spacing: 5) {
+                               
+                                Text(file.lastPathComponent).font(Font.system(size: 12))
+                                    .fontWeight(.semibold)
+                                    .fontDesign(.rounded)
+                                
+                                Button {
+                                    fileUrls.removeAll(where: { $0 == file })
+                                } label: {
+                                    Image(systemName: "x.circle.fill").fixedSize()
+                                        .foregroundStyle(Color.mmDark)
+                                }
+                            }.padding(6)
+                        }.fixedSize()
+                    }
+                 
+                    
+                    
                     HStack(alignment: .bottom) {
                         Menu {
 //                            Button {
@@ -794,15 +817,11 @@ struct ChatView: View {
             }
             )
         }.sheet(isPresented: $showFilePicker) {
-            DocPicker(contentType: [.item, .image, .folder, .fileURL], allowMultipleFileSelect: true) { url in
+            DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
+                
             }
-            
-            List(fileUrls, id: \.self) { url in
-                Text(url.lastPathComponent)
-            }
-        }.photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, maxSelectionCount: 10, matching: .images)
-        
+        } //.photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, maxSelectionCount: 10, matching: .images)
     }
 }
 

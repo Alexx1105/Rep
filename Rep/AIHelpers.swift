@@ -68,9 +68,6 @@ public class Chat: ObservableObject {
                     print("metadata:", metadataText)
                 }
           
-           
-            
-            
             let formatted = try AIRequestManager.shared.extractChatContent(extractedContent: formattedText)
             
             await MainActor.run {
@@ -84,7 +81,7 @@ public class Chat: ObservableObject {
 
 
 struct DocPicker: UIViewControllerRepresentable {
-    var contentType: [UTType] = [.item, .image, .folder, .fileURL]
+    var contentType: [UTType] = [.pdf, .png, .jpeg, .plainText, .commaSeparatedText, .image]
     var allowMultipleFileSelect: Bool = true
     var onSelect: ([URL]) -> Void
     
