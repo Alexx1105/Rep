@@ -718,7 +718,8 @@ struct ChatView: View {
                         .padding(.horizontal)
                         .fontWeight(.medium)
                         .onSubmit {
-                            Chat.sendChatMessage()
+                            Chat.sendChatMessage(userFile: fileUrls.first)
+                            fileUrls.removeAll()
                         }
                     
                     ForEach(fileUrls, id: \.self) { file in
@@ -726,9 +727,9 @@ struct ChatView: View {
                             Capsule()
                                 .frame(maxWidth: .infinity, maxHeight: 28)
                                 .glassEffect(.regular)
-                           
+                            
                             HStack(spacing: 5) {
-                               
+                                
                                 Text(file.lastPathComponent).font(Font.system(size: 12))
                                     .fontWeight(.semibold)
                                     .fontDesign(.rounded)
@@ -789,7 +790,9 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
-                            Chat.sendChatMessage()
+                            if let file = fileUrls.first {
+                                Chat.sendChatMessage(userFile: file)
+                            }
                         } label: {
                             ZStack {
                                 Circle().fill(Color.mmDark)

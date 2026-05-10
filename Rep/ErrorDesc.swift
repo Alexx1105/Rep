@@ -26,6 +26,7 @@ enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
     case photoUploadError
     case serverError
     case responseError
+    case fileProcessingError
 }
 
 enum ErrorDefinition: Error {

@@ -17,6 +17,7 @@ public final class AIRequestManager: ObservableObject {
     struct aiModels: Codable {
         let userMessage: String
         let gptModel: String
+        let userFile: [URL]
     }
     
     enum modelTier: Codable {
@@ -25,14 +26,50 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, gptModel: String = "mini", onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
+    public func buildFilePathHelper(userFileUrl: URL, fileIdentifier: String) throws -> Data {
+        let fileName: String = userFileUrl.lastPathComponent
+        let fileData: Data = try Data(contentsOf: userFileUrl)
+        let getMIME = guessMimeType(for: fileData)
+        
+        var fileBody = Data()
+        
+        fileBody.append("--\(fileIdentifier)\r\n".data(using: .utf8)!)
+        fileBody.append("Content-Disposition: form-data; name=\"files\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+        fileBody.append("Content-Type: \(getMIME)\r\n\r\n".data(using: .utf8)!)
+        fileBody.append(fileData)
+        fileBody.append("\r\n".data(using: .utf8)!)
+        
+        print("file body built: \(fileBody)")
+        return fileBody
+    }
+    
+    
+    public func openAIRequest(userMessage: String, userFileUrl: URL?, gptModel: String = "mini", onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
+        let fileIdentifier: String = UUID().uuidString
+        
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("multipart/form-data; boundary=\(fileIdentifier)", forHTTPHeaderField: "Content-Type")
         urlRequest.httpMethod = "POST"
         
-        let messageBody: [String: Any] = ["input": userMessage, "model": gptModel]
-        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: messageBody)
+        var multipartReqBody: Data = Data()
+        
+        multipartReqBody.append("--\(fileIdentifier)\r\n".data(using: .utf8)!)
+        multipartReqBody.append("Content-Disposition: form-data; name=\"input\"\r\n\r\n".data(using: .utf8)!)
+        multipartReqBody.append("\(userMessage)\r\n".data(using: .utf8)!)
+        
+        multipartReqBody.append("--\(fileIdentifier)\r\n".data(using: .utf8)!)
+        
+        multipartReqBody.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
+        multipartReqBody.append("\(gptModel)\r\n".data(using: .utf8)!)
+        
+        if let userFileUrl {
+            let fileBytes = try buildFilePathHelper(userFileUrl: userFileUrl, fileIdentifier: fileIdentifier)
+            multipartReqBody.append(fileBytes)
+        }
+        
+        multipartReqBody.append("--\(fileIdentifier)--\r\n".data(using: .utf8)!)
+        urlRequest.httpBody = multipartReqBody
         
         do {
             let (bytes, _) = try await URLSession.shared.bytes(for: urlRequest)

@@ -3,7 +3,9 @@
 //  Rep
 //
 //  Created by alex haidar on 4/20/26.
-//helper functions, methods, and classes for the AI Chat view and voice transcription and accessing system level APIs/view controllers here,
+//
+/* helper functions, methods, and classes for the AI Chat view
+   and voice transcription and accessing system level APIs/view controllers for the front-end here */
 
 import Foundation
 import SwiftUI
@@ -17,12 +19,9 @@ final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {     ///FYI: 
     init(onSelect: @escaping ([URL]) -> Void) {
         self.onSelect = onSelect
     }
-    
-    
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         onSelect(urls)
     }
-    
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {}
 }
 
@@ -40,7 +39,7 @@ public class Chat: ObservableObject {
     }
     
     
-    public static func sendChatMessage() {
+    public static func sendChatMessage(userFile: URL?) {
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
         print("sending chat: \(trimUserInput)")
@@ -52,9 +51,13 @@ public class Chat: ObservableObject {
                 shared.responseMessage.append(messageModel(id: UUID().uuidString, text: ""))
             }
             
+            if let userFile {
+                print("sending selected file: \(userFile)")
+            }
+            
             var formattedText: String = ""
             var metadataText: String = ""
-            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, gptModel: "mini") { chunk in
+            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, gptModel: "mini") { chunk in
                 formattedText += chunk
                 
                 Task { @MainActor in
@@ -63,13 +66,13 @@ public class Chat: ObservableObject {
                     }
                 }
             }
-            onMeta: { meta in
-                    metadataText = meta
-                    print("metadata:", metadataText)
-                }
-          
-            let formatted = try AIRequestManager.shared.extractChatContent(extractedContent: formattedText)
             
+            onMeta: { meta in
+                metadataText = meta
+                print("metadata:", metadataText)
+            }
+            
+            let formatted = try AIRequestManager.shared.extractChatContent(extractedContent: formattedText)
             await MainActor.run {
                 if let addLastFormattedChunk = shared.responseMessage.indices.last {
                     shared.responseMessage[addLastFormattedChunk].text = formatted
@@ -100,6 +103,7 @@ struct DocPicker: UIViewControllerRepresentable {
         uiViewController.allowsMultipleSelection = allowMultipleFileSelect
     }
 }
+
 
 struct CameraPicker: UIViewControllerRepresentable {
     var onImagePicked: (UIImage?) -> Void
