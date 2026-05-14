@@ -612,6 +612,7 @@ struct ChatView: View {
     @State private var imageCaptured: UIImage?
     @State var fileUrls: [URL] = []
     @State public var isNewChat: Bool = false
+    @State var isGenerating: Bool = false
     
     var body: some View {
         ZStack {
@@ -619,13 +620,14 @@ struct ChatView: View {
             ScrollView {
                 VStack() {
                     Spacer(minLength: 65)
+            
                     ForEach(Chat.shared.responseMessage, id: \.id) { response in
                         Text(response.text)
                             .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium)
                             .listRowBackground(Color.mmBackground)
                             .lineLimit(nil)
                             .opacity(textOpacity)
-                            .animation(.easeOut(duration: 0.25), value: response.text)
+                            .animation(.easeOut(duration: 0.50), value: response.text)
                             .transition(.opacity.combined(with: .blurReplace))
                     }
                     
@@ -697,6 +699,7 @@ struct ChatView: View {
                             Button {
                                 isNewChat = true
                                 Chat.shared.responseMessage.removeAll()
+                               
                             } label: {
                                 Image(systemName: "pencil.line")
                                     .font(.system(size: 20))
@@ -743,7 +746,7 @@ struct ChatView: View {
                             }.padding(6)
                         }.fixedSize()
                     }
-                 
+                    
                     
                     
                     HStack(alignment: .bottom) {

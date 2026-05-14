@@ -26,6 +26,19 @@ final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {     ///FYI: 
 }
 
 
+actor chatBuffer {
+    private var textStorage: String = ""
+    
+    func append(_ text: String) {
+        textStorage += text
+    }
+    func chunkSnapshot() -> String {
+        textStorage
+    }
+}
+
+let chatBufferInstance = chatBuffer()
+
 public class Chat: ObservableObject {
     private init() {}
     
@@ -55,28 +68,33 @@ public class Chat: ObservableObject {
                 print("sending selected file: \(userFile)")
             }
             
-            var formattedText: String = ""
             var metadataText: String = ""
             try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, gptModel: "mini") { chunk in
-                formattedText += chunk
                 
-                Task { @MainActor in
-                    if let addLastRawChunk = shared.responseMessage.indices.last {
-                        shared.responseMessage[addLastRawChunk].text = formattedText
+                Task {
+                    await chatBufferInstance.append(chunk)
+                    let snapshot = await chatBufferInstance.chunkSnapshot()
+                    print("SNAPSHOT IN BUFFER: \(snapshot)")
+                    
+                    var formattedChunk: String
+                    do {
+                        let format = try AIRequestManager.shared.extractChatContent(extractedContent: snapshot)
+                        formattedChunk = format
+                    } catch {
+                        print("formatting chunk from buffer failed - using raw JSON chunk as fallback")
+                        formattedChunk = snapshot
+                    }
+                    
+                    Task { @MainActor in
+                        if let addLastRawChunk = shared.responseMessage.indices.last {
+                            shared.responseMessage[addLastRawChunk].text = formattedChunk
+                        }
                     }
                 }
             }
-            
             onMeta: { meta in
                 metadataText = meta
                 print("metadata:", metadataText)
-            }
-            
-            let formatted = try AIRequestManager.shared.extractChatContent(extractedContent: formattedText)
-            await MainActor.run {
-                if let addLastFormattedChunk = shared.responseMessage.indices.last {
-                    shared.responseMessage[addLastFormattedChunk].text = formatted
-                }
             }
         }
     }
