@@ -127,7 +127,7 @@ struct MainMenuTab: View {
                         .padding(5)
                 }
                 
-                HStack(spacing: 5) {
+                HStack(spacing: 10) {
                     if let emoji: String = userPageTitle?.emoji {
                         Text(emoji)
                     }
@@ -146,12 +146,19 @@ struct MainMenuTab: View {
                         Spacer()
                     }
                     
-                    Text(userPageTitle?.text ?? "")
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.mmDark)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    Spacer()
+                    if userPageTitle?.text != nil {
+                        Image("notionLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                        
+                        Text(userPageTitle?.text ?? "")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
                 }
                 
                 Spacer()

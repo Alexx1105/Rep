@@ -51,12 +51,20 @@ struct ImportedNotes: View {
                     switch titleSource {
                         
                     case (.notionContent(_ )):
-                        if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.text {
-                            Text(emojis ?? "")
-                            Text(title ?? "")
-                                .fontWeight(.semibold)
-                                .truncationMode(.middle)
-                                .lineLimit(1)
+                            if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.text {
+                                HStack(spacing: 10) {
+                                Text(emojis ?? "")
+                                Text(title ?? "")
+                                    .fontWeight(.semibold)
+                                    .truncationMode(.middle)
+                                    .lineLimit(1)
+                                
+                                Image("notionLogo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 18, height: 18)
+                                    .padding(.trailing)
+                            }
                         } else {
                             Rectangle()
                                 .cornerRadius(5)
@@ -66,10 +74,17 @@ struct ImportedNotes: View {
                         
                     case .openaiChatContent(let openaiChatTitle):
                         if !openaiChatTitle.content.isEmpty {
+                            
                             Text(openaiChatTitle.content)
                                 .fontWeight(.semibold)
                                 .truncationMode(.middle)
                                 .lineLimit(1)
+                            
+                            Image("openaiLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .padding(.trailing)
                         }
                     }
                     Spacer()
@@ -97,6 +112,7 @@ struct ImportedNotes: View {
                                     .font(.system(size: 16)).lineSpacing(5)
                                     .listRowBackground(Color.mmBackground)
                                     .listRowSeparator(.hidden)
+                                    .multilineTextAlignment(.leading)
                                     .padding(.bottom)
                             }
                             .listStyle(.plain)
@@ -104,7 +120,7 @@ struct ImportedNotes: View {
                         bottomBlur
                         
                     case .openaiChatContent(let openaiChatContent):
-                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).filter{ !$0.isEmpty }
+                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).filter { !$0.isEmpty }
                         if chatLines.isEmpty {
                             VStack(spacing: -10) {
                                 ForEach(0..<13) { _ in
@@ -114,10 +130,12 @@ struct ImportedNotes: View {
                         } else {
                             List(chatLines, id: \.self) { line in
                                 Text(line)
-                                    .font(.system(size: 16)).lineSpacing(5)
+                                    .font(.system(size: 16))
                                     .listRowBackground(Color.mmBackground)
                                     .listRowSeparator(.hidden)
                                     .padding(.bottom)
+                                    .multilineTextAlignment(.leading)
+                                    .listRowInsets(EdgeInsets(top: 1, leading: 10, bottom: 10, trailing: 10))
                             }
                             .listStyle(.plain)
                         }

@@ -80,11 +80,19 @@ struct NotionImportPageView: View {
                                 .padding(.bottom)
                         }.padding(.horizontal)
                         
-                        Text("Import page")
-                            .foregroundStyle(Color.checkmark)
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .padding(.bottom)
+                        HStack(alignment: .center, spacing: 10) {
+                            Image("notionlogoReversed")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .padding(.bottom)
+                            
+                            Text("Import page")
+                                .foregroundStyle(Color.checkmark)
+                                .fontWeight(.medium)
+                                .font(.system(size: 16))
+                                .padding(.bottom)
+                        }
                     }
                 }.frame(maxHeight: 165)
                     .padding()
