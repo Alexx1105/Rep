@@ -27,95 +27,115 @@ struct ImportedNotes: View {
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
     @State var pageBlocks: [UserPageContent] = []
-    
-    @MainActor
-    func fetchPageContent(context: ModelContext) throws -> [UserPageContent] {
-        
-        let descriptor = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == pageID }, sortBy: [SortDescriptor(\.id, order: .forward)])
-        let result = try context.fetch(descriptor)
-        
-        guard !result.isEmpty else { throw ErrorDefinition.emptyContent }
-        return result
-    }
+    let titleSource: CombinedDataSource
     
     private var bottomBlur: some View {
         LinearGradient(gradient: Gradient(colors: [Color.mmBackground.opacity(0),
-                                                   Color.mmBackground.opacity(0.6), Color.mmBackground]),startPoint: .top, endPoint: .bottom
-        )
+                                                   Color.mmBackground.opacity(0.6),
+                                                   Color.mmBackground]),startPoint: .top, endPoint: .bottom)
         .frame(height: 80)
         .allowsHitTesting(false)
     }
     
     var body: some View {
-        
-        
         NavigationView {
             
             VStack {
                 HStack(spacing: 7) {
-                    
                     Button {
                         dismissTab()
                     } label: {
                         Image(systemName: "arrow.backward").foregroundStyle(Color.mmDark.opacity(0.8)).padding(17)
                     }.glassEffect()
                     
-                    if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.text {
-                        Text("\(emojis ?? "")")
-                        Text("\(title ?? "")")
-                            .fontWeight(.semibold)
-                            .truncationMode(.middle)
-                            .lineLimit(1)
+                    switch titleSource {
                         
-                    } else {
-                        Rectangle()
-                            .cornerRadius(5)
-                            .frame(width: 150, height: 20)
-                            .opacity(0.1)
+                    case (.notionContent(_ )):
+                        if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.text {
+                            Text(emojis ?? "")
+                            Text(title ?? "")
+                                .fontWeight(.semibold)
+                                .truncationMode(.middle)
+                                .lineLimit(1)
+                        } else {
+                            Rectangle()
+                                .cornerRadius(5)
+                                .frame(width: 150, height: 20)
+                                .opacity(0.1)
+                        }
                         
+                    case .openaiChatContent(let openaiChatTitle):
+                        if !openaiChatTitle.content.isEmpty {
+                            Text(openaiChatTitle.content)
+                                .fontWeight(.semibold)
+                                .truncationMode(.middle)
+                                .lineLimit(1)
+                        }
                     }
                     Spacer()
-                    
                 }
-                .frame(maxWidth: 370)
+                .frame(maxWidth: .infinity)
+                .padding(.leading)
                 .padding(.top, 5)
                 
                 Spacer()
                 Divider()
                 
-                if pageBlocks.isEmpty {
-                    VStack(spacing: -10) {
-                        ForEach(0..<13) { i in
-                            SkeletonLoader()
-                        }
-                    }
-                } else {
-                    
-                    ZStack(alignment: .bottom) {
+                ZStack(alignment: .bottom) {
+                    switch titleSource {
                         
-                        List(pageBlocks, id: \.self) { block in
-                            
-                            Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
-                                .font(.system(size: 16)).lineSpacing(4)
-                                .listRowBackground(Color.mmBackground)
-                                .listRowSeparator(.hidden)
+                    case .notionContent(_ ):
+                        if pageBlocks.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            List(pageBlocks, id: \.self) { block in
+                                Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
+                                    .font(.system(size: 16)).lineSpacing(5)
+                                    .listRowBackground(Color.mmBackground)
+                                    .listRowSeparator(.hidden)
+                                    .padding(.bottom)
+                            }
+                            .listStyle(.plain)
                         }
-                        .listStyle(.plain)
                         bottomBlur
                         
+                    case .openaiChatContent(let openaiChatContent):
+                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).filter{ !$0.isEmpty }
+                        if chatLines.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            List(chatLines, id: \.self) { line in
+                                Text(line)
+                                    .font(.system(size: 16)).lineSpacing(5)
+                                    .listRowBackground(Color.mmBackground)
+                                    .listRowSeparator(.hidden)
+                                    .padding(.bottom)
+                            }
+                            .listStyle(.plain)
+                        }
+                        bottomBlur
                     }
-                    .fontWeight(.regular)
-                    .ignoresSafeArea(edges: .bottom)
                 }
+                .fontWeight(.medium)
+                .ignoresSafeArea(edges: .bottom)
+                
             }
             .background(Color.mmBackground)
         }
         .task {
             do {
-                pageBlocks = try fetchPageContent(context: context)
-                
+                pageBlocks = try ImportedNotesFetch.fetchPageContent(context: context, pageID: pageID)
+                print("content fetched... \(pageBlocks.count)")
             } catch {
-                print("function call failure: \(error.localizedDescription)")
+                print("function call failure ❗️:", ErrorDesc.callsiteError, error)
             }
         }
     }
@@ -124,7 +144,9 @@ struct ImportedNotes: View {
 
 
 #Preview {
-    ImportedNotes(pageID: "")
+    ImportedNotes(pageID: "", titleSource:
+    .openaiChatContent(OpenAIChat(content: "Preview chat content",
+                                 openaiId: "preview-id")))
 }
 
 

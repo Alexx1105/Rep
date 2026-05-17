@@ -120,7 +120,6 @@ struct MainMenuTab: View {
                     }
                     
                 } label: {
-                    
                     Image(systemName: "clock.arrow.2.circlepath")
                         .foregroundStyle(Color.mmDark)
                         .opacity(0.8)
@@ -128,10 +127,25 @@ struct MainMenuTab: View {
                         .padding(5)
                 }
                 
-                HStack {
+                HStack(spacing: 5) {
                     if let emoji: String = userPageTitle?.emoji {
                         Text(emoji)
                     }
+                    
+                    if openaiChatTitle?.content != nil {
+                        Image("openaiLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 25, height: 25)
+                        
+                        Text(openaiChatTitle?.content ?? "OpenAI Chat")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
+                    
                     Text(userPageTitle?.text ?? "")
                         .fontWeight(.medium)
                         .foregroundStyle(Color.mmDark)
@@ -160,7 +174,6 @@ struct SliderView: View {
         let symbolName: String
         let interval: DateComponents
     }
-    
     
     var sliderOptions: [SliderView.SliderOption]
     
@@ -629,8 +642,7 @@ struct ChatView: View {
                             .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium)
                             .listRowBackground(Color.mmBackground)
                             .lineLimit(nil)
-                            .opacity(textOpacity)
-                            .animation(.easeOut(duration: 0.50), value: response.text)
+                            .animation(.easeOut(duration: 0.53), value: response.text)
                             .transition(.opacity.combined(with: .blurReplace))
                     }
                     
@@ -685,6 +697,8 @@ struct ChatView: View {
                                     
                                 } label: {
                                     Label("GPT-5.4 mini", image: "openaiLogo")  //TODO: explain that its faster
+                                    .font(.system(size: 5))
+                                    .fixedSize(horizontal: false, vertical: true)
                                 }
                                 
 //                                Button {
@@ -862,7 +876,7 @@ struct MainMenuDataSourceList: View {
             
             if !pageTitle.text.isEmpty {
                 NavigationLink {
-                    ImportedNotes(pageID: pageTitle.pageID)
+                    ImportedNotes(pageID: pageTitle.pageID, titleSource: title)
                         .navigationBarBackButtonHidden(true)
                     
                 } label: {
@@ -888,7 +902,7 @@ struct MainMenuDataSourceList: View {
             
             if !chatTitle.content.isEmpty {
                 NavigationLink {
-                    ImportedNotes(pageID: chatTitle.content)
+                    ImportedNotes(pageID: chatTitle.content, titleSource: title)
                         .navigationBarBackButtonHidden(true)
                 } label: {
                     MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle)

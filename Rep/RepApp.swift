@@ -30,7 +30,9 @@ struct ContainerView: View {
                     case .logOut:
                         SignOutView()
                     case .importpageUser:
-                        ImportedNotes(pageID: "")
+                        ImportedNotes(pageID: "", titleSource:
+                                .openaiChatContent(OpenAIChat(content: "Preview chat content",
+                                                              openaiId: "preview-id")))
                     case .tos:
                         TOSPage()
                     }

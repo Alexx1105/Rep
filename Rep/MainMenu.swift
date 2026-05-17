@@ -141,7 +141,7 @@ struct MainMenu: View {
                     } else {
                         EmptyView()
                     }
-                    Text("Your notes from Notion:")
+                    Text("Your Notes:")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
                         .padding(.bottom)
@@ -218,7 +218,6 @@ struct MainMenu: View {
                     Spacer()
                     ForEach(mainMenuSources, id:\.id) { title in
                         HStack(spacing: 20) {
-                            
                             MainMenuDataSourceList(title: title)
                         }
                     }
