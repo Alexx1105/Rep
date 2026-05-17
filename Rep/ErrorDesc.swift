@@ -27,6 +27,7 @@ enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
     case serverError
     case responseError
     case fileProcessingError
+    case ssetextStreamEventError
 }
 
 enum ErrorDefinition: Error {

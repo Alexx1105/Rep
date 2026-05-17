@@ -12,6 +12,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import PhotosUI
 import UIKit
+import SwiftData
 
 
 final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {     ///FYI: acts a a bridge between SwiftUI & UIKit
@@ -51,29 +52,28 @@ public class Chat: ObservableObject {
         public var text: String
     }
     
-    
-    public static func sendChatMessage(userFile: URL?) {
+    @MainActor
+    public static func sendChatMessage(userFile: URL?, context: ModelContext) {
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
         print("sending chat: \(trimUserInput)")
         
         Chat.shared.chat = ""
+        let localId: String = UUID().uuidString
         
         Task {
             await MainActor.run {
-                shared.responseMessage.append(messageModel(id: UUID().uuidString, text: ""))
+                shared.responseMessage.append(messageModel(id: localId, text: ""))
             }
             
-            if let userFile {
-                print("sending selected file: \(userFile)")
-            }
+            if let userFile { print("sending selected file: \(userFile)") }
             
             var metadataText: String = ""
-            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, gptModel: "mini") { chunk in
+            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, gptModel: "mini", context: context) { chunk in
                 
                 Task {
                     await chatBufferInstance.append(chunk)
-                    let snapshot = await chatBufferInstance.chunkSnapshot()
+                    let snapshot: String = await chatBufferInstance.chunkSnapshot()
                     print("SNAPSHOT IN BUFFER: \(snapshot)")
                     
                     var formattedChunk: String
@@ -95,6 +95,19 @@ public class Chat: ObservableObject {
             onMeta: { meta in
                 metadataText = meta
                 print("metadata:", metadataText)
+            }
+            
+            let fullSnapahot: String = await chatBufferInstance.chunkSnapshot().trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
+            
+            do {
+                let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)
+                context.insert(cacheChat)
+                try context.save()
+                
+                print("chat session saved...")
+            } catch {
+                print("failed to persist chat session ❗️", ErrorDesc.persistenceError, error)
             }
         }
     }

@@ -51,7 +51,9 @@ struct MuscleMemoryApp: App {
         }
     }
     
-    let centralContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self, AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self, DeletedPage.self)
+    let centralContainer: ModelContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self,
+                                                                    AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self,
+                                                                    DeletedPage.self, OpenAIChat.self, OpenAIMeta.self)
     
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     

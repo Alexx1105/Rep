@@ -94,3 +94,25 @@ import SwiftUI
         self.hashed = hashed
     }
 }
+
+@Model final class OpenAIChat {
+    @Attribute(.unique) public var openaiId: String
+    var content: String
+    
+    init(content: String, openaiId: String) {
+        self.content = content
+        self.openaiId = openaiId
+    }
+}
+
+@Model final class OpenAIMeta {
+    @Attribute(.unique) public var id: String
+    var model: String
+    var status: String
+    
+    init(id: String, model: String, status: String) {
+        self.id = id
+        self.model = model
+        self.status = status
+    }
+}

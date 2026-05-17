@@ -94,7 +94,8 @@ struct MainMenuTab: View {
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
-    let userPageTitle: UserPageTitle
+    let userPageTitle: UserPageTitle?
+    let openaiChatTitle: OpenAIChat?
     
     var body: some View {
         
@@ -114,7 +115,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle.pageID)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? "")) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
@@ -128,10 +129,10 @@ struct MainMenuTab: View {
                 }
                 
                 HStack {
-                    if let emoji = userPageTitle.emoji {
+                    if let emoji: String = userPageTitle?.emoji {
                         Text(emoji)
                     }
-                    Text(userPageTitle.text)
+                    Text(userPageTitle?.text ?? "")
                         .fontWeight(.medium)
                         .foregroundStyle(Color.mmDark)
                         .lineLimit(1)
@@ -565,7 +566,8 @@ struct ToastNotification: View {
 }
 
 #Preview {
-    MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄")) ///page tab
+    MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄"),
+                                     openaiChatTitle: OpenAIChat(content: "", openaiId: ""))   ///page tab
 }
 
 
@@ -613,6 +615,7 @@ struct ChatView: View {
     @State var fileUrls: [URL] = []
     @State public var isNewChat: Bool = false
     @State var isGenerating: Bool = false
+    @Environment(\.modelContext) private var context
     
     var body: some View {
         ZStack {
@@ -721,7 +724,7 @@ struct ChatView: View {
                         .padding(.horizontal)
                         .fontWeight(.medium)
                         .onSubmit {
-                            Chat.sendChatMessage(userFile: fileUrls.first)
+                            Chat.sendChatMessage(userFile: fileUrls.first, context: context)
                             fileUrls.removeAll()
                         }
                     
@@ -794,7 +797,7 @@ struct ChatView: View {
                         Spacer()
                         Button {
                             if let file = fileUrls.first {
-                                Chat.sendChatMessage(userFile: file)
+                                Chat.sendChatMessage(userFile: file, context: context)
                             }
                         } label: {
                             ZStack {
@@ -828,6 +831,70 @@ struct ChatView: View {
                 
             }
         } //.photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, maxSelectionCount: 10, matching: .images)
+    }
+}
+
+struct MainMenuDataSourceList: View {
+    @Environment(\.modelContext) var context
+    @State private var tabSlideOver = false
+    @State private var deleteMultipleTabs = Set<String>()
+    @State private var selectedCheckBox = false
+
+    
+    let title: CombinedDataSource
+    var body: some View {
+        
+        switch title {
+        case .notionContent(let pageTitle):
+            if tabSlideOver {
+                Button {
+                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
+                    if deleteMultipleTabs.contains(pageTitle.pageID) {
+                        deleteMultipleTabs.remove(pageTitle.pageID)
+                    } else {
+                        deleteMultipleTabs.insert(pageTitle.pageID)
+                    }
+                    
+                } label: {
+                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
+                }
+            }
+            
+            if !pageTitle.text.isEmpty {
+                NavigationLink {
+                    ImportedNotes(pageID: pageTitle.pageID)
+                        .navigationBarBackButtonHidden(true)
+                    
+                } label: {
+                    MainMenuTab(userPageTitle: pageTitle, openaiChatTitle: nil)
+                }
+                .allowsHitTesting(!tabSlideOver)
+            }
+            
+        case .openaiChatContent(let chatTitle):
+            if tabSlideOver {
+                Button {
+                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
+                    if deleteMultipleTabs.contains(chatTitle.openaiId) {
+                        deleteMultipleTabs.remove(chatTitle.openaiId)
+                    } else {
+                        deleteMultipleTabs.insert(chatTitle.openaiId)
+                    }
+                    
+                } label: {
+                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(chatTitle.openaiId))
+                }
+            }
+            
+            if !chatTitle.content.isEmpty {
+                NavigationLink {
+                    ImportedNotes(pageID: chatTitle.content)
+                        .navigationBarBackButtonHidden(true)
+                } label: {
+                    MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle)
+                }.allowsHitTesting(!tabSlideOver)
+            }
+        }
     }
 }
 
