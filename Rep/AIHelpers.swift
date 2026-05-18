@@ -67,7 +67,6 @@ public class Chat: ObservableObject {
             }
             
             if let userFile { print("sending selected file: \(userFile)") }
-            
             var metadataText: String = ""
             try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, gptModel: "mini", context: context) { chunk in
                 

@@ -638,6 +638,8 @@ struct ChatView: View {
     @State public var isNewChat: Bool = false
     @State var isGenerating: Bool = false
     @Environment(\.modelContext) private var context
+    @FocusState private var isChatFocused: Bool
+    @State private var keyboardHeight: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -645,7 +647,7 @@ struct ChatView: View {
             ScrollView {
                 VStack() {
                     Spacer(minLength: 65)
-            
+                    
                     ForEach(Chat.shared.responseMessage, id: \.id) { response in
                         Text(response.text)
                             .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium)
@@ -655,10 +657,9 @@ struct ChatView: View {
                             .transition(.opacity.combined(with: .blurReplace))
                     }
                     
+                    Spacer(minLength: 135)
                 }.frame(maxWidth: .infinity)
                     .padding(.horizontal)
-                
-                Spacer(minLength: 135)
             }.frame(maxWidth: .infinity, alignment: .leading)
             
             
@@ -680,7 +681,6 @@ struct ChatView: View {
             
             VStack {
                 HStack(alignment: .top) {
-                    
                     Button {
                         withAnimation { closeChatSheet() }
                     } label: {
@@ -706,15 +706,15 @@ struct ChatView: View {
                                     
                                 } label: {
                                     Label("GPT-5.4 mini", image: "openaiLogo")  //TODO: explain that its faster
-                                    .font(.system(size: 5))
-                                    .fixedSize(horizontal: false, vertical: true)
+                                        .font(.system(size: 5))
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                                 
-//                                Button {
-//                                    
-//                                } label: {
-//                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed, will add support for this model later
-//                                }
+                                //                                Button {
+                                //
+                                //                                } label: {
+                                //                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed, will add support for this model later
+                                //                                }
                                 
                             } label: {
                                 Image(systemName: "ellipsis")
@@ -725,7 +725,7 @@ struct ChatView: View {
                             Button {
                                 isNewChat = true
                                 Chat.shared.responseMessage.removeAll()
-                               
+                                
                             } label: {
                                 Image(systemName: "pencil.line")
                                     .font(.system(size: 20))
@@ -738,10 +738,12 @@ struct ChatView: View {
                 }.padding(.top)
                     .padding(.horizontal)
                 
-                
                 Spacer(minLength: 60)
                 VStack(alignment: .leading, spacing: 20) {
                     TextField(messagePlaceholder, text: $chatState.chat, axis: .vertical)
+                        .focused($isChatFocused)
+                        .offset(y: -keyboardHeight)
+                        .animation(.easeOut(duration: 0.25), value: isChatFocused)
                         .lineLimit(1...10)
                         .autocorrectionDisabled(true)
                         .padding(.horizontal)
@@ -758,7 +760,6 @@ struct ChatView: View {
                                 .glassEffect(.regular)
                             
                             HStack(spacing: 5) {
-                                
                                 Text(file.lastPathComponent).font(Font.system(size: 12))
                                     .fontWeight(.semibold)
                                     .fontDesign(.rounded)
@@ -771,33 +772,31 @@ struct ChatView: View {
                                 }
                             }.padding(6)
                         }.fixedSize()
-                    }
-                    
-                    
+                    }.offset(y: -keyboardHeight)
                     
                     HStack(alignment: .bottom) {
                         Menu {
-//                            Button {
-//                                
-//                            } label: {
-//                                Label("Take Photo", systemImage: "camera.fill")
-//                            }
-//                            Button {
-//                                showPhotoPicker = true
-//                            } label: {
-//                                Label("Upload Photo", systemImage: "photo")
-//                            }.onChange(of: selectedPhoto) {_, newValueItem in
-//                                //do {
-//                                Task {
-//                                    for item in newValueItem {
-//                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
-//                                        let _ = UIImage(data: rawImageData ?? Data())
-//                                    }
-//                                }
-//                                //                                } catch {
-//                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
-//                                //                                }
-//                            }
+                            //                            Button {
+                            //
+                            //                            } label: {
+                            //                                Label("Take Photo", systemImage: "camera.fill")
+                            //                            }
+                            //                            Button {
+                            //                                showPhotoPicker = true
+                            //                            } label: {
+                            //                                Label("Upload Photo", systemImage: "photo")
+                            //                            }.onChange(of: selectedPhoto) {_, newValueItem in
+                            //                                //do {
+                            //                                Task {
+                            //                                    for item in newValueItem {
+                            //                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
+                            //                                        let _ = UIImage(data: rawImageData ?? Data())
+                            //                                    }
+                            //                                }
+                            //                                //                                } catch {
+                            //                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
+                            //                                //                                }
+                            //                            }
                             
                             Button {
                                 showFilePicker = true
@@ -819,9 +818,8 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
-                            if let file = fileUrls.first {
-                                Chat.sendChatMessage(userFile: file, context: context)
-                            }
+                            Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            fileUrls.removeAll()
                         } label: {
                             ZStack {
                                 Circle().fill(Color.mmDark)
@@ -831,31 +829,38 @@ struct ChatView: View {
                                 
                             }
                         }.padding(.trailing)
-                    }
+                        
+                    }.offset(y: -keyboardHeight)
                 }.padding(.leading)
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 30))
+                        .offset(y: -keyboardHeight)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal))
                     .padding(.bottom)
+                
             }
-        }.sheet(isPresented: $showCameraPicker) {
-            CameraPicker(onImagePicked: { image in
-                imageCaptured = image
-                showCameraPicker = false
-            },
-                         onCancel: {
-                showCameraPicker = false
-            }
-            )
         }.sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
                 
             }
-        } //.photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, maxSelectionCount: 10, matching: .images)
+        }.onReceive(NotificationCenter.default.publisher(
+            for: UIResponder.keyboardWillShowNotification
+        )) { note in
+            
+            if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                keyboardHeight = frame.height + 5
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(
+            for: UIResponder.keyboardWillHideNotification
+        )) { _ in
+            keyboardHeight = 0
+        }
     }
 }
+
 
 struct MainMenuDataSourceList: View {         ///conditionally renders the list in ImportedNotes.swift based on data source. notion, openai etc
     @Environment(\.modelContext) var context
