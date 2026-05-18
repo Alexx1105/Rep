@@ -97,6 +97,8 @@ struct MainMenuTab: View {
     let userPageTitle: UserPageTitle?
     let openaiChatTitle: OpenAIChat?
     
+    let dataSource: CombinedDataSource
+    
     var body: some View {
         
         ZStack(alignment: .center) {
@@ -115,7 +117,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? "")) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? "", dataSource: dataSource)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
@@ -587,7 +589,7 @@ struct ToastNotification: View {
 
 #Preview {
     MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄"),
-                                     openaiChatTitle: OpenAIChat(content: "", openaiId: ""))   ///page tab
+                openaiChatTitle: OpenAIChat(content: "", openaiId: ""), dataSource: .notionContent(UserPageTitle(pageID: "", text: "")))   ///page tab
 }
 
 
@@ -860,7 +862,7 @@ struct MainMenuDataSourceList: View {
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
-
+    
     
     let title: CombinedDataSource
     var body: some View {
@@ -887,7 +889,7 @@ struct MainMenuDataSourceList: View {
                         .navigationBarBackButtonHidden(true)
                     
                 } label: {
-                    MainMenuTab(userPageTitle: pageTitle, openaiChatTitle: nil)
+                    MainMenuTab(userPageTitle: pageTitle, openaiChatTitle: nil, dataSource: title)
                 }
                 .allowsHitTesting(!tabSlideOver)
             }
@@ -912,7 +914,7 @@ struct MainMenuDataSourceList: View {
                     ImportedNotes(pageID: chatTitle.content, titleSource: title)
                         .navigationBarBackButtonHidden(true)
                 } label: {
-                    MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle)
+                    MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle, dataSource: title)
                 }.allowsHitTesting(!tabSlideOver)
             }
         }

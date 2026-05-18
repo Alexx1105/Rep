@@ -63,7 +63,7 @@ struct MainMenu: View {
             print("sync task stopped successfully ⏹️")
         }
     }
-
+    
     @State private var taskController: TaskController?
     
     var mainMenuSources: [CombinedDataSource] {
@@ -71,7 +71,7 @@ struct MainMenu: View {
     }
     
     var body: some View {
-    
+        
         VStack {
             HStack {
                 Rectangle()
@@ -82,7 +82,7 @@ struct MainMenu: View {
                 
                 
                 VStack(spacing: 3) {
-                    Text("Workspace email")
+                    Text("Notion Workspace Email")
                         .fontWeight(.regular)
                         .font(.system(size: 14))
                         .opacity(textOpacity)

@@ -159,10 +159,11 @@ struct DynamicRepControlsView: View {
     @AppStorage var storeSelectedOption: Int
     @AppStorage var storeSelectedHyperModeOption: Int
     
-    init(pageID: String) {
+    init(pageID: String, dataSource: CombinedDataSource) {
         self.pageID = pageID
         self._storeSelectedOption = AppStorage(wrappedValue: 0, "intervalOption_\(pageID)")
         self._storeSelectedHyperModeOption = AppStorage(wrappedValue: 0, "intervalHyperOption_\(pageID)")
+        self.dataSource = dataSource
     }
     
     @AppStorage("disableOption") var storeDisableOption: Int = 0
@@ -180,6 +181,7 @@ struct DynamicRepControlsView: View {
         return pageTitle.first(where: { $0.pageID == pageID})?.pageID ?? ""
     }
     
+    let dataSource: CombinedDataSource
     
     var body: some View {
         VStack(spacing: 50) {
@@ -199,26 +201,37 @@ struct DynamicRepControlsView: View {
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
                     
-                    
-                    Text(filterTitle)
-                        .font(.system(size: 14))
-                        .fontWeight(.regular)
-                        .truncationMode(.tail)
-                        .lineLimit(1)
-                        .padding()
-                    
-                        .background(Capsule()
-                            .frame(height: 25)
-                            .glassEffect(.regular))
-                     
-                    
+                    switch dataSource {
+                    case .notionContent(_ ):
+                        Text(filterTitle)
+                            .font(.system(size: 14))
+                            .fontWeight(.regular)
+                            .truncationMode(.tail)
+                            .lineLimit(1)
+                            .padding()
+                        
+                            .background(Capsule()
+                                .frame(height: 25)
+                                .glassEffect(.regular))
+                        
+                    case .openaiChatContent(let openAIChat):
+                        Text(openAIChat.content)
+                            .font(.system(size: 14))
+                            .fontWeight(.regular)
+                            .truncationMode(.tail)
+                            .lineLimit(1)
+                            .padding()
+                        
+                            .background(Capsule()
+                                .frame(height: 25)
+                                .glassEffect(.regular))
+                    }
                 }
             }.frame(maxWidth: .infinity)
-             .padding(.horizontal)
+                .padding(.horizontal)
             
-             .padding(.top)
+                .padding(.top)
             VStack(spacing: 10) {
-                
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5){
                         Text("Frequency")
@@ -237,7 +250,6 @@ struct DynamicRepControlsView: View {
                 ZStack(alignment: .top) {
                     
                     if hyperToggleEnabled {
-                        
                         SliderView(sliderOptions: hyperModeOptions, initialSelectedOption: storeSelectedHyperModeOption) { hyperOption in
                             switch hyperOption {
                             case 0:
@@ -276,7 +288,6 @@ struct DynamicRepControlsView: View {
                         print("hyper mode toggled in controls view: \(newValue)")
                     }
                 
-                
                     .padding(.horizontal, 10)
                     .onChange(of: hyperToggleEnabled) { runSliderOperation() }
                     .onChange(of: storeSelectedOption) { runSliderOperation() }    ///defualt mode selected
@@ -289,7 +300,7 @@ struct DynamicRepControlsView: View {
                             .font(.system(size: 14))
                             .opacity(textOpacity)
                             .frame(maxWidth: .infinity)
-                           
+                        
                     }
                 }.padding(.horizontal, -8)
                 
@@ -297,7 +308,7 @@ struct DynamicRepControlsView: View {
                     .padding(.top)
                 
             }.frame(alignment: .center)
-             .padding(.top)
+                .padding(.top)
             
             Spacer()
         }
@@ -310,6 +321,6 @@ struct DynamicRepControlsView: View {
 
 
 #Preview {
-    DynamicRepControlsView(pageID: "")
+    DynamicRepControlsView(pageID: "", dataSource: .notionContent(UserPageTitle(pageID: "", text: "")))
 }
 
