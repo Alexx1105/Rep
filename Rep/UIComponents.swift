@@ -857,7 +857,7 @@ struct ChatView: View {
     }
 }
 
-struct MainMenuDataSourceList: View {
+struct MainMenuDataSourceList: View {         ///conditionally renders the list in ImportedNotes.swift based on data source. notion, openai etc
     @Environment(\.modelContext) var context
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
