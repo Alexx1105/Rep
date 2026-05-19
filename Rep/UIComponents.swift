@@ -640,6 +640,9 @@ struct ChatView: View {
     @Environment(\.modelContext) private var context
     @FocusState private var isChatFocused: Bool
     @State private var keyboardHeight: CGFloat = 0
+    @State private var isCircleVisible: Bool = false
+    @State private var isCirclePulsing: Bool = false
+    
     
     var body: some View {
         ZStack {
@@ -648,9 +651,37 @@ struct ChatView: View {
                 VStack() {
                     Spacer(minLength: 65)
                     
+                    if isCircleVisible {
+                        HStack(alignment: .top, spacing: 10) {
+                            Circle().frame(width: 18, height: 18, alignment: .leading)
+                                .opacity(textOpacity)
+                                .scaleEffect(isCirclePulsing ? 1.0 : 0.5)
+                                .scaleEffect(isCirclePulsing ? 1.0 : 0.2)
+                            
+                            Text("Generating...").opacity(textOpacity)
+                                .opacity(isCirclePulsing ? 0.5 : 0.2)
+                                .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: isCirclePulsing)
+                                .onAppear { isCirclePulsing = true  }
+                                .fontDesign(.rounded)
+                                .fontWeight(.medium)
+                                .padding(.bottom)
+                            
+                            Spacer()
+                            
+                        }.padding(.top)
+                            .padding(.leading)
+                            .onAppear {
+                                withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
+                                    isCirclePulsing = true
+                                }
+                            }
+                        }
+                    
                     ForEach(Chat.shared.responseMessage, id: \.id) { response in
                         Text(response.text)
-                            .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading)
+                            .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
                             .listRowBackground(Color.mmBackground)
                             .lineLimit(nil)
                             .animation(.easeOut(duration: 0.53), value: response.text)
@@ -750,7 +781,15 @@ struct ChatView: View {
                         .fontWeight(.medium)
                         .onSubmit {
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            isCircleVisible = true
+                            isCirclePulsing = true
                             fileUrls.removeAll()
+                            
+                        }.onChange(of: Chat.shared.responseMessage.last?.text) { _, newValue in
+                            if let presentText = newValue, !presentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                isCircleVisible = false
+                                isCirclePulsing = false
+                            }
                         }
                     
                     ForEach(fileUrls, id: \.self) { file in
@@ -818,6 +857,8 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
+                            isCircleVisible = true
+                            isCirclePulsing = true
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context)
                             fileUrls.removeAll()
                         } label: {
