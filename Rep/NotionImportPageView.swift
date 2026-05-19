@@ -86,6 +86,7 @@ struct NotionImportPageView: View {
                                 .scaledToFit()
                                 .frame(width: 18, height: 18)
                                 .padding(.bottom)
+                                .opacity(textOpacity)
                             
                             Text("Import page")
                                 .foregroundStyle(Color.checkmark)

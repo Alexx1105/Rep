@@ -64,6 +64,7 @@ struct ImportedNotes: View {
                                     .scaledToFit()
                                     .frame(width: 18, height: 18)
                                     .padding(.trailing)
+                                    .opacity(textOpacity)
                             }
                         } else {
                             Rectangle()
@@ -85,6 +86,7 @@ struct ImportedNotes: View {
                                 .scaledToFit()
                                 .frame(width: 25, height: 25)
                                 .padding(.trailing)
+                                .opacity(textOpacity)
                         }
                     }
                     Spacer()

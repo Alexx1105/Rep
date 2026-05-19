@@ -139,6 +139,7 @@ struct MainMenuTab: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 25, height: 25)
+                            .opacity(textOpacity)
                         
                         Text(openaiChatTitle?.content ?? "OpenAI Chat")
                             .fontWeight(.medium)
@@ -153,6 +154,7 @@ struct MainMenuTab: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 18, height: 18)
+                            .opacity(textOpacity)
                         
                         Text(userPageTitle?.text ?? "")
                             .fontWeight(.medium)
