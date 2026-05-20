@@ -144,7 +144,7 @@ struct MainMenu: View {
                     Text("Your Notes:")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
-                        .padding(.bottom)
+                        
                 }
                 Spacer()
                 Menu {
@@ -152,7 +152,9 @@ struct MainMenu: View {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) { tabSlideOver = true }
                     } label: {
                         Label("Select tab/s", systemImage: "checkmark.circle")
-                    }; Button {
+                    }
+                    
+                    Button {
                         deleteMultipleTabs.removeAll()
                         tabSlideOver = false
                     } label: {
@@ -166,6 +168,7 @@ struct MainMenu: View {
                         do {
                             try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
+                            try context.delete(model: OpenAIChat.self, where: #Predicate{deleteTabIDs.contains($0.openaiId)})
                             
                             let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
                             for i in try context.fetch(fetchDesc) {
@@ -208,7 +211,7 @@ struct MainMenu: View {
                 }
                 
             }
-            .frame(maxWidth: .infinity, maxHeight: 100 )
+            .frame(maxWidth: .infinity, maxHeight: 95 )
             .padding(.horizontal)
             Spacer()
             
@@ -218,10 +221,10 @@ struct MainMenu: View {
                     Spacer()
                     ForEach(mainMenuSources, id:\.id) { title in
                         HStack(spacing: 20) {
-                            MainMenuDataSourceList(title: title)
+                            MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
                         }
                     }
-                }
+                }.frame(maxHeight: .infinity)
                 .padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))

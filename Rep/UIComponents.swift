@@ -655,29 +655,28 @@ struct ChatView: View {
                     
                     if isCircleVisible {
                         HStack(alignment: .top, spacing: 10) {
-                            Circle().frame(width: 18, height: 18, alignment: .leading)
-                                .opacity(textOpacity)
-                                .scaleEffect(isCirclePulsing ? 1.0 : 0.5)
-                                .scaleEffect(isCirclePulsing ? 1.0 : 0.2)
-                            
-                            Text("Generating...").opacity(textOpacity)
-                                .opacity(isCirclePulsing ? 0.5 : 0.2)
-                                .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: isCirclePulsing)
-                                .onAppear { isCirclePulsing = true  }
+                            Circle()
+                                .frame(width: 18, height: 18)
+                                .opacity(isCirclePulsing ? 1.0 : 0.25)
+                                .scaleEffect(isCirclePulsing ? 1.0 : 0.3)
+
+                            Text("Generating...")
+                                .opacity(isCirclePulsing ? 0.8 : 0.25)
                                 .fontDesign(.rounded)
                                 .fontWeight(.medium)
-                                .padding(.bottom)
-                            
+
                             Spacer()
-                            
-                        }.padding(.top)
-                            .padding(.leading)
-                            .onAppear {
-                                withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
-                                    isCirclePulsing = true
-                                }
-                            }
                         }
+                        .padding(.top)
+                        .padding(.leading)
+                        .animation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true), value: isCirclePulsing)
+                        .onAppear {
+                            isCirclePulsing = true
+                        }
+                        .onDisappear {
+                            isCirclePulsing = false
+                        }
+                    }
                     
                     ForEach(Chat.shared.responseMessage, id: \.id) { response in
                         Text(response.text)
@@ -907,10 +906,9 @@ struct ChatView: View {
 
 struct MainMenuDataSourceList: View {         ///conditionally renders the list in ImportedNotes.swift based on data source. notion, openai etc
     @Environment(\.modelContext) var context
-    @State private var tabSlideOver = false
-    @State private var deleteMultipleTabs = Set<String>()
+    @Binding var tabSlideOver: Bool
+    @Binding var deleteMultipleTabs: Set<String>
     @State private var selectedCheckBox = false
-    
     
     let title: CombinedDataSource
     var body: some View {
