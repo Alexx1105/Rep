@@ -11,7 +11,9 @@ import Supabase
 import SwiftData
 
 
+@MainActor
 public final class AIRequestManager: ObservableObject {
+    @Published public private(set) var isNotesGenerated: Bool = false
     public static let shared = AIRequestManager()
     private init() {}
     
@@ -98,6 +100,7 @@ public final class AIRequestManager: ObservableObject {
             print("failed to decode request from supabase", ErrorDesc.decodeError, error)
             throw ErrorDesc.decodeError
         }
+        self.isNotesGenerated = true
     }
     
     
@@ -118,7 +121,7 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func extractChatContent(extractedContent: String) throws -> String {      
+    public func extractChatContent(extractedContent: String) throws -> String {
         do {
             let data: Data = Data(extractedContent.utf8)
             let decodeParentResponse = JSONDecoder()
@@ -135,6 +138,7 @@ public final class AIRequestManager: ObservableObject {
         }
     }
 }
+
 
 
 

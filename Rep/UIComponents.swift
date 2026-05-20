@@ -33,7 +33,9 @@ public final class Toast: ObservableObject {
 
 struct RootTabs: View {
     @State private var showImportToast: Bool = false
-    @StateObject private var toastManager = NotionDataManager.shared
+    @State private var showGeneratedChat: Bool = false
+    @StateObject private var importManager = NotionDataManager.shared
+    @StateObject private var chatGenerationManager = AIRequestManager.shared
     
     var body: some View {
         NavigationStack {
@@ -53,9 +55,19 @@ struct RootTabs: View {
                     .background(Color.clear)
                 
                     .overlay(alignment: .top) {
-                        if showImportToast {
+                        if showImportToast {                                ///for notion imports
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 ToastNotification()
+                                    .transition(.move(edge: .top).combined(with: .blurReplace))
+                                    .allowsHitTesting(false)
+                                    .fixedSize(horizontal: false, vertical: false)
+                                    .ignoresSafeArea(edges: .top).padding(.top, 1)
+                            }
+                        }
+                        
+                        if showGeneratedChat {                              /// for AI generated notes
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                ChatDialogToast()
                                     .transition(.move(edge: .top).combined(with: .blurReplace))
                                     .allowsHitTesting(false)
                                     .fixedSize(horizontal: false, vertical: false)
@@ -66,10 +78,17 @@ struct RootTabs: View {
             }
         }
         
-        .task(id: toastManager.isPageImportedNotification) {
+        .task(id: importManager.isPageImportedNotification) {
             Task { @MainActor in
-                guard self.toastManager.isPageImportedNotification else { return }
+                guard self.importManager.isPageImportedNotification else { return }
                 await Toast.shared.callToastOnPageLoad($showImportToast)
+            }
+        }
+        
+        .task(id: chatGenerationManager.isNotesGenerated) {
+            Task { @MainActor in
+                guard self.chatGenerationManager.isNotesGenerated else { return }
+                await Toast.shared.callToastOnPageLoad($showGeneratedChat)
             }
         }
     }
@@ -573,6 +592,38 @@ struct ToastNotification: View {
                         .padding(.leading)
                     
                     Text("Close Out The Import Dialog")
+                        .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
+                        .padding(.leading)
+                }
+                
+                ZStack {
+                    Circle()
+                        .frame(maxWidth: 35, maxHeight: 35)
+                        .foregroundStyle(Color.intervalBlue)
+                    
+                    Image(systemName: "checkmark.circle").font(.system(size: 17)).foregroundStyle(Color.kimchiLabs)
+                }
+            }
+        }
+    }
+}
+
+struct ChatDialogToast: View {
+    var body: some View {
+        
+        ZStack {
+            Capsule()
+                .frame(maxWidth: 248, maxHeight: 43)
+                .glassEffect(.regular)
+            
+            HStack(alignment: .center, spacing: 15) {
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Notes Successfully Generated")
+                        .font(Font.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(Color.mmDark)
+                        .padding(.leading)
+                    
+                    Text("Close Out The Chat Dialog")
                         .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
                         .padding(.leading)
                 }
