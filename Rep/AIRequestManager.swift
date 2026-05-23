@@ -45,7 +45,7 @@ public final class AIRequestManager: ObservableObject {
         return fileBody
     }
     
-  
+    
     public func openAIRequest(userMessage: String, userFileUrl: URL?, gptModel: String = "mini", context: ModelContext, onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
@@ -121,11 +121,12 @@ public final class AIRequestManager: ObservableObject {
     
     
     public func extractChatContent(extractedContent: String) throws -> String {
+        
         do {
             let data: Data = Data(extractedContent.utf8)
             let decodeParentResponse = JSONDecoder()
             let decodedTitlesAndBullets = try decodeParentResponse.decode(DecodedParentResponse.self, from: data)
-        
+            
             let formatContent: String = decodedTitlesAndBullets.sections.map { line in
                 "\(line.title)\n" + line.bullets.map {" • \($0) "}.joined(separator: "\n") }.joined(separator: "\n")
             
@@ -138,9 +139,24 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    //TODO: iterate via chat JSON rows and call SupbaseClientManager class + new function, follow the pattern used in NotionDataManager!
+    public func upsertChatContent(fullSnapshot: String, openaiID: String, title: String) async throws {
+        
+        do {
+            guard !fullSnapshot.isEmpty && !openaiID.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
+            let chunks: [String] = fullSnapshot.components(separatedBy: .newlines)
+            
+            for chunk in chunks {
+                let content: String = chunk.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !content.isEmpty else { continue }
+                
+                await SupabaseClientManager.shared.supabaseOpenaiChatUpsert(openaiID: openaiID, title: title, content: content)
+                print("==========================\neach chunk: \(chunk)")
+            }
+             //TODO: TEST TEST TEST!
+            print("openai chat successfully upserted into supabase ✅")
+        } catch {
+            print("openai chat did not get upserted into supabase ❗️", ErrorDesc.persistenceError, error)
+        }
+    }
 }
-
-
-
 

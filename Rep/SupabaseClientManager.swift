@@ -54,7 +54,7 @@ public final class SupabaseClientManager: ObservableObject {
     
     
     @MainActor
-    public static func supabaseOpenaiChatUpsert(openaiID: String, title: String, content: String) async {
+    public func supabaseOpenaiChatUpsert(openaiID: String, title: String, content: String) async {
         
         do {
             guard !openaiID.isEmpty && !title.isEmpty && !content.isEmpty else { throw SupabaseError.nilDataError }

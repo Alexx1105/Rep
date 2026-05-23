@@ -5,7 +5,7 @@
 //  Created by alex haidar on 4/20/26.
 //
 /* helper functions, methods, and classes for the AI Chat view
-   and voice transcription and accessing system level APIs/view controllers for the front-end here */
+ and voice transcription and accessing system level APIs/view controllers for the front-end here */
 
 import Foundation
 import SwiftUI
@@ -103,6 +103,12 @@ public class Chat: ObservableObject {
                 let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)
                 context.insert(cacheChat)
                 try context.save()
+                
+                let title: String = String(fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines).prefix(20))
+                let trimmedText: String = fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                guard !title.isEmpty && !trimmedText.isEmpty else { throw ErrorDesc.nilValue }
+                try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: localId, title: title)
                 
                 print("chat session saved...")
             } catch {
