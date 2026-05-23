@@ -23,12 +23,14 @@ public struct PushToSupabaseNotion: Encodable {
 
 
 public struct PushToSupabaseOpenAi: Encodable {
+    let token: String
     let openaiID: String
     let title: String
     let content: String
     let contentHash: String
     
     enum CodingKeys: String, CodingKey {
+        case token = "token"
         case openaiID = "page_id"
         case content = "page_data"
         case title = "page_title"
@@ -56,19 +58,19 @@ public final class SupabaseClientManager: ObservableObject {
     }
     
     
-    public func supabaseOpenaiChatUpsert(openaiID: String, title: String, content: String) async {
+    public func supabaseOpenaiChatUpsert(openaiID: String, title: String, content: String, token: String) async {
         
-        let hash: Data = content.data(using: .utf8)!
+        let hash: Data = Data(content.utf8)
         let hashed = SHA256.hash(data: hash).map { String(format: "%02x", $0) }.joined()
         print("generated local hash:", hashed)
         
         do {
-            guard !openaiID.isEmpty && !title.isEmpty && !content.isEmpty else { throw SupabaseError.nilDataError }
+            guard !openaiID.isEmpty && !title.isEmpty && !content.isEmpty && !token.isEmpty else { throw SupabaseError.nilDataError }
             
-            let schema: PushToSupabaseOpenAi = PushToSupabaseOpenAi(openaiID: openaiID, title: title, content: content, contentHash: hashed)
-            let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("page_id, page_data, page_title").execute()
+            let schema: PushToSupabaseOpenAi = PushToSupabaseOpenAi(token: token, openaiID: openaiID, title: title, content: content, contentHash: hashed)
+            let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
             
-            print("page data successfully inserted ✅:", send)
+            print("==========\npage data successfully inserted ✅:", send)
         } catch {
             print("[openai chat] supabse insertion errror ❗️", SupabaseError.upsertError, error)
         }

@@ -142,14 +142,15 @@ public final class AIRequestManager: ObservableObject {
     public func upsertChatContent(fullSnapshot: String, openaiID: String, title: String) async throws {
         
         do {
-            guard !fullSnapshot.isEmpty && !openaiID.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
+            let token: String = await PushTokenManager.generatePushToken()
+            guard !fullSnapshot.isEmpty && !openaiID.isEmpty && !title.isEmpty && !token.isEmpty else { throw ErrorDesc.nilValue }
             let chunks: [String] = fullSnapshot.components(separatedBy: .newlines)
             
             for chunk in chunks {
                 let content: String = chunk.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !content.isEmpty else { continue }
                 
-                await SupabaseClientManager.shared.supabaseOpenaiChatUpsert(openaiID: openaiID, title: title, content: content)
+                await SupabaseClientManager.shared.supabaseOpenaiChatUpsert(openaiID: openaiID, title: title, content: content, token: token)
                 print("==========================\neach chunk: \(chunk)")
             }
             
