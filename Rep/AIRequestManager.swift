@@ -133,7 +133,7 @@ public final class AIRequestManager: ObservableObject {
             print("formatted titles and bullets: \(formatContent)")
             return formatContent
         } catch {
-            print("failed to extract chat content ❗️", ErrorDesc.parsingError, error)
+            print("failed to extract chat content ❗️", ErrorDesc.parsingError, error)  
             throw ErrorDesc.nilValue
         }
     }
@@ -152,7 +152,7 @@ public final class AIRequestManager: ObservableObject {
                 await SupabaseClientManager.shared.supabaseOpenaiChatUpsert(openaiID: openaiID, title: title, content: content)
                 print("==========================\neach chunk: \(chunk)")
             }
-             //TODO: TEST TEST TEST!
+            
             print("openai chat successfully upserted into supabase ✅")
         } catch {
             print("openai chat did not get upserted into supabase ❗️", ErrorDesc.persistenceError, error)
