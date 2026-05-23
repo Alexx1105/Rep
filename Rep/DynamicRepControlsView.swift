@@ -43,6 +43,7 @@ final class Query: ObservableObject {
 }
 
 
+
 func staggerDateComponents(components: DateComponents, add: Int = 1, multiplier: Int) -> DateComponents {
     var new = DateComponents()
     
@@ -56,20 +57,41 @@ func staggerDateComponents(components: DateComponents, add: Int = 1, multiplier:
 struct DynamicRepControlsView: View {
     
     let frequencyOptions: [SliderView.SliderOption] = [
-        .init(label: "Off",     symbolName: "multiply.circle", interval: DateComponents(minute: 1)),
-        .init(label: "1hr",     symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 60)),
-        .init(label: "2h 30m",  symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 2, minute: 30)),
-        .init(label: "3h 40m",  symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 3, minute: 40))
+        .init(label: "Off", symbolName: "multiply.circle", interval: DateComponents(minute: 1)),
+        .init(label: "1hr", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 60)),
+        .init(label: "2h 30m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 2, minute: 30)),
+        .init(label: "3h 40m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 3, minute: 40))
     ]
     
     let hyperModeOptions: [SliderView.SliderOption] = [
-        .init(label: "Off",     symbolName: "multiply.circle", interval: DateComponents(minute: 1)),
-        .init(label: "10m",     symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 10)),
-        .init(label: "30m",  symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 30)),
-        .init(label: "45m",  symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 45))
+        .init(label: "Off", symbolName: "multiply.circle", interval: DateComponents(minute: 1)),
+        .init(label: "10m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 10)),
+        .init(label: "30m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 30)),
+        .init(label: "45m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 45))
     ]
     
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled = false
+    
+    let dataSource: CombinedDataSource
+    
+    var dataSourceId: String {
+        switch dataSource {
+        case .notionContent(let notionPage):
+            return notionPage.pageID
+        case .openaiChatContent(let openaiChat):
+            return openaiChat.openaiId
+            
+        }
+    }
+    
+    var dataSourceTitle: String {
+        switch dataSource {
+        case .notionContent(let notion):
+            return notion.text
+        case .openaiChatContent(let openai):
+            return String(openai.content.prefix(20))
+        }
+    }
     
     @MainActor
     func runSliderOperation() {
@@ -77,7 +99,7 @@ struct DynamicRepControlsView: View {
         let selectedIndex = hyperToggleEnabled ? storeSelectedHyperModeOption : storeSelectedOption
         guard selectedIndex < mode.count else { return }
         let opt = mode[selectedIndex]
-        let intervalTitle = filterTitle
+        let intervalTitle = dataSourceTitle
         
         Task {
             try await Task.sleep(nanoseconds: 500_000_000)
@@ -89,10 +111,10 @@ struct DynamicRepControlsView: View {
         func sliderChangeTask() {
             currentTask?.cancel()
             
-            localPage[filterPageID] = Date()
-            let basePerPage: Date = localPage[filterPageID]!
+            localPage[dataSourceId] = Date()
+            let basePerPage: Date = localPage[dataSourceId]!
             let selectedOption: SliderView.SliderOption = mode[selectedIndex]
-            let pageID: String = filterPageID
+            let pageID: String = dataSourceId
             let pageContentID: String = pageContent.first?.userPageId ?? ""
             
             currentTask = Task {
@@ -100,7 +122,7 @@ struct DynamicRepControlsView: View {
             }
         }
         
-        //TODO: support querying openai chat ids
+
         func scheduleTask(selectedOption: SliderView.SliderOption, pageID: String, pageContentID: String, basePerPage: Date) async {
             do {
                 let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
@@ -171,17 +193,10 @@ struct DynamicRepControlsView: View {
     @State var localPage: [String: Date] = [:]          ///acts as local per-page base compute
     @State private var currentTask: Task<Void, Never>?
     
-    
     var pageID: String
     var filterTitle: String {
         return pageTitle.first(where: { $0.pageID == pageID})?.text ?? ""
     }
-    
-    var filterPageID: String {
-        return pageTitle.first(where: { $0.pageID == pageID})?.pageID ?? ""
-    }
-    
-    let dataSource: CombinedDataSource
     
     var body: some View {
         VStack(spacing: 50) {
