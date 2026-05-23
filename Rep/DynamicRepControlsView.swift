@@ -86,7 +86,7 @@ struct DynamicRepControlsView: View {
         }
         
         @MainActor
-        func sliderChangeTask() {           ///fixes prev slider state being retained on slider change
+        func sliderChangeTask() {
             currentTask?.cancel()
             
             localPage[filterPageID] = Date()
@@ -100,8 +100,8 @@ struct DynamicRepControlsView: View {
             }
         }
         
+        //TODO: support querying openai chat ids
         func scheduleTask(selectedOption: SliderView.SliderOption, pageID: String, pageContentID: String, basePerPage: Date) async {
-            
             do {
                 let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
                 let result: [QueryIDs] = selectQuery.value

@@ -4,8 +4,7 @@
 //
 //  Created by alex haidar on 4/25/26.
 //
-// All requests to the supabase edge functions for the
-// AI chatbox and audio transcription will be handled here
+/* All requests to the supabase edge functions for the AI chatbox and audio transcription will be handled here  */
 import Foundation
 import Supabase
 import SwiftData
@@ -137,6 +136,9 @@ public final class AIRequestManager: ObservableObject {
             throw ErrorDesc.nilValue
         }
     }
+    
+    
+    //TODO: iterate via chat JSON rows and call SupbaseClientManager class + new function, follow the pattern used in NotionDataManager!
 }
 
 

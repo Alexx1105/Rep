@@ -33,3 +33,8 @@ enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
 enum ErrorDefinition: Error {
     case emptyContent
 }
+
+public enum SupabaseError: LocalizedError {
+    case upsertError
+    case nilDataError
+}
