@@ -702,52 +702,64 @@ struct ChatView: View {
     var body: some View {
         ZStack {
             Color.mmBackground.ignoresSafeArea()
-            ScrollView {
-                VStack() {
-                    Spacer(minLength: 65)
-                    
-                    if isCircleVisible {
-                        HStack(alignment: .top, spacing: 10) {
-                            Circle()
-                                .frame(width: 18, height: 18)
-                                .opacity(isCirclePulsing ? 1.0 : 0.25)
-                                .scaleEffect(isCirclePulsing ? 1.0 : 0.3)
-                            
-                            Text("Generating...")
-                                .opacity(isCirclePulsing ? 0.8 : 0.25)
-                                .fontDesign(.rounded)
-                                .fontWeight(.medium)
-                            
-                            Spacer()
-                        }
-                        .padding(.top)
-                        .padding(.leading)
-                        .onAppear {
-                            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                                isCirclePulsing.toggle()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack {
+                        Spacer(minLength: 65)
+                        
+                        if isCircleVisible {
+                            HStack(alignment: .top, spacing: 10) {
+                                Circle()
+                                    .frame(width: 18, height: 18)
+                                    .opacity(isCirclePulsing ? 1.0 : 0.25)
+                                    .scaleEffect(isCirclePulsing ? 1.0 : 0.3)
+                                
+                                Text("Generating...")
+                                    .opacity(isCirclePulsing ? 0.8 : 0.25)
+                                    .fontDesign(.rounded)
+                                    .fontWeight(.medium)
+                                
+                                Spacer()
+                            }
+                            .padding(.top)
+                            .padding(.leading)
+                            .onAppear {
+                                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                                    isCirclePulsing.toggle()
+                                }
+                            }
+                            .onDisappear {
+                                isCirclePulsing = false
                             }
                         }
-                        .onDisappear {
-                            isCirclePulsing = false
+                        
+                        ForEach(Chat.shared.responseMessage, id: \.id) { response in
+                            Text(response.text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.leading)
+                                .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
+                                .listRowBackground(Color.mmBackground)
+                                .lineLimit(nil)
+                                .animation(.easeOut(duration: 0.53), value: response.text)
+                                .transition(.opacity.combined(with: .blurReplace))
+                                .textSelection(.enabled)
+                        }
+                        
+                        Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 135 : 135)
+                        Color.clear.frame(height: 1).id("chat-bottom")
+                        
+                    }.frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                    
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                    .onChange(of: Chat.shared.responseMessage.last?.text) { _, _ in
+                        Task { @MainActor in
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            }
                         }
                     }
-                    
-                    ForEach(Chat.shared.responseMessage, id: \.id) { response in
-                        Text(response.text)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.leading)
-                            .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
-                            .listRowBackground(Color.mmBackground)
-                            .lineLimit(nil)
-                            .animation(.easeOut(duration: 0.53), value: response.text)
-                            .transition(.opacity.combined(with: .blurReplace))
-                    }
-                    
-                    Spacer(minLength: 135)
-                }.frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-            }.frame(maxWidth: .infinity, alignment: .leading)
-            
+                }
             
             LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
                                                       .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
@@ -852,7 +864,7 @@ struct ChatView: View {
                                 .offset(y: showEmptyState ? 0 : 8)
                                 .animation(.easeOut(duration: 0.45).delay(0.10), value: showEmptyState)
                             
-                            Text("- Convert this AI chat into memory prompts").font(.subheadline)
+                            Text("- Turn my study notes into quick review prompts").font(.subheadline)
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(.secondary)
                                 .opacity(showEmptyState ? 1 : 0)

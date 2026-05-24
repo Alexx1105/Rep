@@ -116,13 +116,14 @@ struct ImportedNotes: View {
                                     .listRowSeparator(.hidden)
                                     .multilineTextAlignment(.leading)
                                     .padding(.bottom)
+                                    .textSelection(.enabled)
                             }
                             .listStyle(.plain)
                         }
                         bottomBlur
                         
                     case .openaiChatContent(let openaiChatContent):
-                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter { !$0.isEmpty }
                         if chatLines.isEmpty {
                             VStack(spacing: -10) {
                                 ForEach(0..<13) { _ in
@@ -130,16 +131,18 @@ struct ImportedNotes: View {
                                 }
                             }
                         } else {
-                            List(chatLines, id: \.self) { line in
-                                Text(line)
-                                    .font(.system(size: 16))
-                                    .listRowBackground(Color.mmBackground)
-                                    .listRowSeparator(.hidden)
-                                    .padding(.bottom)
-                                    .multilineTextAlignment(.leading)
-                                    .listRowInsets(EdgeInsets(top: 1, leading: 10, bottom: 10, trailing: 10))
+                            ScrollView {
+                                ForEach(chatLines, id: \.self) { line in
+                                    Text(line)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading)
+                                        .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
+                                        .lineLimit(nil)
+                                        .lineHeight(.loose)
+                                        .textSelection(.enabled)
+                                    
+                                }.padding(.bottom)
                             }
-                            .listStyle(.plain)
                         }
                         bottomBlur
                     }
@@ -165,8 +168,7 @@ struct ImportedNotes: View {
 
 #Preview {
     ImportedNotes(pageID: "", titleSource:
-    .openaiChatContent(OpenAIChat(content: "Preview chat content",
-                                 openaiId: "preview-id")))
+            .openaiChatContent(OpenAIChat(content: "Preview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content", openaiId: "preview-id")))
 }
 
 
