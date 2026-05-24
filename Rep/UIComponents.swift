@@ -695,6 +695,8 @@ struct ChatView: View {
     @State private var keyboardHeight: CGFloat = 0
     @State private var isCircleVisible: Bool = false
     @State private var isCirclePulsing: Bool = false
+    @State var showEmptyState: Bool = false
+    @AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
     
     
     var body: some View {
@@ -710,19 +712,20 @@ struct ChatView: View {
                                 .frame(width: 18, height: 18)
                                 .opacity(isCirclePulsing ? 1.0 : 0.25)
                                 .scaleEffect(isCirclePulsing ? 1.0 : 0.3)
-
+                            
                             Text("Generating...")
                                 .opacity(isCirclePulsing ? 0.8 : 0.25)
                                 .fontDesign(.rounded)
                                 .fontWeight(.medium)
-
+                            
                             Spacer()
                         }
                         .padding(.top)
                         .padding(.leading)
-                        .animation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true), value: isCirclePulsing)
                         .onAppear {
-                            isCirclePulsing = true
+                            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                                isCirclePulsing.toggle()
+                            }
                         }
                         .onDisappear {
                             isCirclePulsing = false
@@ -821,6 +824,67 @@ struct ChatView: View {
                 }.padding(.top)
                     .padding(.horizontal)
                 
+                
+                if !isEmptyStateSeen && Chat.shared.responseMessage.isEmpty {
+                    VStack(spacing: 20) {
+                        VStack(spacing: 5) {
+                            
+                            Text("Turn notes, PDFs, and AI chats into spaced repetition flashcards.").font(.headline)
+                                .font(.system(size: 20, weight: .bold))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(1)
+                                .foregroundStyle(Color.mmDark)
+                                .padding(.horizontal, 32)
+                            
+                            Text("Rep adapts your content into passive Live Activity memory drills.").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 50)
+                        }
+                        
+                        VStack(spacing: 8) {
+                            
+                            Text("- Turn this PDF into spaced repetition drills").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .opacity(showEmptyState ? 1 : 0)
+                                .offset(y: showEmptyState ? 0 : 8)
+                                .animation(.easeOut(duration: 0.45).delay(0.10), value: showEmptyState)
+                            
+                            Text("- Convert this AI chat into memory prompts").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .opacity(showEmptyState ? 1 : 0)
+                                .offset(y: showEmptyState ? 0 : 8)
+                                .animation(.easeOut(duration: 0.45).delay(0.20), value: showEmptyState)
+                            
+                            Text("- Review onboarding documents throughout the day").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .opacity(showEmptyState ? 1 : 0)
+                                .offset(y: showEmptyState ? 0 : 8)
+                                .animation(.easeOut(duration: 0.45).delay(0.30), value: showEmptyState)
+                            
+                        }
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 60)
+                    .opacity(showEmptyState ? 1 : 0)
+                    .offset(y: showEmptyState ? 0 : 12)
+                    .animation(.easeOut(duration: 0.45), value: showEmptyState)
+                    .onAppear {
+                        guard !isEmptyStateSeen else { return }
+                        
+                        withAnimation(.easeOut(duration: 0.45)) {
+                            showEmptyState = true
+                        }
+                    }
+                }
+                
+                
                 Spacer(minLength: 60)
                 VStack(alignment: .leading, spacing: 20) {
                     TextField(messagePlaceholder, text: $chatState.chat, axis: .vertical)
@@ -828,11 +892,13 @@ struct ChatView: View {
                         .offset(y: -keyboardHeight)
                         .animation(.easeOut(duration: 0.25), value: isChatFocused)
                         .lineLimit(1...10)
-                        .autocorrectionDisabled(true)
+                        .autocorrectionDisabled(false)
                         .padding(.horizontal)
                         .fontWeight(.medium)
                         .onSubmit {
+                            showEmptyState = false
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            isEmptyStateSeen = true
                             isCircleVisible = true
                             isCirclePulsing = true
                             fileUrls.removeAll()
@@ -909,6 +975,7 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
+                            isEmptyStateSeen = true
                             isCircleVisible = true
                             isCirclePulsing = true
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context)
