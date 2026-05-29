@@ -51,7 +51,14 @@ public final class AIRequestManager: ObservableObject {
         
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
+        
+        let session = try await supabaseDBClient.auth.session
+        let supabaseAccessToken: String = session.accessToken
+        
+        guard !supabaseAccessToken.isEmpty else { throw ErrorDesc.authTokenError }
+        
         urlRequest.setValue("multipart/form-data; boundary=\(fileIdentifier)", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(supabaseAccessToken)", forHTTPHeaderField: "Authorization")
         urlRequest.httpMethod = "POST"
         
         var multipartReqBody: Data = Data()
