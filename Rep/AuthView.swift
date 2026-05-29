@@ -14,31 +14,45 @@ struct AuthView: View {
     @ObservedObject var auth = authBackend()
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
+    @State private var animateTitle: Bool = false
     
     var body: some View {
         VStack {
-            Spacer()
-            Image("AppIcon")
-            Spacer()
             
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Sign Into Rep")
+            VStack(alignment: .center, spacing: 50) {
+                Text("Rep")
                     .fontWeight(.bold)
-                    .font(.system(size: 16))
-                    .padding(.trailing, 70)
-                    .padding(.bottom, 1)
+                    .font(.system(size: 105))
+                    .foregroundStyle(Color.mmDark)
+                    .tracking(-3)
+                    .scaleEffect(animateTitle ? 1.03 : 1.0)
+                    .opacity(animateTitle ? 1.0 : 0.92)
                 
-                Text("Powered by Kimchi Labs  ")
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.gray)
-                    .font(.system(size: 14))
-                    .padding(.trailing, 90)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Sign Into Rep")
+                        .fontWeight(.bold)
+                        .font(.system(size: 16))
+                        .padding(.trailing, 70)
+                        .padding(.bottom, 1)
+                    
+                    Text("Powered by Kimchi Labs  ")
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.gray)
+                        .font(.system(size: 14))
+                        .padding(.trailing, 90)
+                }
+            }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                    animateTitle = false
+            
+                }
             }
             
             Divider()
                 .frame(maxWidth: .infinity, maxHeight: 1)
-                .padding(.bottom, 4)
-                .padding()
+                .padding(.horizontal)
+             
             
             Group {
                 switch colorScheme {
@@ -82,11 +96,12 @@ struct AuthView: View {
                     EmptyView()
                 }
             }
-            .frame(width: 297, height:  43)
-            .cornerRadius(20)
-            .padding(.bottom, 130)
+            .frame(maxWidth: .infinity, maxHeight:  45)
+            .cornerRadius(25)
+            .padding(.horizontal)
             
-        } .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
