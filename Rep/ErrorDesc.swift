@@ -23,8 +23,18 @@ enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
     case concurrencyError
     case oauthError
     case swiftDataQueryError
+    case photoUploadError
+    case serverError
+    case responseError
+    case fileProcessingError
+    case ssetextStreamEventError
 }
 
 enum ErrorDefinition: Error {
     case emptyContent
+}
+
+public enum SupabaseError: LocalizedError {
+    case upsertError
+    case nilDataError
 }

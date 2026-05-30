@@ -8,6 +8,9 @@
 
 import SwiftUI
 import SwiftData
+import PhotosUI
+import AVFoundation
+
 
 @MainActor
 public final class Toast: ObservableObject {
@@ -30,7 +33,9 @@ public final class Toast: ObservableObject {
 
 struct RootTabs: View {
     @State private var showImportToast: Bool = false
-    @StateObject private var toastManager = NotionDataManager.shared
+    @State private var showGeneratedChat: Bool = false
+    @StateObject private var importManager = NotionDataManager.shared
+    @StateObject private var chatGenerationManager = AIRequestManager.shared
     
     var body: some View {
         NavigationStack {
@@ -50,23 +55,40 @@ struct RootTabs: View {
                     .background(Color.clear)
                 
                     .overlay(alignment: .top) {
-                        if showImportToast {
+                        if showImportToast {                                ///for notion imports
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 ToastNotification()
                                     .transition(.move(edge: .top).combined(with: .blurReplace))
                                     .allowsHitTesting(false)
                                     .fixedSize(horizontal: false, vertical: false)
                                     .ignoresSafeArea(edges: .top).padding(.top, 1)
+                            }
+                        }
+                        
+                        if showGeneratedChat {                              /// for AI generated notes
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                ChatDialogToast()
+                                    .transition(.move(edge: .top).combined(with: .blurReplace))
+                                    .allowsHitTesting(false)
+                                    .fixedSize(horizontal: false, vertical: false)
+                                    .ignoresSafeArea(edges: .top).padding(.top, 1)
+                            }
                         }
                     }
-                }
             }
         }
         
-        .task(id: toastManager.isPageImportedNotification) {
+        .task(id: importManager.isPageImportedNotification) {
             Task { @MainActor in
-                guard self.toastManager.isPageImportedNotification else { return }
+                guard self.importManager.isPageImportedNotification else { return }
                 await Toast.shared.callToastOnPageLoad($showImportToast)
+            }
+        }
+        
+        .task(id: chatGenerationManager.isNotesGenerated) {
+            Task { @MainActor in
+                guard self.chatGenerationManager.isNotesGenerated else { return }
+                await Toast.shared.callToastOnPageLoad($showGeneratedChat)
             }
         }
     }
@@ -91,7 +113,10 @@ struct MainMenuTab: View {
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
-    let userPageTitle: UserPageTitle
+    let userPageTitle: UserPageTitle?
+    let openaiChatTitle: OpenAIChat?
+    
+    let dataSource: CombinedDataSource
     
     var body: some View {
         
@@ -111,12 +136,11 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle.pageID)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? "", dataSource: dataSource)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
                 } label: {
-                    
                     Image(systemName: "clock.arrow.2.circlepath")
                         .foregroundStyle(Color.mmDark)
                         .opacity(0.8)
@@ -124,16 +148,40 @@ struct MainMenuTab: View {
                         .padding(5)
                 }
                 
-                HStack {
-                    if let emoji = userPageTitle.emoji {
+                HStack(spacing: 10) {
+                    if let emoji: String = userPageTitle?.emoji {
                         Text(emoji)
                     }
-                    Text(userPageTitle.text)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.mmDark)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    Spacer()
+                    
+                    if openaiChatTitle?.content != nil {
+                        Image("openaiLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 25, height: 25)
+                            .opacity(textOpacity)
+                        
+                        Text(openaiChatTitle?.content ?? "OpenAI Chat")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
+                    
+                    if userPageTitle?.text != nil {
+                        Image("notionLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .opacity(textOpacity)
+                        
+                        Text(userPageTitle?.text ?? "")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
                 }
                 
                 Spacer()
@@ -156,7 +204,6 @@ struct SliderView: View {
         let symbolName: String
         let interval: DateComponents
     }
-    
     
     var sliderOptions: [SliderView.SliderOption]
     
@@ -307,7 +354,7 @@ struct PaymentMenuCard: View {
             
             
             ZStack {
-                Rectangle().foregroundStyle(Color.mmBackground)        ///solid overlay here
+                Rectangle().foregroundStyle(Color.mmBackground).ignoresSafeArea()        ///solid overlay here
                     .frame(maxWidth: .infinity, maxHeight: 700)
                     .cornerRadius(25)
                     .padding()
@@ -461,13 +508,13 @@ struct HyperToggleCard: View {
             VStack(alignment: .leading) {
                 
                 HStack(spacing: 3) {
-//                    Text("Pro").foregroundStyle(Color.intervalBlue)
-//                        .font(.system(size: 16))
-//                        .fontWeight(.heavy)
-//                        .overlay {
-//                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-//                                .frame(width: 40, height: 21)
-//                        }
+                    //                    Text("Pro").foregroundStyle(Color.intervalBlue)
+                    //                        .font(.system(size: 16))
+                    //                        .fontWeight(.heavy)
+                    //                        .overlay {
+                    //                            Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
+                    //                                .frame(width: 40, height: 21)
+                    //                        }
                     
                     Spacer()
                     
@@ -561,8 +608,41 @@ struct ToastNotification: View {
     }
 }
 
+struct ChatDialogToast: View {
+    var body: some View {
+        
+        ZStack {
+            Capsule()
+                .frame(maxWidth: 248, maxHeight: 43)
+                .glassEffect(.regular)
+            
+            HStack(alignment: .center, spacing: 15) {
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Notes Successfully Generated")
+                        .font(Font.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(Color.mmDark)
+                        .padding(.leading)
+                    
+                    Text("Close Out The Chat Dialog")
+                        .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
+                        .padding(.leading)
+                }
+                
+                ZStack {
+                    Circle()
+                        .frame(maxWidth: 35, maxHeight: 35)
+                        .foregroundStyle(Color.intervalBlue)
+                    
+                    Image(systemName: "checkmark.circle").font(.system(size: 17)).foregroundStyle(Color.kimchiLabs)
+                }
+            }
+        }
+    }
+}
+
 #Preview {
-    MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄")) ///page tab
+    MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄"),
+                openaiChatTitle: OpenAIChat(content: "", openaiId: ""), dataSource: .notionContent(UserPageTitle(pageID: "", text: "")))   ///page tab
 }
 
 
@@ -595,6 +675,429 @@ struct ToastNotification: View {
     }
 }
 
+
+struct ChatView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var closeChatSheet
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+    private var messagePlaceholder: String = "Upload notes or Ask..."
+    @StateObject private var chatState = Chat.shared
+    @State var showFilePicker: Bool = false
+    @State var showCameraPicker: Bool = false
+    @State var selectedPhoto: [PhotosPickerItem] = []
+    @State var showPhotoPicker: Bool = false
+    @State private var imageCaptured: UIImage?
+    @State var fileUrls: [URL] = []
+    @State public var isNewChat: Bool = false
+    @State var isGenerating: Bool = false
+    @Environment(\.modelContext) private var context
+    @FocusState private var isChatFocused: Bool
+    @State private var keyboardHeight: CGFloat = 0
+    @State private var isCircleVisible: Bool = false
+    @State private var isCirclePulsing: Bool = false
+    @State var showEmptyState: Bool = false
+    @AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
+    
+    
+    var body: some View {
+        ZStack {
+            Color.mmBackground.ignoresSafeArea()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack {
+                        Spacer(minLength: 65)
+                        
+                        if isCircleVisible {
+                            HStack(alignment: .top, spacing: 10) {
+                                Circle()
+                                    .frame(width: 18, height: 18)
+                                    .opacity(isCirclePulsing ? 1.0 : 0.25)
+                                    .scaleEffect(isCirclePulsing ? 1.0 : 0.3)
+                                
+                                Text("Generating...")
+                                    .opacity(isCirclePulsing ? 0.8 : 0.25)
+                                    .fontDesign(.rounded)
+                                    .fontWeight(.medium)
+                                
+                                Spacer()
+                            }
+                            .padding(.top)
+                            .padding(.leading)
+                            .onAppear {
+                                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                                    isCirclePulsing.toggle()
+                                }
+                            }
+                            .onDisappear {
+                                isCirclePulsing = false
+                            }
+                        }
+                        
+                        ForEach(Chat.shared.responseMessage, id: \.id) { response in
+                            Text(response.text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.leading)
+                                .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
+                                .listRowBackground(Color.mmBackground)
+                                .lineLimit(nil)
+                                .animation(.easeOut(duration: 0.53), value: response.text)
+                                .transition(.opacity.combined(with: .blurReplace))
+                                .textSelection(.enabled)
+                        }
+                        
+                        Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 135 : 135)
+                        Color.clear.frame(height: 1).id("chat-bottom")
+                        
+                    }.frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                    
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                    .onChange(of: Chat.shared.responseMessage.last?.text) { _, _ in
+                        Task { @MainActor in
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            }
+                        }
+                    }
+                }
+            
+            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
+                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
+                                                      .init(color: Color.mmBackground.opacity(0.50), location: 0.05),
+                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.10),]), startPoint: .top, endPoint: .bottom)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .allowsHitTesting(false)
+            .ignoresSafeArea()
+            
+            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(1.00), location: 0.00),
+                                                      .init(color: Color.mmBackground.opacity(1.00), location: 0.05),
+                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.10),
+                                                      .init(color: Color.mmBackground.opacity(0.05), location: 0.15),]), startPoint: .bottom, endPoint: .top)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .allowsHitTesting(false)
+            .ignoresSafeArea()
+            
+            VStack {
+                HStack(alignment: .top) {
+                    Button {
+                        withAnimation { closeChatSheet() }
+                    } label: {
+                        ZStack {
+                            Circle().fill(Color.clear).glassEffect(.regular)
+                                .frame(width: 45, height: 45)
+                            
+                            Image(systemName: "xmark")
+                                .foregroundStyle(Color.mmDark)
+                                .font(.system(size: 20))
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 25))
+                            .frame(width: 110, height: 45)
+                        
+                        HStack {
+                            Menu {
+                                Button {
+                                    
+                                } label: {
+                                    Label("GPT-5.4 mini", image: "openaiLogo")  //TODO: explain that its faster
+                                        .font(.system(size: 5))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                
+                                //                                Button {
+                                //
+                                //                                } label: {
+                                //                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed, will add support for this model later
+                                //                                }
+                                
+                            } label: {
+                                Image(systemName: "ellipsis")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(Color.mmDark)
+                                    .padding()
+                            }
+                            Button {
+                                isNewChat = true
+                                Chat.shared.responseMessage.removeAll()
+                                
+                            } label: {
+                                Image(systemName: "pencil.line")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(Color.mmDark)
+                                    .padding()
+                            }
+                        }
+                    }
+                    
+                }.padding(.top)
+                    .padding(.horizontal)
+                
+                
+                if !isEmptyStateSeen && Chat.shared.responseMessage.isEmpty {
+                    VStack(spacing: 20) {
+                        VStack(spacing: 5) {
+                            
+                            Text("Turn notes, PDFs, and AI chats into spaced repetition flashcards.").font(.headline)
+                                .font(.system(size: 20, weight: .bold))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(1)
+                                .foregroundStyle(Color.mmDark)
+                                .padding(.horizontal, 32)
+                            
+                            Text("Rep adapts your content into passive Live Activity memory drills.").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 50)
+                        }
+                        
+                        VStack(spacing: 8) {
+                            
+                            Text("- Turn this PDF into spaced repetition drills").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .opacity(showEmptyState ? 1 : 0)
+                                .offset(y: showEmptyState ? 0 : 8)
+                                .animation(.easeOut(duration: 0.45).delay(0.10), value: showEmptyState)
+                            
+                            Text("- Turn my study notes into quick review prompts").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .opacity(showEmptyState ? 1 : 0)
+                                .offset(y: showEmptyState ? 0 : 8)
+                                .animation(.easeOut(duration: 0.45).delay(0.20), value: showEmptyState)
+                            
+                            Text("- Review onboarding documents throughout the day").font(.subheadline)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .opacity(showEmptyState ? 1 : 0)
+                                .offset(y: showEmptyState ? 0 : 8)
+                                .animation(.easeOut(duration: 0.45).delay(0.30), value: showEmptyState)
+                            
+                        }
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 60)
+                    .opacity(showEmptyState ? 1 : 0)
+                    .offset(y: showEmptyState ? 0 : 12)
+                    .animation(.easeOut(duration: 0.45), value: showEmptyState)
+                    .onAppear {
+                        guard !isEmptyStateSeen else { return }
+                        
+                        withAnimation(.easeOut(duration: 0.45)) {
+                            showEmptyState = true
+                        }
+                    }
+                }
+                
+                
+                Spacer(minLength: 60)
+                VStack(alignment: .leading, spacing: 20) {
+                    TextField(messagePlaceholder, text: $chatState.chat, axis: .vertical)
+                        .focused($isChatFocused)
+                        .offset(y: -keyboardHeight)
+                        .animation(.easeOut(duration: 0.25), value: isChatFocused)
+                        .lineLimit(1...10)
+                        .autocorrectionDisabled(false)
+                        .padding(.horizontal)
+                        .fontWeight(.medium)
+                        .onSubmit {
+                            showEmptyState = false
+                            Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            isEmptyStateSeen = true
+                            isCircleVisible = true
+                            isCirclePulsing = true
+                            fileUrls.removeAll()
+                            
+                        }.onChange(of: Chat.shared.responseMessage.last?.text) { _, newValue in
+                            if let presentText = newValue, !presentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                isCircleVisible = false
+                                isCirclePulsing = false
+                            }
+                        }
+                    
+                    ForEach(fileUrls, id: \.self) { file in
+                        ZStack {
+                            Capsule()
+                                .frame(maxWidth: .infinity, maxHeight: 28)
+                                .glassEffect(.regular)
+                            
+                            HStack(spacing: 5) {
+                                Text(file.lastPathComponent).font(Font.system(size: 12))
+                                    .fontWeight(.semibold)
+                                    .fontDesign(.rounded)
+                                
+                                Button {
+                                    fileUrls.removeAll(where: { $0 == file })
+                                } label: {
+                                    Image(systemName: "x.circle.fill").fixedSize()
+                                        .foregroundStyle(Color.mmDark)
+                                }
+                            }.padding(6)
+                        }.fixedSize()
+                    }.offset(y: -keyboardHeight)
+                    
+                    HStack(alignment: .bottom) {
+                        Menu {
+                            //                            Button {
+                            //
+                            //                            } label: {
+                            //                                Label("Take Photo", systemImage: "camera.fill")
+                            //                            }
+                            //                            Button {
+                            //                                showPhotoPicker = true
+                            //                            } label: {
+                            //                                Label("Upload Photo", systemImage: "photo")
+                            //                            }.onChange(of: selectedPhoto) {_, newValueItem in
+                            //                                //do {
+                            //                                Task {
+                            //                                    for item in newValueItem {
+                            //                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
+                            //                                        let _ = UIImage(data: rawImageData ?? Data())
+                            //                                    }
+                            //                                }
+                            //                                //                                } catch {
+                            //                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
+                            //                                //                                }
+                            //                            }
+                            
+                            Button {
+                                showFilePicker = true
+                            } label: {
+                                Label("Upload File(s)", systemImage: "folder.fill")
+                            }
+                        } label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.2).foregroundStyle(Color.intervalBlue)
+                                
+                                HStack(spacing: 2) {
+                                    Image(systemName: "plus.app").foregroundStyle(Color.intervalBlue)
+                                    Text("Upload")
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .foregroundStyle(Color.intervalBlue)
+                                }
+                            }
+                        }
+                        
+                        Spacer()
+                        Button {
+                            isEmptyStateSeen = true
+                            isCircleVisible = true
+                            isCirclePulsing = true
+                            Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            fileUrls.removeAll()
+                        } label: {
+                            ZStack {
+                                Circle().fill(Color.mmDark)
+                                    .frame(maxWidth: 30, maxHeight: 30)
+                                
+                                Image(systemName: "arrow.up").foregroundStyle(Color.checkmark)
+                                
+                            }
+                        }.padding(.trailing)
+                        
+                    }.offset(y: -keyboardHeight)
+                }.padding(.leading)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 30))
+                        .offset(y: -keyboardHeight)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal))
+                    .padding(.bottom)
+                
+            }
+        }.sheet(isPresented: $showFilePicker) {
+            DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
+                fileUrls = url
+                
+            }
+        }.onReceive(NotificationCenter.default.publisher(
+            for: UIResponder.keyboardWillShowNotification
+        )) { note in
+            
+            if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                keyboardHeight = frame.height + 5
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(
+            for: UIResponder.keyboardWillHideNotification
+        )) { _ in
+            keyboardHeight = 0
+        }
+    }
+}
+
+
+struct MainMenuDataSourceList: View {         ///conditionally renders the list in ImportedNotes.swift based on data source. notion, openai etc
+    @Environment(\.modelContext) var context
+    @Binding var tabSlideOver: Bool
+    @Binding var deleteMultipleTabs: Set<String>
+    @State private var selectedCheckBox = false
+    
+    let title: CombinedDataSource
+    var body: some View {
+        
+        switch title {
+        case .notionContent(let pageTitle):
+            if tabSlideOver {
+                Button {
+                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
+                    if deleteMultipleTabs.contains(pageTitle.pageID) {
+                        deleteMultipleTabs.remove(pageTitle.pageID)
+                    } else {
+                        deleteMultipleTabs.insert(pageTitle.pageID)
+                    }
+                    
+                } label: {
+                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
+                }
+            }
+            
+            if !pageTitle.text.isEmpty {
+                NavigationLink {
+                    ImportedNotes(pageID: pageTitle.pageID, titleSource: title)
+                        .navigationBarBackButtonHidden(true)
+                    
+                } label: {
+                    MainMenuTab(userPageTitle: pageTitle, openaiChatTitle: nil, dataSource: title)
+                }
+                .allowsHitTesting(!tabSlideOver)
+            }
+            
+        case .openaiChatContent(let chatTitle):
+            if tabSlideOver {
+                Button {
+                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
+                    if deleteMultipleTabs.contains(chatTitle.openaiId) {
+                        deleteMultipleTabs.remove(chatTitle.openaiId)
+                    } else {
+                        deleteMultipleTabs.insert(chatTitle.openaiId)
+                    }
+                    
+                } label: {
+                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(chatTitle.openaiId))
+                }
+            }
+            
+            if !chatTitle.content.isEmpty {
+                NavigationLink {
+                    ImportedNotes(pageID: chatTitle.content, titleSource: title)
+                        .navigationBarBackButtonHidden(true)
+                } label: {
+                    MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle, dataSource: title)
+                }.allowsHitTesting(!tabSlideOver)
+            }
+        }
+    }
+}
+
+
 #Preview {
     PaymentMenuCard(isPresented:  .constant(true))
 }
@@ -609,3 +1112,8 @@ struct ToastNotification: View {
 #Preview {
     ToastNotification()
 }
+
+#Preview {
+    ChatView()
+}
+

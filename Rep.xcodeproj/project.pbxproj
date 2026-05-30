@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
+		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
+		B212332B2F96AAF2001F39D1 /* AIHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* AIHelpers.swift */; };
 		B21427D92F38FB9200D86624 /* SyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21427D82F38FB9200D86624 /* SyncController.swift */; };
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
@@ -24,8 +26,10 @@
 		B26A46672CD04C210064AF46 /* SignOutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26A46662CD04C210064AF46 /* SignOutView.swift */; };
 		B26D98A92EE26CDB003DEA64 /* StoreKitTestCertificate.cer in Resources */ = {isa = PBXBuildFile; fileRef = B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */; };
 		B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B271C18F2CD1CEBB00710E70 /* NavPath.swift */; };
+		B281FE392FA6492A00C3EEC5 /* AIDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */; };
 		B286AF3B2F5148CC0014AC64 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B286AF3A2F5148CC0014AC64 /* KimchiKit */; };
 		B286AF3D2F5149580014AC64 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B286AF3C2F5149580014AC64 /* KimchiKit */; };
+		B288975F2F9DAD2400423F83 /* AIRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B288975E2F9DAD0A00423F83 /* AIRequestManager.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
 		B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */; };
@@ -92,6 +96,8 @@
 /* Begin PBXFileReference section */
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = combinedDataSources.swift; sourceTree = "<group>"; };
+		B212332A2F96AAD0001F39D1 /* AIHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIHelpers.swift; sourceTree = "<group>"; };
 		B21427D82F38FB9200D86624 /* SyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncController.swift; sourceTree = "<group>"; };
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
@@ -111,6 +117,8 @@
 		B26A46662CD04C210064AF46 /* SignOutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutView.swift; sourceTree = "<group>"; };
 		B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = StoreKitTestCertificate.cer; sourceTree = "<group>"; };
 		B271C18F2CD1CEBB00710E70 /* NavPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavPath.swift; sourceTree = "<group>"; };
+		B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataStructs.swift; sourceTree = "<group>"; };
+		B288975E2F9DAD0A00423F83 /* AIRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRequestManager.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
 		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -195,8 +203,12 @@
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponents.swift */,
+				B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */,
 				B205064F2D98A3CC0082FEA2 /* LocalCache.swift */,
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
+				B212332A2F96AAD0001F39D1 /* AIHelpers.swift */,
+				B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */,
+				B288975E2F9DAD0A00423F83 /* AIRequestManager.swift */,
 				B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */,
 				B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */,
 				B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */,
@@ -353,16 +365,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B281FE392FA6492A00C3EEC5 /* AIDataStructs.swift in Sources */,
 				B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */,
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
 				B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */,
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
 				B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */,
+				B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */,
 				B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */,
 				B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */,
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
+				B212332B2F96AAF2001F39D1 /* AIHelpers.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,
+				B288975F2F9DAD2400423F83 /* AIRequestManager.swift in Sources */,
 				B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */,
 				B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,
@@ -614,7 +630,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -636,7 +652,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -654,7 +670,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -676,7 +692,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

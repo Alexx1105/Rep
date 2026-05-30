@@ -15,17 +15,16 @@ import BackgroundTasks
 
 @MainActor
 struct MainMenu: View {
-    
     @Environment(\.modelContext) var context
     @Environment(\.colorScheme) var colorScheme
     
     @Query(sort: [SortDescriptor(\UserPageTitle.pageID)])
     var pageTitles: [UserPageTitle]
-    
     @Query var showUserEmail: [UserEmail]
+    @Query var openaiChat: [OpenAIChat]
     
     var pageID: String
-        
+    
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
@@ -41,7 +40,6 @@ struct MainMenu: View {
         let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
         print("page ids here: \(pageID)")
     }
-    
     
     @MainActor
     public class TaskController: ObservableObject {
@@ -68,6 +66,10 @@ struct MainMenu: View {
     
     @State private var taskController: TaskController?
     
+    var mainMenuSources: [CombinedDataSource] {
+        pageTitles.map{.notionContent($0)} + openaiChat.map {.openaiChatContent($0)}
+    }
+    
     var body: some View {
         
         VStack {
@@ -80,7 +82,7 @@ struct MainMenu: View {
                 
                 
                 VStack(spacing: 3) {
-                    Text("Workspace email")
+                    Text("Notion Workspace Email")
                         .fontWeight(.regular)
                         .font(.system(size: 14))
                         .opacity(textOpacity)
@@ -110,23 +112,17 @@ struct MainMenu: View {
             //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    
-                    
                     if AutoSync.isAutoSync {
-        
                         ZStack {
-                            
                             Capsule()
                                 .frame(minWidth: 110,maxWidth: 180, maxHeight: 21)
                                 .glassEffect()
                             
                             HStack(spacing: 3) {
-                                
                                 Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
                                     .resizable()
                                     .frame(width: 10, height: 8)
                                     .opacity(textOpacity)
-                                
                                 
                                 Text("Last updated:")
                                     .font(.system(size: 10)).lineSpacing(3)
@@ -134,9 +130,7 @@ struct MainMenu: View {
                                     .opacity(textOpacity)
                                     .padding(.trailing, 3)
                                 
-                                
                                 let time: Date = LastEdited.shared.lastEdited ?? Date()
-                                
                                 Text(time.formatted(.dateTime.weekday().day().hour().minute()))
                                     .font(.system(size: 10))
                                     .fontWeight(.regular)
@@ -147,24 +141,22 @@ struct MainMenu: View {
                     } else {
                         EmptyView()
                     }
-                    
-                    Text("Your notes from Notion:")
+                    Text("Your Notes:")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
-                        .padding(.bottom)
+                        
                 }
                 Spacer()
-                
                 Menu {
                     Button {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) { tabSlideOver = true }
                     } label: {
                         Label("Select tab/s", systemImage: "checkmark.circle")
-                    }; Button {
-                        
+                    }
+                    
+                    Button {
                         deleteMultipleTabs.removeAll()
                         tabSlideOver = false
-                        
                     } label: {
                         Label("Cancel select", systemImage: "xmark.circle")
                     }
@@ -176,6 +168,7 @@ struct MainMenu: View {
                         do {
                             try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
+                            try context.delete(model: OpenAIChat.self, where: #Predicate{deleteTabIDs.contains($0.openaiId)})
                             
                             let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
                             for i in try context.fetch(fetchDesc) {
@@ -191,16 +184,12 @@ struct MainMenu: View {
                                     context.insert(DeletedPage(pageID: id))
                                 }
                             }
-                            
                             try context.save()
-                            
                             let ids = Array(deleteMultipleTabs)
-                            
                             print("stored ids: \(deleteMultipleTabs)")
                             Task {
                                 try await delete(pageID: ids )
                             }
-                            
                             tabSlideOver = false
                             
                             print("deletion successful")
@@ -222,7 +211,7 @@ struct MainMenu: View {
                 }
                 
             }
-            .frame(maxWidth: .infinity, maxHeight: 100 )
+            .frame(maxWidth: .infinity, maxHeight: 95 )
             .padding(.horizontal)
             Spacer()
             
@@ -230,35 +219,12 @@ struct MainMenu: View {
                 ScrollView {
                     
                     Spacer()
-                    ForEach(pageTitles) { pageTitle in
+                    ForEach(mainMenuSources, id:\.id) { title in
                         HStack(spacing: 20) {
-                            if tabSlideOver {
-                                Button {
-                                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
-                                    if deleteMultipleTabs.contains(pageTitle.pageID) {
-                                        deleteMultipleTabs.remove(pageTitle.pageID)
-                                    } else {
-                                        deleteMultipleTabs.insert(pageTitle.pageID)
-                                    }
-                                    
-                                } label: {
-                                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
-                                }
-                            }
-                            
-                            if !pageTitle.text.isEmpty {
-                                NavigationLink {
-                                    ImportedNotes(pageID: pageTitle.pageID)
-                                        .navigationBarBackButtonHidden(true)
-                                    
-                                } label: {
-                                    MainMenuTab(userPageTitle: pageTitle)
-                                }
-                                .allowsHitTesting(!tabSlideOver)
-                            }
+                            MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
                         }
                     }
-                }
+                }.frame(maxHeight: .infinity)
                 .padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))

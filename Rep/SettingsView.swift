@@ -67,7 +67,12 @@ struct SettingsView: View {
                 
                 VStack(alignment: .leading) {
                     Divider()
-                    HStack(alignment: .top) {
+                    HStack(alignment: .top, spacing: 10) {
+                        
+                        Image(systemName: "circle.lefthalf.filled.inverse").offset(y: 7)
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                            .opacity(textOpacity)
                         
                         Toggle("Appearance", isOn: $toggleEnabled)
                             .fontWeight(.semibold)
@@ -88,21 +93,19 @@ struct SettingsView: View {
                     Divider()
                     
                     HStack(alignment: .top ) {
-                        HStack(spacing: 15) {
+                        HStack(spacing: 10) {
                             
-//                            Text("Pro").foregroundStyle(Color.intervalBlue)
-//                                .font(.system(size: 16))
-//                                .fontWeight(.heavy)
-//                                .overlay {
-//                                    Capsule().foregroundStyle(Color.intervalBlue.opacity(0.2))
-//                                        .frame(width: 40, height: 21)
-//                                }.padding(.leading, 5)
+                            Image("notionLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
+                                .opacity(textOpacity)
                             
                             Toggle("Auto Sync", isOn: $AutoSync.isAutoSync)
                                 .fontWeight(.semibold)
                                 .opacity(textOpacity)
                                 .tint(.blue)
-                                .onChange(of: AutoSync.isAutoSync) { oldValue, newValue in
+                                .onChange(of: AutoSync.isAutoSync) { _, newValue in
                                     print("auto sync toggled in settings view: \(newValue)")
                                 }
                             
@@ -111,7 +114,7 @@ struct SettingsView: View {
                     }.frame(maxWidth: .infinity)
                         .padding(.horizontal)
                     
-                    Text("Toggle Auto Sync to enable on-demand\nsyncing between your notion and your\nimported notes")
+                    Text("Toggle Auto Sync to enable on-demand\nsyncing between your Notion and your\nimported notes")
                         .font(.system(size: 14)).lineSpacing(3)
                         .fontWeight(.medium)
                         .opacity(0.50)

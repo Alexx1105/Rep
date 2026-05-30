@@ -9,46 +9,54 @@ import SwiftUI
 import AuthenticationServices
 import Foundation
 
-struct authView: View {
+struct AuthView: View {
     
     @ObservedObject var auth = authBackend()
     @Environment(\.colorScheme) var colorScheme
+    @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
+    @State private var animateTitle: Bool = false
     
     var body: some View {
-        
-        
         VStack {
-          
-            Spacer()
-            Image("auth")
-                .renderingMode(.template)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 330, height: 330)
-                .padding(.trailing, 10)
-                .padding(.top, 60)
+            
+            VStack(alignment: .center, spacing: 50) {
+                Text("Rep")
+                    .fontWeight(.bold)
+                    .font(.system(size: 105))
+                    .foregroundStyle(Color.mmDark)
+                    .tracking(-3)
+                    .scaleEffect(animateTitle ? 1.03 : 1.0)
+                    .opacity(animateTitle ? 1.0 : 0.92)
                 
-          
-            Spacer()
-            Text("Sign into MuscleMemory ")
-                .fontWeight(.bold)
-                .font(.system(size: 16))
-                .padding(.trailing, 70)
-                .padding(.bottom, 1)
-         
-            Text("Powered by Kimchi Labs  ")
-                .fontWeight(.medium)
-                .foregroundStyle(Color.gray)
-                .font(.system(size: 14))
-                .padding(.trailing, 90)
-       
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Sign Into Rep")
+                        .fontWeight(.bold)
+                        .font(.system(size: 16))
+                        .padding(.trailing, 70)
+                        .padding(.bottom, 1)
+                    
+                    Text("Powered by Kimchi Labs  ")
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.gray)
+                        .font(.system(size: 14))
+                        .padding(.trailing, 90)
+                }
+            }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                    animateTitle = false
+            
+                }
+            }
+            
             Divider()
-                .frame(width: 360, height: 1)
-              
-                .padding(.bottom, 4)
+                .frame(maxWidth: .infinity, maxHeight: 1)
+                .padding(.horizontal)
+             
             
             Group {
                 switch colorScheme {
+                    
                 case .light:
                     SignInWithAppleButton(.signIn, onRequest: { request in
                         request.requestedScopes = [.fullName, .email]
@@ -56,11 +64,17 @@ struct authView: View {
                         switch result {
                         case .success(let authorization):
                             auth.handleSuccessfulLogin(authorization)
+                            Task { @MainActor in
+                                print("AuthView: sign-in succeeded — flipping user.signedIn and notifying")
+                                isUserAuthed = true
+                                NotificationCenter.default.post(name: Notification.Name("AuthDidSucceed"), object: nil)
+                            }
                         case .failure(let error):
                             auth.handleLoginError(with: error)
                         }
                     })
                     .signInWithAppleButtonStyle(.black)
+                    
                 case .dark:
                     SignInWithAppleButton(.signIn, onRequest: { request in
                         request.requestedScopes = [.fullName, .email]
@@ -68,6 +82,11 @@ struct authView: View {
                         switch result {
                         case .success(let authorization):
                             auth.handleSuccessfulLogin(authorization)
+                            Task { @MainActor in
+                                print("AuthView: sign-in succeeded — flipping user.signedIn and notifying")
+                                isUserAuthed = true
+                                NotificationCenter.default.post(name: Notification.Name("AuthDidSucceed"), object: nil)
+                            }
                         case .failure(let error):
                             auth.handleLoginError(with: error)
                         }
@@ -77,23 +96,18 @@ struct authView: View {
                     EmptyView()
                 }
             }
-            .frame(width: 297, height:  43)
-            .cornerRadius(20)
-            .padding(.bottom, 130)
+            .frame(maxWidth: .infinity, maxHeight:  45)
+            .cornerRadius(25)
+            .padding(.horizontal)
             
-
             
-        } .frame(maxWidth: .infinity, maxHeight: .infinity)
-        
-        
-        
-        
-        
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
 }
 
+
+
 #Preview {
-        authView()
-    }
+    AuthView()
+}
 

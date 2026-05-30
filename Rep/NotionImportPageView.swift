@@ -22,31 +22,29 @@ struct NotionImportPageView: View {
     
     @State private var maskHeight: CGFloat = 0
     @State private var borderOpacity: Double = 1.0
-    @State private var showOathWebView = false
+    @State private var showOathWebView: Bool = false
+    @State private var showChatView: Bool = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-    @State private var closeView = false
+    
 
     var body: some View {
         
-        VStack {
+        VStack(alignment: .center, spacing: 1) {
             HStack {
-                
                 Spacer()
-                
             }
             .frame(maxWidth: 370)
             
             Spacer()
             ZStack(alignment: .center) {
-                
-                
                 Rectangle()
                     .fill(Color.clear)
-                    .frame(width: 370, height: 160)
+                    .frame(maxWidth: .infinity, maxHeight: 160)
                     .glassEffect(.regular, in: .rect(cornerRadius: 30))
+                    .padding()
                 
                 
                 HStack(alignment: .top) {
@@ -77,24 +75,67 @@ struct NotionImportPageView: View {
                         } label: {
                             RoundedRectangle(cornerRadius: 30)
                                 .fill(Color.mmDark)
-                                .frame(width: 297, height: 48)
+                                .frame(maxWidth: .infinity, maxHeight: 48)
+                                .padding(.horizontal)
+                                .padding(.bottom)
+                        }.padding(.horizontal)
+                        
+                        HStack(alignment: .center, spacing: 10) {
+                            Image("notionlogoReversed")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .padding(.bottom)
+                                .opacity(textOpacity)
+                            
+                            Text("Import page")
+                                .foregroundStyle(Color.checkmark)
+                                .fontWeight(.medium)
+                                .font(.system(size: 16))
                                 .padding(.bottom)
                         }
-                        
-                        Text("Import page")
-                            .foregroundStyle(Color.checkmark)
-                            .fontWeight(.medium)
-                            .font(.system(size: 16))
-                            .padding(.bottom)
-                        
                     }
                 }.frame(maxHeight: 165)
                     .padding()
             }
             
+            VStack(alignment: .center) {
+                Button {
+                    showChatView = true
+                } label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 30)
+                            .fill(Color.clear)
+                            .glassEffect(.regular, in: .rect(cornerRadius: 30))
+                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.regular))
+                        
+                        HStack(spacing: 10) {
+                            Image(systemName: "list.bullet.circle.fill")
+                                .resizable()
+                                .frame(width: 25, height: 25)
+                                .foregroundStyle(Color.mmDark)
+                                .opacity(textOpacity)
+                               
+                            
+                            Text("Generate With AI")
+                                .foregroundStyle(Color.mmDark)
+                                .opacity(textOpacity)
+                                .font(.system(size: 16))
+                                .fontWeight(.medium)
+                            Spacer()
+                        }.padding(.horizontal)
+                    }
+                }.sheet(isPresented: $showChatView) {
+                    if showChatView {
+                        ChatView()
+                            .ignoresSafeArea()
+                    }
+                }
+                
+                
+            }.padding(.horizontal)
             Spacer()
-            
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.mmBackground)

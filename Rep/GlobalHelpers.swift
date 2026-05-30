@@ -3,6 +3,10 @@
 //  Rep
 //
 //  Created by alex haidar on 3/13/26.
+//
+/* Helpers centered primarily around fetching, and querying
+   from SwiftData, also includes LiveActivity token genorator */
+
 import Foundation
 import SwiftData
 import ActivityKit
@@ -39,6 +43,18 @@ final class FetchUnsynced {
     static public func fetchPg(pageID: String, context: ModelContext) throws -> UserPageTitle? {                     ///query un-synced page
         let fetchPg = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == pageID })
         return try context.fetch(fetchPg).first
+    }
+}
+
+final class ImportedNotesFetch {
+    
+    @MainActor
+    static public func fetchPageContent(context: ModelContext, pageID: String) throws -> [UserPageContent] {
+        let descriptor = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == pageID }, sortBy: [SortDescriptor(\.id, order: .forward)])
+        let result = try context.fetch(descriptor)
+        
+        guard !result.isEmpty else { throw ErrorDefinition.emptyContent }
+        return result
     }
 }
 

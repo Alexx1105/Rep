@@ -254,7 +254,7 @@ public final class NotionDataManager: ObservableObject {
                 $0.addTask {
                     for row in chunkedRows {
                         let contentHash: String = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
-                        await SupabaseClientManager.shared.supabaseUpsert(token: token, pageID: userPageTitle.pageID, row: row, pageTitle: userPageTitle.text, content_hash: contentHash)
+                        await SupabaseClientManager.shared.supabaseNotionUpsert(token: token, pageID: userPageTitle.pageID, row: row, pageTitle: userPageTitle.text, content_hash: contentHash)
                         print("==========================\nsplit rows for supaabse upsert ✅: \(row) \nhash: \(contentHash)")
                     }
                 }
