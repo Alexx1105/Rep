@@ -174,11 +174,44 @@ struct CameraPicker: UIViewControllerRepresentable {
 }
 
 
-struct PhotoPicker: View {       //WIP
+struct PhotoPicker: View {
+    @Environment(\.dismiss) private var dismiss
+    @State var selectedPhotoItem: PhotosPickerItem? = nil
+    @State var selectedImage: Image? = nil
+    @State var importedPhotoData: Data? = nil
+    
     var body: some View {
-        @State var selectedPhotoItem: PhotosPickerItem? = nil
-        @State var selectedImage: Image? = nil
-        @State var importedPhotoData: Data? = nil
+        VStack(alignment: .center) {
+            PhotosPicker(selection: $selectedPhotoItem, matching: .images, photoLibrary: .shared()) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 30)
+                        .fill(Color.clear)
+                        .glassEffect(.regular, in: .rect(cornerRadius: 30))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .ignoresSafeArea(.all)
+                    
+                    VStack(spacing: 5) {
+                        Label("Upload Photo", systemImage: "photo").font(.headline)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(Color.mmDark)
+                        
+                        Text("Upload an image with text and Rep\nwill turn them into notes").font(.subheadline)
+                            .foregroundStyle(Color.mmDark).opacity(0.5)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
+                        
+                        HStack(alignment: .bottom , spacing: 5) {
+                            ForEach(0..<5) { square in
+                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 55, maxHeight: 55)
+                                .foregroundStyle(Color.mmDark).opacity(0.2)
+                                
+                            }
+                        }.padding(.top, 2)
+                    }
+                }
+            }.presentationDetents([.fraction(0.3)])
+        }
     }
     
     @MainActor

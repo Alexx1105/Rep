@@ -740,12 +740,12 @@ struct ChatView: View {
                                 .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
                                 .listRowBackground(Color.mmBackground)
                                 .lineLimit(nil)
-                                .animation(.easeOut(duration: 0.53), value: response.text)
+                                .animation(.easeOut(duration: 0.8), value: response.text)
                                 .transition(.opacity.combined(with: .blurReplace))
                                 .textSelection(.enabled)
                         }
                         
-                        Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 135 : 135)
+                        Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 150 : 135)
                         Color.clear.frame(height: 1).id("chat-bottom")
                         
                     }.frame(maxWidth: .infinity)
@@ -945,27 +945,24 @@ struct ChatView: View {
                     
                     HStack(alignment: .bottom) {
                         Menu {
-                            //                            Button {
-                            //
-                            //                            } label: {
-                            //                                Label("Take Photo", systemImage: "camera.fill")
-                            //                            }
-                            //                            Button {
-                            //                                showPhotoPicker = true
-                            //                            } label: {
-                            //                                Label("Upload Photo", systemImage: "photo")
-                            //                            }.onChange(of: selectedPhoto) {_, newValueItem in
-                            //                                //do {
-                            //                                Task {
-                            //                                    for item in newValueItem {
-                            //                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
-                            //                                        let _ = UIImage(data: rawImageData ?? Data())
-                            //                                    }
-                            //                                }
-                            //                                //                                } catch {
-                            //                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
-                            //                                //                                }
-                            //                            }
+                            Button {
+                                
+                            } label: {
+                                Label("Take Photo", systemImage: "camera.fill")
+                            }
+                            Button {
+                                showPhotoPicker = true
+                            } label: {
+                                Label("Upload Photo", systemImage: "photo")
+                            }.onChange(of: selectedPhoto) {_, newValueItem in
+                                
+                                Task { @MainActor in
+                                    for item in newValueItem {
+                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
+                                        let _ = UIImage(data: rawImageData ?? Data())
+                                    }
+                                }
+                            }
                             
                             Button {
                                 showFilePicker = true
@@ -1012,22 +1009,21 @@ struct ChatView: View {
                     .padding(.bottom)
                 
             }
-        }.sheet(isPresented: $showFilePicker) {
+        }.sheet(isPresented: $showPhotoPicker) {
+            PhotoPicker()
+        }
+        .sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
                 
             }
-        }.onReceive(NotificationCenter.default.publisher(
-            for: UIResponder.keyboardWillShowNotification
-        )) { note in
+        }.onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
             
             if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 keyboardHeight = frame.height + 5
             }
         }
-        .onReceive(NotificationCenter.default.publisher(
-            for: UIResponder.keyboardWillHideNotification
-        )) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             keyboardHeight = 0
         }
     }
