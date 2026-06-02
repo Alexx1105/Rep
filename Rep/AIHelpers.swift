@@ -115,7 +115,7 @@ public class Chat: ObservableObject {
                     
                     var formattedChunk: String
                     do {
-                        let format = try AIRequestManager.shared.extractChatContent(extractedContent: snapshot)
+                        let format = try AIRequestManager.shared.extractChatContent(extractedContent: snapshot)  //TODO: improve response speed
                         formattedChunk = format
                     } catch {
                         print("formatting chunk from buffer failed - using raw JSON chunk as fallback")
@@ -221,11 +221,13 @@ struct PhotoPickerList: View {
         ForEach(Array(selectedPhotos.indices), id: \.self) { index in
             ZStack {
                 Capsule()
-                    .frame(maxWidth: .infinity, maxHeight: 28)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 28)
                     .glassEffect(.regular)
+               
                 
-                HStack(spacing: 2) {
-                    Text(String(index + 1)).font(Font.system(size: 12))
+                HStack(spacing: 3) {
+                    Text(String("Image \(index + 1)")).font(Font.system(size: 12))
                         .fontWeight(.semibold)
                         .fontDesign(.rounded)
                     
@@ -247,8 +249,8 @@ struct PhotoPickerList: View {
 
 
 struct PhotoPicker: View {
-    @Environment(\.dismiss) private var dismiss
     @Binding var selectedPhotos: [PhotosPickerItem]
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(alignment: .center) {
@@ -259,6 +261,11 @@ struct PhotoPicker: View {
                         .glassEffect(.regular, in: .rect(cornerRadius: 30))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .ignoresSafeArea(.all)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.mmDark.opacity(0.5), style: StrokeStyle(lineWidth: 0.5, lineCap: .round, dash: [8, 6]))
+                        }.padding()
+                    
                     
                     VStack(spacing: 5) {
                         Label("Upload Photo", systemImage: "photo").font(.headline)
@@ -281,6 +288,10 @@ struct PhotoPicker: View {
                     }
                 }
             }.presentationDetents([.fraction(0.3)])
+        }.onChange(of: selectedPhotos) { _, newValue in
+            if !newValue.isEmpty {
+                dismiss()
+            }
         }
     }
     
