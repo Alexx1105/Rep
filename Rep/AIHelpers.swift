@@ -93,7 +93,6 @@ public class Chat: ObservableObject {
             
             let userPhotoData: Data?
             if let userPhoto = selectedPhotos.compactMap({ $0 }).first {
-                print("user photo: \(userPhoto.supportedContentTypes)")
                 if let transferPhoto = try await userPhoto.loadTransferable(type: PhotoTransfer.self) {
                     userPhotoData = transferPhoto.photo
                     

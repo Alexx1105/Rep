@@ -936,6 +936,7 @@ struct ChatView: View {
                             
                             HStack(spacing: 5) {
                                 Text(file.lastPathComponent).font(Font.system(size: 12))
+                                    .truncationMode(.middle)
                                     .fontWeight(.semibold)
                                     .fontDesign(.rounded)
                                 
