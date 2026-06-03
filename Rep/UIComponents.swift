@@ -679,26 +679,30 @@ struct ChatDialogToast: View {
 struct ChatView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var closeChatSheet
+    @Environment(\.modelContext) private var context
+    
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     private var messagePlaceholder: String = "Upload notes or Ask..."
+    
     @StateObject private var chatState = Chat.shared
     @State var showFilePicker: Bool = false
     @State var showCameraPicker: Bool = false
-    @State var selectedPhoto: [PhotosPickerItem] = []
+    @State var selectedPhotos: [PhotosPickerItem] = []
     @State var showPhotoPicker: Bool = false
     @State private var imageCaptured: UIImage?
     @State var fileUrls: [URL] = []
     @State public var isNewChat: Bool = false
     @State var isGenerating: Bool = false
-    @Environment(\.modelContext) private var context
-    @FocusState private var isChatFocused: Bool
     @State private var keyboardHeight: CGFloat = 0
     @State private var isCircleVisible: Bool = false
     @State private var isCirclePulsing: Bool = false
     @State var showEmptyState: Bool = false
+
+    @FocusState private var isChatFocused: Bool
+    
     @AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
-    
-    
+
+
     var body: some View {
         ZStack {
             Color.mmBackground.ignoresSafeArea()
@@ -740,12 +744,12 @@ struct ChatView: View {
                                 .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
                                 .listRowBackground(Color.mmBackground)
                                 .lineLimit(nil)
-                                .animation(.easeOut(duration: 0.53), value: response.text)
+                                .animation(.easeOut(duration: 0.8), value: response.text)
                                 .transition(.opacity.combined(with: .blurReplace))
                                 .textSelection(.enabled)
                         }
                         
-                        Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 135 : 135)
+                        Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 150 : 135)
                         Color.clear.frame(height: 1).id("chat-bottom")
                         
                     }.frame(maxWidth: .infinity)
@@ -895,7 +899,7 @@ struct ChatView: View {
                         }
                     }
                 }
-                
+                 
                 
                 Spacer(minLength: 60)
                 VStack(alignment: .leading, spacing: 20) {
@@ -909,11 +913,13 @@ struct ChatView: View {
                         .fontWeight(.medium)
                         .onSubmit {
                             showEmptyState = false
-                            Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            let photos: [PhotosPickerItem] = selectedPhotos
+                            Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
                             isEmptyStateSeen = true
                             isCircleVisible = true
                             isCirclePulsing = true
                             fileUrls.removeAll()
+                            selectedPhotos.removeAll()
                             
                         }.onChange(of: Chat.shared.responseMessage.last?.text) { _, newValue in
                             if let presentText = newValue, !presentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -930,6 +936,7 @@ struct ChatView: View {
                             
                             HStack(spacing: 5) {
                                 Text(file.lastPathComponent).font(Font.system(size: 12))
+                                    .truncationMode(.middle)
                                     .fontWeight(.semibold)
                                     .fontDesign(.rounded)
                                 
@@ -943,29 +950,24 @@ struct ChatView: View {
                         }.fixedSize()
                     }.offset(y: -keyboardHeight)
                     
+                    PhotoPickerList(selectedPhotos: $selectedPhotos, keyboardHeight: keyboardHeight)
+                    
                     HStack(alignment: .bottom) {
                         Menu {
-                            //                            Button {
-                            //
-                            //                            } label: {
-                            //                                Label("Take Photo", systemImage: "camera.fill")
-                            //                            }
-                            //                            Button {
-                            //                                showPhotoPicker = true
-                            //                            } label: {
-                            //                                Label("Upload Photo", systemImage: "photo")
-                            //                            }.onChange(of: selectedPhoto) {_, newValueItem in
-                            //                                //do {
-                            //                                Task {
-                            //                                    for item in newValueItem {
-                            //                                        let rawImageData: Data? = try? await item.loadTransferable(type: Data.self)
-                            //                                        let _ = UIImage(data: rawImageData ?? Data())
-                            //                                    }
-                            //                                }
-                            //                                //                                } catch {
-                            //                                //                                    print("upload error ❗️", ErrorDesc.photoUploadError)
-                            //                                //                                }
-                            //                            }
+                            Button {
+                                showPhotoPicker = true
+                            } label: {
+                                Label("Upload Photo", systemImage: "photo")
+                            }.onChange(of: selectedPhotos) {_, newValueItem in
+                                
+                                Task { @MainActor in
+                                    for item in newValueItem {
+                                        let transferPhoto: PhotoTransfer? = try await item.loadTransferable(type: PhotoTransfer.self)
+                                        let rawImageData: Data? = transferPhoto?.photo
+                                        let _ = UIImage(data: rawImageData ?? Data())
+                                    }
+                                }
+                            }
                             
                             Button {
                                 showFilePicker = true
@@ -975,7 +977,6 @@ struct ChatView: View {
                         } label: {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.2).foregroundStyle(Color.intervalBlue)
-                                
                                 HStack(spacing: 2) {
                                     Image(systemName: "plus.app").foregroundStyle(Color.intervalBlue)
                                     Text("Upload")
@@ -990,8 +991,11 @@ struct ChatView: View {
                             isEmptyStateSeen = true
                             isCircleVisible = true
                             isCirclePulsing = true
-                            Chat.sendChatMessage(userFile: fileUrls.first, context: context)
+                            
+                            let photos: [PhotosPickerItem] = selectedPhotos
+                            Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
                             fileUrls.removeAll()
+                            selectedPhotos.removeAll()
                         } label: {
                             ZStack {
                                 Circle().fill(Color.mmDark)
@@ -1012,22 +1016,22 @@ struct ChatView: View {
                     .padding(.bottom)
                 
             }
-        }.sheet(isPresented: $showFilePicker) {
+        }.sheet(isPresented: $showPhotoPicker) {
+            PhotoPicker(selectedPhotos: $selectedPhotos)
+            
+        }
+        .sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
                 
             }
-        }.onReceive(NotificationCenter.default.publisher(
-            for: UIResponder.keyboardWillShowNotification
-        )) { note in
+        }.onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
             
             if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 keyboardHeight = frame.height + 5
             }
         }
-        .onReceive(NotificationCenter.default.publisher(
-            for: UIResponder.keyboardWillHideNotification
-        )) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             keyboardHeight = 0
         }
     }

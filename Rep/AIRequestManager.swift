@@ -46,7 +46,22 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, userFileUrl: URL?, gptModel: String = "mini", context: ModelContext, onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
+    public func buildPhotoBodyHelper(userPhotoData: Data, fileIdentifier: String) throws -> Data {
+        let photoMime: String = guessMimeType(for: userPhotoData)
+   
+        var photoBody = Data()
+        
+        photoBody.append("--\(fileIdentifier)\r\n".data(using: .utf8)!)
+        photoBody.append("Content-Disposition: form-data; name=\"files\"; filename=\"\(photoMime)\"\r\n".data(using: .utf8)!)
+        photoBody.append("Content-Type: \(photoMime)\r\n\r\n".data(using: .utf8)!)
+        photoBody.append(userPhotoData)
+        photoBody.append("\r\n".data(using: .utf8)!)
+        
+        return photoBody
+    }
+    
+    
+    public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
@@ -75,6 +90,11 @@ public final class AIRequestManager: ObservableObject {
         if let userFileUrl {
             let fileBytes = try buildFilePathHelper(userFileUrl: userFileUrl, fileIdentifier: fileIdentifier)
             multipartReqBody.append(fileBytes)
+        }
+        
+        if let userPhotoData {
+            let photoBytes = try buildPhotoBodyHelper(userPhotoData: userPhotoData, fileIdentifier: fileIdentifier)
+            multipartReqBody.append(photoBytes)
         }
         
         multipartReqBody.append("--\(fileIdentifier)--\r\n".data(using: .utf8)!)
