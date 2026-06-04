@@ -744,10 +744,9 @@ struct ChatView: View {
                                 .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
                                 .listRowBackground(Color.mmBackground)
                                 .lineLimit(nil)
-                                .animation(.easeOut(duration: 0.8), value: response.text)
                                 .transition(.opacity.combined(with: .blurReplace))
                                 .textSelection(.enabled)
-                        }
+                        }.animation(.easeOut(duration: 0.3), value: Chat.shared.responseMessage.count)
                         
                         Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 150 : 135)
                         Color.clear.frame(height: 1).id("chat-bottom")

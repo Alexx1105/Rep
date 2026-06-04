@@ -107,24 +107,12 @@ public class Chat: ObservableObject {
             var metadataText: String = ""
             try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context) { chunk in
                 
-                Task {
-                    await chatBufferInstance.append(chunk)
-                    let snapshot: String = await chatBufferInstance.chunkSnapshot()
-                    print("SNAPSHOT IN BUFFER: \(snapshot)")
-                    
-                    var formattedChunk: String
-                    do {
-                        let format = try AIRequestManager.shared.extractChatContent(extractedContent: snapshot)  //TODO: improve response speed
-                        formattedChunk = format
-                    } catch {
-                        print("formatting chunk from buffer failed - using raw JSON chunk as fallback")
-                        formattedChunk = snapshot
-                    }
-                    
-                    Task { @MainActor in
-                        if let addLastRawChunk = shared.responseMessage.indices.last {
-                            shared.responseMessage[addLastRawChunk].text = formattedChunk
-                        }
+                await chatBufferInstance.append(chunk)
+                let format: String = chunk
+                
+                await MainActor.run {
+                    if let addLastRawChunk = shared.responseMessage.indices.last {
+                        shared.responseMessage[addLastRawChunk].text += format
                     }
                 }
             }

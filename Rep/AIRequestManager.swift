@@ -48,7 +48,7 @@ public final class AIRequestManager: ObservableObject {
     
     public func buildPhotoBodyHelper(userPhotoData: Data, fileIdentifier: String) throws -> Data {
         let photoMime: String = guessMimeType(for: userPhotoData)
-   
+        
         var photoBody = Data()
         
         photoBody.append("--\(fileIdentifier)\r\n".data(using: .utf8)!)
@@ -61,7 +61,7 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, onChunk: @escaping(String) -> Void, onMeta: @escaping(String) -> Void) async throws {
+    public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
@@ -107,7 +107,6 @@ public final class AIRequestManager: ObservableObject {
             for try await stream in bytes.lines {
                 
                 guard stream.hasPrefix("data:") else { continue }
-                print(stream)
                 let ssePayload = String(stream.dropFirst(6))    ///strip the "data:" field from the sse payload line
                 if ssePayload == "[DONE]" { break }
                 
@@ -119,7 +118,7 @@ public final class AIRequestManager: ObservableObject {
                     onMeta(meta)
                 }
                 guard streamDecoder.type == "response.output_text.delta", let delta = streamDecoder.delta else { continue }
-                onChunk(delta)
+                await onChunk(delta)
             }
             
         } catch {
@@ -144,25 +143,6 @@ public final class AIRequestManager: ObservableObject {
             print("error saving chat metadata", ErrorDesc.persistenceError, error)
         }
         return "extracted AI id: \(responseID) | status: \(responseStatus) | ai model: \(responseAIModel) ✅"
-    }
-    
-    
-    public func extractChatContent(extractedContent: String) throws -> String {
-        
-        do {
-            let data: Data = Data(extractedContent.utf8)
-            let decodeParentResponse = JSONDecoder()
-            let decodedTitlesAndBullets = try decodeParentResponse.decode(DecodedParentResponse.self, from: data)
-            
-            let formatContent: String = decodedTitlesAndBullets.sections.map { line in
-                "\(line.title)\n" + line.bullets.map {" • \($0) "}.joined(separator: "\n") }.joined(separator: "\n")
-            
-            print("formatted titles and bullets: \(formatContent)")
-            return formatContent
-        } catch {
-            print("failed to extract chat content ❗️", ErrorDesc.parsingError, error)  
-            throw ErrorDesc.nilValue
-        }
     }
     
     
