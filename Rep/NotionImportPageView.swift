@@ -81,10 +81,10 @@ struct NotionImportPageView: View {
                         }.padding(.horizontal)
                         
                         HStack(alignment: .center, spacing: 10) {
-                            Image("notionlogoReversed")
+                            Image("notionLogoReversed")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 18, height: 18)
+                                .frame(width: 20, height: 20)
                                 .padding(.bottom)
                                 .opacity(textOpacity)
                             
