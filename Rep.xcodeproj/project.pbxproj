@@ -20,6 +20,7 @@
 		B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2575D0C2EE120D900B82793 /* PaymentStore.swift */; };
 		B2575D0F2EE123A000B82793 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2575D0E2EE123A000B82793 /* StoreKit.framework */; };
 		B2575D112EE269B500B82793 /* Rep pro tier.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B2575D102EE269B500B82793 /* Rep pro tier.storekit */; };
+		B25D6AEB2FD5AFD8004801B7 /* AudioTranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */; };
 		B26842D12CC704DB00471001 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26842CE2CC704DB00471001 /* MainMenu.swift */; };
 		B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26842D22CC9F5FC00471001 /* SettingsView.swift */; };
 		B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26A46622CCFC4250064AF46 /* LaunchScreen.swift */; };
@@ -29,7 +30,7 @@
 		B281FE392FA6492A00C3EEC5 /* AIDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */; };
 		B286AF3B2F5148CC0014AC64 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B286AF3A2F5148CC0014AC64 /* KimchiKit */; };
 		B286AF3D2F5149580014AC64 /* KimchiKit in Frameworks */ = {isa = PBXBuildFile; productRef = B286AF3C2F5149580014AC64 /* KimchiKit */; };
-		B288975F2F9DAD2400423F83 /* AIRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B288975E2F9DAD0A00423F83 /* AIRequestManager.swift */; };
+		B288975F2F9DAD2400423F83 /* ChatRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
 		B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */; };
@@ -111,6 +112,7 @@
 		B2575D102EE269B500B82793 /* Rep pro tier.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep pro tier.storekit"; sourceTree = "<group>"; };
 		B25A0A472D91D9E300420892 /* DynamicRepTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepTest.swift; sourceTree = "<group>"; };
 		B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DynamicRepExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionManager.swift; sourceTree = "<group>"; };
 		B26842CE2CC704DB00471001 /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		B26842D22CC9F5FC00471001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B26A46622CCFC4250064AF46 /* LaunchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreen.swift; sourceTree = "<group>"; };
@@ -118,7 +120,7 @@
 		B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = StoreKitTestCertificate.cer; sourceTree = "<group>"; };
 		B271C18F2CD1CEBB00710E70 /* NavPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavPath.swift; sourceTree = "<group>"; };
 		B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataStructs.swift; sourceTree = "<group>"; };
-		B288975E2F9DAD0A00423F83 /* AIRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRequestManager.swift; sourceTree = "<group>"; };
+		B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRequestManager.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
 		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -208,7 +210,8 @@
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
 				B212332A2F96AAD0001F39D1 /* AIHelpers.swift */,
 				B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */,
-				B288975E2F9DAD0A00423F83 /* AIRequestManager.swift */,
+				B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */,
+				B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */,
 				B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */,
 				B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */,
 				B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */,
@@ -367,6 +370,7 @@
 			files = (
 				B281FE392FA6492A00C3EEC5 /* AIDataStructs.swift in Sources */,
 				B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */,
+				B25D6AEB2FD5AFD8004801B7 /* AudioTranscriptionManager.swift in Sources */,
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
 				B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */,
@@ -378,7 +382,7 @@
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
 				B212332B2F96AAF2001F39D1 /* AIHelpers.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,
-				B288975F2F9DAD2400423F83 /* AIRequestManager.swift in Sources */,
+				B288975F2F9DAD2400423F83 /* ChatRequestManager.swift in Sources */,
 				B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */,
 				B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,

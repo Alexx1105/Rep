@@ -4,7 +4,7 @@
 //
 //  Created by alex haidar on 4/25/26.
 //
-/* All requests to the supabase edge functions for the AI chatbox and audio transcription will be handled here  */
+/* All requests to the supabase edge functions for the AI chats will be handled here  */
 import Foundation
 import Supabase
 import SwiftData
@@ -74,6 +74,7 @@ public final class AIRequestManager: ObservableObject {
         
         urlRequest.setValue("multipart/form-data; boundary=\(fileIdentifier)", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(supabaseAccessToken)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("chat", forHTTPHeaderField: "x-rep-action")
         urlRequest.httpMethod = "POST"
         
         var multipartReqBody: Data = Data()

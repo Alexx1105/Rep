@@ -1101,6 +1101,93 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
 }
 
 
+struct VoiceTranscriptionView: View {
+    @Environment(\.dismiss) var closeAudioTranscriptionSheet
+ 
+    @State var audioWaveLevels: [CGFloat] = [0.65, 0.65, 0.65, 0.65, 0.65]
+    @StateObject var audioControl = AudioTranscriptionManager()
+
+    
+    var body: some View {
+        VStack {
+            
+            HStack(alignment: .top) {
+                Button {
+                    withAnimation { closeAudioTranscriptionSheet() }
+                } label: {
+                    ZStack {
+                        Circle().fill(Color.clear).glassEffect(.regular)
+                            .frame(width: 45, height: 45)
+                        
+                        Image(systemName: "xmark")
+                            .foregroundStyle(Color.mmDark)
+                            .font(.system(size: 20))
+                    }
+                }
+                
+                Spacer().frame(height: 25)
+                
+            }.frame(maxWidth: .infinity)
+                .padding(.leading)
+                .padding(.top)
+            
+            VStack {
+                RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.clear, in: .rect(cornerRadius: 30))
+                    .padding(.horizontal)
+                
+                Spacer().frame(height: 100)
+                
+                HStack(spacing: 3) {
+                    ForEach(0..<5) { wave in
+                        Capsule().frame(maxWidth: .infinity, maxHeight: 150 * audioWaveLevels[wave])
+                            .foregroundStyle(Color.mmDark)
+                            .animation(.spring(response: 0.18, dampingFraction: 0.72), value: audioWaveLevels[wave])
+                    }
+                }.padding()
+                
+                Spacer().frame(height: 25)
+                
+                Button {
+                    audioControl.isTranscribing.toggle()
+                  
+                    Task {
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.prepare()
+                        impact.impactOccurred()
+                        
+                        if audioControl.isTranscribing {
+                            let session = try await audioControl.openAudioSession()
+                            try await audioControl.startAudioStream(session: session)
+                        } else {
+                            try await audioControl.stopAudioStream()
+                        }
+                    }
+                    
+                } label: {
+                    ZStack {
+                        Circle().fill(Color.clear).glassEffect(.regular)
+                            .frame(maxWidth: 80, maxHeight: 80)
+                            .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioControl.isTranscribing)
+                        
+                        if audioControl.isTranscribing {
+                            RoundedRectangle(cornerRadius: 12).fill(Color.red).frame(maxWidth: 45, maxHeight: 45)
+                                .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioControl.isTranscribing)
+                            
+                        } else {
+                            Circle().fill(Color.red).frame(maxWidth: 70, maxHeight: 70)
+                        }
+                    }
+                }.padding(.top)
+                
+                Spacer().frame(height: 150)
+                
+            }.padding(.top)
+            
+        }.background(Color.mmBackground)
+    }
+}
+
+
 #Preview {
     PaymentMenuCard(isPresented:  .constant(true))
 }
@@ -1120,3 +1207,6 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
     ChatView()
 }
 
+#Preview {
+    VoiceTranscriptionView()
+}

@@ -32,3 +32,27 @@ public struct DecodedParentResponse: Codable {        ///get titles and bullet l
     }
 }
 
+
+public struct AudioSession: Decodable {             ///for audio trnascription
+    let session: SessionData
+    
+    public struct SessionData: Decodable {
+        let value: String
+        let expires_at: String
+        let session: SessionTypes
+        
+        public struct SessionTypes: Decodable {
+            let type: String
+            let id: String
+        }
+    }
+}
+
+public struct TranscriptionStream: Decodable {
+    let type: String
+    let item_id: String?
+    let content_index: Int?
+    let delta: String?
+    let transcript: String?
+    
+}
