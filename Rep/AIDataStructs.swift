@@ -38,7 +38,7 @@ public struct AudioSession: Decodable {             ///for audio trnascription
     
     public struct SessionData: Decodable {
         let value: String
-        let expires_at: String
+        let expires_at: Int
         let session: SessionTypes
         
         public struct SessionTypes: Decodable {

@@ -24,7 +24,7 @@ struct NotionImportPageView: View {
     @State private var borderOpacity: Double = 1.0
     @State private var showOathWebView: Bool = false
     @State private var showChatView: Bool = false
-    @State private var showAudioTranscriptionView: Bool = true
+    @State private var showAudioTranscriptionView: Bool = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }

@@ -1132,7 +1132,7 @@ struct VoiceTranscriptionView: View {
                 .padding(.top)
             
             VStack {
-                RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.clear, in: .rect(cornerRadius: 30))
+                RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 30))
                     .padding(.horizontal)
                 
                 Spacer().frame(height: 100)
@@ -1156,6 +1156,7 @@ struct VoiceTranscriptionView: View {
                         impact.impactOccurred()
                         
                         if audioControl.isTranscribing {
+                            try await allowAudioInputAV()
                             let session = try await audioControl.openAudioSession()
                             try await audioControl.startAudioStream(session: session)
                         } else {

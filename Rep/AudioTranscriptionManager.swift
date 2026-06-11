@@ -5,13 +5,17 @@
 //  Created by alex haidar on 6/7/26.
 //
 /* All requests to the supabase edge functions for the Voice
-   transcription with gpt-4o-mini-transcribe or future models will be handled here  */
+ transcription with gpt-4o-mini-transcribe or future models will be handled here  */
 
 
 import Foundation
 import Supabase
+import AVFoundation
+
+//TODO: move all function calls into a single runner func
 
 
+@MainActor
 public final class AudioTranscriptionManager: ObservableObject {
     public init() {}
     public static let AudioTranscription = AudioTranscriptionManager()
@@ -79,6 +83,9 @@ public final class AudioTranscriptionManager: ObservableObject {
                 try await transcriptionEventListener()
             }
             
+            try configAudioSession()
+            try startMicCapture()
+            
             print("web socket for audio stream successfully created...")
         } catch {
             print("failed to start stream to openai transcription endpoint", ErrorDesc.webSocketError, error)
@@ -106,7 +113,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     }
     
     
-    public func extractTranscriptionResponse() async throws {
+    public func extractTranscriptionResponseDelta() async throws {
         
         do {
             let response = try await decodeTranscriptionResponse()
@@ -117,11 +124,13 @@ public final class AudioTranscriptionManager: ObservableObject {
                 
                 switch response.type {
                 case "conversation.item.input_audio_transcription.delta":
+                    print("appending transcript delta...", response.type)
                     if let delta = response.delta {
                         self.liveTranscription += delta
                     }
                     
                 case "conversation.item.input_audio_transcription.completed":
+                    print("complete")
                     if let text = response.transcript {
                         self.finishedTranscript += text
                     }
@@ -144,16 +153,103 @@ public final class AudioTranscriptionManager: ObservableObject {
         webSocketTask = nil
         isTranscribing = false
         
+        audioEngine.inputNode.removeTap(onBus: 0)
+        audioEngine.stop()
     }
+    
     
     public func transcriptionEventListener() async throws {
         
-         do {
-             while webSocketTask != nil {
-                 try await extractTranscriptionResponse()
-             }
-         } catch {
-             print("audio stream interrupted ❗️", ErrorDesc.webSocketError, error)
-         }
+        do {
+            while webSocketTask != nil {
+                try await extractTranscriptionResponseDelta()
+            }
+        } catch {
+            print("audio stream interrupted ❗️", ErrorDesc.webSocketError, error)
+        }
+    }
+    
+    
+    public func sendAudioChunk(_ pcm16AudioData: Data) async throws {
+        guard let webSocketTask else {
+            throw ErrorDesc.webSocketError
+        }
+        
+        let base64Audio = pcm16AudioData.base64EncodedString()
+        
+        let event: [String: Any] = ["type": "input_audio_buffer.append", "audio": base64Audio]
+        
+        let jsonData = try JSONSerialization.data(withJSONObject: event)
+        guard let jsonString = String(data: jsonData, encoding: .utf8) else { throw ErrorDesc.encodeError }
+        
+        try await webSocketTask.send(.string(jsonString))
+        print("sent audio chunk ✅ bytes:", pcm16AudioData.count, "base64:", base64Audio.count)
+    }
+    
+    
+    private let audioEngine = AVAudioEngine()
+    
+    public func convertBufferToPCM16Data(_ buffer: AVAudioPCMBuffer) throws -> Data {
+        guard let bufferChannelData = buffer.floatChannelData else { throw ErrorDesc.floatError }
+        
+        let frameLength: Int = Int(buffer.frameLength)
+        let channel: UnsafeMutablePointer<Float> = bufferChannelData[0]
+        
+        var data = Data(capacity: frameLength * 2)
+        
+        for i in 0..<frameLength {
+            let frameSample: Float32 = max(-1.0, min(1.0, channel[i]))
+            let frameInt: Int16 = Int16(frameSample * Float(Int16.max))
+            
+            var littleBytes: Int16 = frameInt.littleEndian
+            withUnsafeBytes(of: &littleBytes) { bytes in        ///temporary short-lived pointer
+                data.append(contentsOf: bytes)
+            }
+        }
+        return data
+    }
+    
+    
+    func configAudioSession() throws {
+        
+        do {
+            let audioSession = AVAudioSession()
+            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.allowBluetoothHFP, .defaultToSpeaker])
+            try audioSession.setPreferredSampleRate(24_000)
+            try audioSession.setPreferredInputNumberOfChannels(1)
+            try audioSession.setActive(true)
+            
+            print("audio session successfully set up")
+        } catch {
+            print("failed to config audio session", ErrorDesc.configError, error)
+        }
+    }
+    
+    
+    
+    public func startMicCapture() throws {
+        let micInput = audioEngine.inputNode
+        let micInputFormat = micInput.outputFormat(forBus: 0)
+        
+        audioEngine.inputNode.removeTap(onBus: 0)
+        
+        micInput.installTap(onBus: 0, bufferSize: 512, format: micInputFormat) { [weak self] buffer, _ in    //TODO: update to installAudioTap(onBus:bufferSize:format:tapProvider:)
+            guard let self else { return }
+            
+            Task { [weak self] in
+                do {
+                    let pcmData: Data = try self!.convertBufferToPCM16Data(buffer)
+                    
+                    Task {
+                        try? await self!.sendAudioChunk(pcmData)
+                    }
+                } catch {
+                    print("failed to convert PCM buffer:", error)
+                }
+            }
+        }
+        
+        audioEngine.prepare()
+        try audioEngine.start()
     }
 }
