@@ -10,7 +10,7 @@
 
 import Foundation
 import Supabase
-import AVFoundation
+@preconcurrency import AVFoundation
 
 //TODO: move all function calls into a single runner func
 
@@ -30,7 +30,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     public func openAudioSession() async throws -> AudioSession.SessionData {
         
-        let url: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!
+        let url: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!  //TODO: change back to prod endpoint after edge function is in prod
         var urlRequest: URLRequest = URLRequest(url: url)
         
         let session = try await supabaseDBClient.auth.session
@@ -117,6 +117,7 @@ public final class AudioTranscriptionManager: ObservableObject {
         
         do {
             let response = try await decodeTranscriptionResponse()
+            print("TYPE:", response.type, "| DELTA:", response.delta ?? "","| TRANSCRIPT:", response.transcript ?? "")
             
             try await MainActor.run {
                 
@@ -124,18 +125,18 @@ public final class AudioTranscriptionManager: ObservableObject {
                 
                 switch response.type {
                 case "conversation.item.input_audio_transcription.delta":
-                    print("appending transcript delta...", response.type)
                     if let delta = response.delta {
                         self.liveTranscription += delta
                     }
                     
                 case "conversation.item.input_audio_transcription.completed":
-                    print("complete")
+                    print("audio transcription complete")
                     if let text = response.transcript {
                         self.finishedTranscript += text
                     }
                     
                 default:
+                    print("ignored event:", response.type)
                     break
                 }
             }
@@ -171,19 +172,16 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     
     public func sendAudioChunk(_ pcm16AudioData: Data) async throws {
-        guard let webSocketTask else {
-            throw ErrorDesc.webSocketError
-        }
+        guard let webSocketTask else { throw ErrorDesc.webSocketError }
         
         let base64Audio = pcm16AudioData.base64EncodedString()
-        
         let event: [String: Any] = ["type": "input_audio_buffer.append", "audio": base64Audio]
         
         let jsonData = try JSONSerialization.data(withJSONObject: event)
         guard let jsonString = String(data: jsonData, encoding: .utf8) else { throw ErrorDesc.encodeError }
         
         try await webSocketTask.send(.string(jsonString))
-        print("sent audio chunk ✅ bytes:", pcm16AudioData.count, "base64:", base64Audio.count)
+        print("sent audio chunk ✅")
     }
     
     
@@ -213,7 +211,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     func configAudioSession() throws {
         
         do {
-            let audioSession = AVAudioSession()
+            let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.allowBluetoothHFP, .defaultToSpeaker])
             try audioSession.setPreferredSampleRate(24_000)
             try audioSession.setPreferredInputNumberOfChannels(1)
@@ -229,27 +227,57 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     public func startMicCapture() throws {
         let micInput = audioEngine.inputNode
-        let micInputFormat = micInput.outputFormat(forBus: 0)
+        let micInputFormat = micInput.inputFormat(forBus: 0)
         
         audioEngine.inputNode.removeTap(onBus: 0)
         
         micInput.installTap(onBus: 0, bufferSize: 512, format: micInputFormat) { [weak self] buffer, _ in    //TODO: update to installAudioTap(onBus:bufferSize:format:tapProvider:)
             guard let self else { return }
             
-            Task { [weak self] in
-                do {
-                    let pcmData: Data = try self!.convertBufferToPCM16Data(buffer)
-                    
-                    Task {
-                        try? await self!.sendAudioChunk(pcmData)
-                    }
-                } catch {
-                    print("failed to convert PCM buffer:", error)
+            do {
+                guard let resampleAudioFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 24_000, channels: 1, interleaved: false) else { throw ErrorDesc.configError }
+                guard let converter = AVAudioConverter(from: micInputFormat, to: resampleAudioFormat) else { throw ErrorDesc.configError }
+                let resampledBuffer = try self.resampleBuffer(buffer, converter: converter, outputFormat: resampleAudioFormat)
+                let pcmData: Data = try self.convertBufferToPCM16Data(resampledBuffer)
+    
+                Task {
+                    try? await self.sendAudioChunk(pcmData)
                 }
+            } catch {
+                print("failed to convert PCM buffer:", error)
             }
+            
         }
         
         audioEngine.prepare()
         try audioEngine.start()
+    }
+    
+    
+    nonisolated private func resampleBuffer(_ inputBuffer: AVAudioPCMBuffer, converter: AVAudioConverter, outputFormat: AVAudioFormat) throws -> AVAudioPCMBuffer {
+        
+        let ratio = outputFormat.sampleRate / inputBuffer.format.sampleRate
+        let outputFrameCapacity = AVAudioFrameCount(Double(inputBuffer.frameLength) * ratio)
+        
+        guard let outputBuffer = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: outputFrameCapacity) else { throw ErrorDesc.configError }
+        
+        var didProvideInput = false
+        var error: NSError?
+        
+        
+        converter.convert(to: outputBuffer, error: &error) { _, outStatus in
+            if didProvideInput {
+                outStatus.pointee = .noDataNow
+                return nil
+            }
+            
+            didProvideInput = true
+            outStatus.pointee = .haveData
+            return inputBuffer
+        }
+        
+        if let error { throw error }
+        
+        return outputBuffer
     }
 }
