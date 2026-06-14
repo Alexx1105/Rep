@@ -46,7 +46,7 @@ struct NotionImportPageView: View {
                     
                     ZStack {
                         RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 45))
-                            .frame(width: 130, height: 50)
+                            .frame(width: 130, height: 48)
                             .padding(.trailing)
                         
                         HStack(spacing: 8) {

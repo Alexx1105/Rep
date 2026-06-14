@@ -10,9 +10,9 @@
 
 import Foundation
 import Supabase
+import SwiftData
 @preconcurrency import AVFoundation
 
-//TODO: move all function calls into a single runner func
 
 
 @MainActor
@@ -20,12 +20,58 @@ public final class AudioTranscriptionManager: ObservableObject {
     public init() {}
     public static let AudioTranscription = AudioTranscriptionManager()
     
+    
     private var webSocketTask: URLSessionWebSocketTask?
     typealias MessageTranscription = URLSessionWebSocketTask.Message
     
     @Published var liveTranscription: String = ""
     @Published var finishedTranscript: String = ""
     @Published var isTranscribing: Bool = false
+    
+    
+    func configAudioSession() throws {
+        
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.allowBluetoothHFP, .defaultToSpeaker, .allowBluetoothA2DP])
+            try audioSession.setPreferredSampleRate(24_000)
+            try audioSession.setPreferredInputNumberOfChannels(1)
+            try audioSession.setActive(true)
+            
+            print("audio session successfully set up")
+        } catch {
+            print("failed to config audio session", ErrorDesc.configError, error)
+        }
+    }
+    
+    
+    private let audioEngine = AVAudioEngine()
+    
+    public func startMicCapture() throws {
+        let micInput = audioEngine.inputNode
+        let micInputFormat = micInput.inputFormat(forBus: 0)
+        
+        audioEngine.inputNode.removeTap(onBus: 0)
+        
+        micInput.installTap(onBus: 0, bufferSize: 512, format: micInputFormat) { [weak self] buffer, _ in    //TODO: update to installAudioTap(onBus:bufferSize:format:tapProvider:)
+            guard let self else { return }
+            
+            do {
+                guard let resampleAudioFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 24_000, channels: 1, interleaved: false) else { throw ErrorDesc.configError }
+                guard let converter = AVAudioConverter(from: micInputFormat, to: resampleAudioFormat) else { throw ErrorDesc.configError }
+                let resampledBuffer = try AudioTranscriptionHelper.resampleBuffer(buffer, converter: converter, outputFormat: resampleAudioFormat)
+                let pcmData: Data = try AudioTranscriptionHelper.convertBufferToPCM16Data(resampledBuffer)
+                
+                Task {
+                    try? await self.sendAudioChunk(pcmData)
+                }
+            } catch {
+                print("failed to convert PCM buffer:", error)
+            }
+        }
+        audioEngine.prepare()
+        try audioEngine.start()
+    }
     
     
     public func openAudioSession() async throws -> AudioSession.SessionData {
@@ -60,6 +106,25 @@ public final class AudioTranscriptionManager: ObservableObject {
     }
     
     
+    func createWebSocket(urlRequest: URLRequest) -> URLSessionWebSocketTask {   ///first time start-up
+        let socketId: String = UUID().uuidString
+        print("new web socket created: \(socketId)")
+        return URLSession.shared.webSocketTask(with: urlRequest)
+    }
+    
+    
+    func retryWebSocket(urlRequest: URLRequest) async throws {                  ///retry for failed connections
+        webSocketTask?.cancel(with: .goingAway, reason: .none)
+        
+        let newWebSocket = createWebSocket(urlRequest: urlRequest)
+        self.webSocketTask = newWebSocket
+        newWebSocket.resume()
+        
+        print("reconnected to web socket...")
+        try await Task.sleep(for: .milliseconds(300))
+    }
+    
+    
     public func startAudioStream(session: AudioSession.SessionData) async throws {
         do {
             let ephemeralSecret: String = session.value
@@ -70,25 +135,78 @@ public final class AudioTranscriptionManager: ObservableObject {
             
             urlRequest.setValue("Bearer \(ephemeralSecret)", forHTTPHeaderField: "Authorization")
             
-            let createSocket = URLSession.shared.webSocketTask(with: urlRequest)
-            self.webSocketTask = createSocket
-            
-            createSocket.resume()
+            let webSocket = createWebSocket(urlRequest: urlRequest)
+            self.webSocketTask = webSocket
+            webSocket.resume()
             
             await MainActor.run {
                 isTranscribing = true
             }
             
             Task {
-                try await transcriptionEventListener()
+                try await transcriptionEventListener(urlRequest: urlRequest)
             }
             
             try configAudioSession()
             try startMicCapture()
             
-            print("web socket for audio stream successfully created...")
         } catch {
-            print("failed to start stream to openai transcription endpoint", ErrorDesc.webSocketError, error)
+            print("failed to start stream to openai transcription endpoint ❗️", ErrorDesc.webSocketError, error)
+        }
+    }
+    
+    
+    public func transcriptionEventListener(urlRequest: URLRequest) async throws {
+        
+        while isTranscribing {
+            guard webSocketTask != nil else { throw ErrorDesc.webSocketError }
+            
+            do {
+                try await extractTranscriptionResponseDelta()
+                
+                print("connected web socket, response delta being extracted...")
+            } catch {
+                print("audio stream interrupted ❗️", ErrorDesc.webSocketError, error)
+                try await retryWebSocket(urlRequest: urlRequest)
+            }
+        }
+    }
+    
+    
+    public func stopAudioStream(context: ModelContext, onChunk: @escaping (String) async -> Void) async throws {
+        do {
+            
+            defer {
+                webSocketTask?.cancel(with: .normalClosure, reason: .none)
+                webSocketTask = nil
+                isTranscribing = false
+                print("socket fully shut for this session")
+            }
+            
+            audioEngine.inputNode.removeTap(onBus: 0)
+            audioEngine.stop()
+            
+            try await commitAudioChunk()
+            try await Task.sleep(for: .milliseconds(300))
+            
+            for i in 0..<31 {
+                let finished: String = finishedTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+                let live: String = liveTranscription.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                if finished.isEmpty, !live.isEmpty {
+                    finishedTranscript = liveTranscription
+                }
+                
+                if !finishedTranscript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    _ = try await summarizeFinishedTranscript(context: context, onChunk: onChunk)
+                    return
+                }
+                try await Task.sleep(for: .milliseconds(300))
+                print("wait loop re-checking: \(i) time(s)")
+            }
+            
+        } catch {
+            print("failed to summarize finished transcript", ErrorDesc.callsiteError, error)
         }
     }
     
@@ -133,6 +251,7 @@ public final class AudioTranscriptionManager: ObservableObject {
                     print("audio transcription complete")
                     if let text = response.transcript {
                         self.finishedTranscript += text
+                        print("TRANSCRIPT DONE: \(finishedTranscript)")
                     }
                     
                 default:
@@ -145,28 +264,6 @@ public final class AudioTranscriptionManager: ObservableObject {
         } catch {
             print("error extracting objects from transcript", ErrorDesc.extractError, error)
             throw ErrorDesc.extractError
-        }
-    }
-    
-    
-    public func stopAudioStream() async throws {
-        webSocketTask?.cancel(with: .normalClosure, reason: .none)
-        webSocketTask = nil
-        isTranscribing = false
-        
-        audioEngine.inputNode.removeTap(onBus: 0)
-        audioEngine.stop()
-    }
-    
-    
-    public func transcriptionEventListener() async throws {
-        
-        do {
-            while webSocketTask != nil {
-                try await extractTranscriptionResponseDelta()
-            }
-        } catch {
-            print("audio stream interrupted ❗️", ErrorDesc.webSocketError, error)
         }
     }
     
@@ -185,99 +282,75 @@ public final class AudioTranscriptionManager: ObservableObject {
     }
     
     
-    private let audioEngine = AVAudioEngine()
-    
-    public func convertBufferToPCM16Data(_ buffer: AVAudioPCMBuffer) throws -> Data {
-        guard let bufferChannelData = buffer.floatChannelData else { throw ErrorDesc.floatError }
+    public func commitAudioChunk() async throws {
         
-        let frameLength: Int = Int(buffer.frameLength)
-        let channel: UnsafeMutablePointer<Float> = bufferChannelData[0]
+        let event: [String: Any] = ["type": "input_audio_buffer.commit"]
+        guard !event.isEmpty else { throw ErrorDesc.nilValue }
         
-        var data = Data(capacity: frameLength * 2)
+        let jsonData = try JSONSerialization.data(withJSONObject: event)
+        guard let jsonString = String(data: jsonData, encoding: .utf8) else { throw ErrorDesc.encodeError }
         
-        for i in 0..<frameLength {
-            let frameSample: Float32 = max(-1.0, min(1.0, channel[i]))
-            let frameInt: Int16 = Int16(frameSample * Float(Int16.max))
-            
-            var littleBytes: Int16 = frameInt.littleEndian
-            withUnsafeBytes(of: &littleBytes) { bytes in        ///temporary short-lived pointer
-                data.append(contentsOf: bytes)
-            }
-        }
-        return data
+        try await webSocketTask?.send(.string(jsonString))
+        print("audio stream session commited ✅")
     }
     
     
-    func configAudioSession() throws {
+    public func summarizeFinishedTranscript(context: ModelContext, onChunk: @escaping(String) async -> Void) async throws -> String {
+        guard !finishedTranscript.isEmpty else { throw ErrorDesc.nilValue }
+        
+        let fullTranscript: String = finishedTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+        print("FULL TRANSCRIPT: \(fullTranscript)")
+        
+        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!  //TODO: change back to prod after
+        var urlRequest: URLRequest = URLRequest(url: openAIRequest)
+        
+        let session = try await supabaseDBClient.auth.session
+        let supabaseAccessToken: String = session.accessToken
+        
+        guard !supabaseAccessToken.isEmpty else { throw ErrorDesc.authTokenError }
+        let boundary: String = UUID().uuidString
+        
+        urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(supabaseAccessToken)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("chat", forHTTPHeaderField: "x-rep-action")
+        urlRequest.httpMethod = "POST"
+        
+        var multipartReqBody = Data()
+
+        multipartReqBody.append("--\(boundary)\r\n".data(using: .utf8)!)
+        multipartReqBody.append("Content-Disposition: form-data; name=\"input\"\r\n\r\n".data(using: .utf8)!)
+        multipartReqBody.append("\(fullTranscript)\r\n".data(using: .utf8)!)
+
+        multipartReqBody.append("--\(boundary)\r\n".data(using: .utf8)!)
+        multipartReqBody.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
+        multipartReqBody.append("mini\r\n".data(using: .utf8)!)
+
+        multipartReqBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        urlRequest.httpBody = multipartReqBody
         
         do {
-            let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.allowBluetoothHFP, .defaultToSpeaker])
-            try audioSession.setPreferredSampleRate(24_000)
-            try audioSession.setPreferredInputNumberOfChannels(1)
-            try audioSession.setActive(true)
+            let (bytes, response) = try await URLSession.shared.bytes(for: urlRequest)
+            guard let httpResponse = response as? HTTPURLResponse else { throw ErrorDesc.serverError }
+            print("==========\n status code: \(httpResponse.statusCode)")
             
-            print("audio session successfully set up")
+            for try await stream in bytes.lines {
+                print("RESPONSE STREAM: \(stream)")
+                guard stream.hasPrefix("data:") else { continue }
+                let ssePayload = String(stream.dropFirst(6)).trimmingCharacters(in: .whitespacesAndNewlines)    ///strip the "data:" field from the sse payload line
+                if ssePayload == "[DONE]" { break }
+                
+                guard let streamData = ssePayload.data(using: .utf8) else { continue }
+                let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
+                
+                guard streamDecoder.type == "response.output_text.delta", let delta = streamDecoder.delta else { continue }
+                await onChunk(delta)
+                print("RETURNED CHUNKS: \(delta)")
+            }
+            
         } catch {
-            print("failed to config audio session", ErrorDesc.configError, error)
+            print("failed to return response ❗️", ErrorDesc.decodeError, error)
+            throw ErrorDesc.decodeError
         }
-    }
-    
-    
-    
-    public func startMicCapture() throws {
-        let micInput = audioEngine.inputNode
-        let micInputFormat = micInput.inputFormat(forBus: 0)
-        
-        audioEngine.inputNode.removeTap(onBus: 0)
-        
-        micInput.installTap(onBus: 0, bufferSize: 512, format: micInputFormat) { [weak self] buffer, _ in    //TODO: update to installAudioTap(onBus:bufferSize:format:tapProvider:)
-            guard let self else { return }
-            
-            do {
-                guard let resampleAudioFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 24_000, channels: 1, interleaved: false) else { throw ErrorDesc.configError }
-                guard let converter = AVAudioConverter(from: micInputFormat, to: resampleAudioFormat) else { throw ErrorDesc.configError }
-                let resampledBuffer = try self.resampleBuffer(buffer, converter: converter, outputFormat: resampleAudioFormat)
-                let pcmData: Data = try self.convertBufferToPCM16Data(resampledBuffer)
-    
-                Task {
-                    try? await self.sendAudioChunk(pcmData)
-                }
-            } catch {
-                print("failed to convert PCM buffer:", error)
-            }
-            
-        }
-        
-        audioEngine.prepare()
-        try audioEngine.start()
-    }
-    
-    
-    nonisolated private func resampleBuffer(_ inputBuffer: AVAudioPCMBuffer, converter: AVAudioConverter, outputFormat: AVAudioFormat) throws -> AVAudioPCMBuffer {
-        
-        let ratio = outputFormat.sampleRate / inputBuffer.format.sampleRate
-        let outputFrameCapacity = AVAudioFrameCount(Double(inputBuffer.frameLength) * ratio)
-        
-        guard let outputBuffer = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: outputFrameCapacity) else { throw ErrorDesc.configError }
-        
-        var didProvideInput = false
-        var error: NSError?
-        
-        
-        converter.convert(to: outputBuffer, error: &error) { _, outStatus in
-            if didProvideInput {
-                outStatus.pointee = .noDataNow
-                return nil
-            }
-            
-            didProvideInput = true
-            outStatus.pointee = .haveData
-            return inputBuffer
-        }
-        
-        if let error { throw error }
-        
-        return outputBuffer
+        return ""
     }
 }

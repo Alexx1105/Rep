@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
-		B212332B2F96AAF2001F39D1 /* AIHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* AIHelpers.swift */; };
+		B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */; };
 		B21427D92F38FB9200D86624 /* SyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21427D82F38FB9200D86624 /* SyncController.swift */; };
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
@@ -44,6 +44,7 @@
 		B2D362FF2E2C856400C3012C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B2D362FE2E2C855900C3012C /* .gitignore */; };
 		B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */; };
 		B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E40A932F7E130100D32ECE /* ErrorDesc.swift */; };
+		B2EAF0552FDE2D2F00532E80 /* AudioTranscriptionDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */; };
 		B2EC7FCE2E80C86100613126 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCD2E80C86100613126 /* Supabase */; };
 		B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponents.swift */; };
 		B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */; };
@@ -98,7 +99,7 @@
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = combinedDataSources.swift; sourceTree = "<group>"; };
-		B212332A2F96AAD0001F39D1 /* AIHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIHelpers.swift; sourceTree = "<group>"; };
+		B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHelpers.swift; sourceTree = "<group>"; };
 		B21427D82F38FB9200D86624 /* SyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncController.swift; sourceTree = "<group>"; };
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
@@ -133,6 +134,7 @@
 		B2D362FE2E2C855900C3012C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClientManager.swift; sourceTree = "<group>"; };
 		B2E40A932F7E130100D32ECE /* ErrorDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDesc.swift; sourceTree = "<group>"; };
+		B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionDataHelpers.swift; sourceTree = "<group>"; };
 		B2F82DAB2E9F32F400006533 /* UIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIComponents.swift; sourceTree = "<group>"; };
 		B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionImportPageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -208,9 +210,10 @@
 				B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */,
 				B205064F2D98A3CC0082FEA2 /* LocalCache.swift */,
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
-				B212332A2F96AAD0001F39D1 /* AIHelpers.swift */,
+				B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */,
 				B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */,
 				B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */,
+				B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */,
 				B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */,
 				B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */,
 				B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */,
@@ -380,9 +383,10 @@
 				B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */,
 				B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */,
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
-				B212332B2F96AAF2001F39D1 /* AIHelpers.swift in Sources */,
+				B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,
 				B288975F2F9DAD2400423F83 /* ChatRequestManager.swift in Sources */,
+				B2EAF0552FDE2D2F00532E80 /* AudioTranscriptionDataHelpers.swift in Sources */,
 				B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */,
 				B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,

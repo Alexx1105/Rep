@@ -1103,10 +1103,10 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
 
 struct VoiceTranscriptionView: View {
     @Environment(\.dismiss) var closeAudioTranscriptionSheet
- 
+    @Environment(\.modelContext) private var context
     @State var audioWaveLevels: [CGFloat] = [0.65, 0.65, 0.65, 0.65, 0.65]
     @StateObject var audioControl = AudioTranscriptionManager()
-
+    @State private var completedSummaryText: String = ""
     
     var body: some View {
         VStack {
@@ -1160,7 +1160,9 @@ struct VoiceTranscriptionView: View {
                             let session = try await audioControl.openAudioSession()
                             try await audioControl.startAudioStream(session: session)
                         } else {
-                            try await audioControl.stopAudioStream()
+                            try await audioControl.stopAudioStream(context: context) { delta in
+                            completedSummaryText += delta
+                            }
                         }
                     }
                     
