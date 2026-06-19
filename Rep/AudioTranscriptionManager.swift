@@ -28,12 +28,11 @@ public final class AudioTranscriptionManager: ObservableObject {
     @Published var finishedTranscript: String = ""
     @Published var isTranscribing: Bool = false
     
+    
     func configAudioSession() throws {
-        
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.allowBluetoothHFP, .defaultToSpeaker, .allowBluetoothA2DP])
-            try audioSession.setPreferredSampleRate(24_000)
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .defaultToSpeaker])
             try audioSession.setPreferredInputNumberOfChannels(1)
             try audioSession.setActive(true)
             
