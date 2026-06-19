@@ -17,17 +17,16 @@ import SwiftData
 
 @MainActor
 public final class AudioTranscriptionManager: ObservableObject {
-    public init() {}
-    public static let AudioTranscription = AudioTranscriptionManager()
+    private init() {}
+    public static let shared = AudioTranscriptionManager()
     
     
     private var webSocketTask: URLSessionWebSocketTask?
     typealias MessageTranscription = URLSessionWebSocketTask.Message
     
-    @Published var liveTranscription: String = ""
+    @Published public var liveTranscription: String = ""
     @Published var finishedTranscript: String = ""
     @Published var isTranscribing: Bool = false
-    
     
     func configAudioSession() throws {
         
@@ -235,32 +234,31 @@ public final class AudioTranscriptionManager: ObservableObject {
         
         do {
             let response = try await decodeTranscriptionResponse()
-            print("TYPE:", response.type, "| DELTA:", response.delta ?? "","| TRANSCRIPT:", response.transcript ?? "")
             
             try await MainActor.run {
-                
                 if response.type == "error" { throw ErrorDesc.extractError }
                 
                 switch response.type {
                 case "conversation.item.input_audio_transcription.delta":
                     if let delta = response.delta {
                         self.liveTranscription += delta
+                        print("text delta: \(delta)")
                     }
                     
                 case "conversation.item.input_audio_transcription.completed":
                     print("audio transcription complete")
                     if let text = response.transcript {
                         self.finishedTranscript += text
-                        print("TRANSCRIPT DONE: \(finishedTranscript)")
+                        print("finished transcript:", finishedTranscript)
                     }
                     
                 default:
                     print("ignored event:", response.type)
                     break
                 }
+                print("appending deltas to transcript:", liveTranscription)
             }
             
-            print("successfully appended deltas into transcipt ✅", liveTranscription)
         } catch {
             print("error extracting objects from transcript", ErrorDesc.extractError, error)
             throw ErrorDesc.extractError
@@ -316,15 +314,15 @@ public final class AudioTranscriptionManager: ObservableObject {
         urlRequest.httpMethod = "POST"
         
         var multipartReqBody = Data()
-
+        
         multipartReqBody.append("--\(boundary)\r\n".data(using: .utf8)!)
         multipartReqBody.append("Content-Disposition: form-data; name=\"input\"\r\n\r\n".data(using: .utf8)!)
         multipartReqBody.append("\(fullTranscript)\r\n".data(using: .utf8)!)
-
+        
         multipartReqBody.append("--\(boundary)\r\n".data(using: .utf8)!)
         multipartReqBody.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
         multipartReqBody.append("mini\r\n".data(using: .utf8)!)
-
+        
         multipartReqBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
         urlRequest.httpBody = multipartReqBody
         
