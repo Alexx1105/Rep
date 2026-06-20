@@ -27,6 +27,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     @Published public var liveTranscription: String = ""
     @Published var finishedTranscript: String = ""
     @Published var isTranscribing: Bool = false
+    @Published var audioLevels: CGFloat = 0
     
     
     func configAudioSession() throws {
@@ -57,8 +58,18 @@ public final class AudioTranscriptionManager: ObservableObject {
             do {
                 guard let resampleAudioFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 24_000, channels: 1, interleaved: false) else { throw ErrorDesc.configError }
                 guard let converter = AVAudioConverter(from: micInputFormat, to: resampleAudioFormat) else { throw ErrorDesc.configError }
+                
                 let resampledBuffer = try AudioTranscriptionHelper.resampleBuffer(buffer, converter: converter, outputFormat: resampleAudioFormat)
-                let pcmData: Data = try AudioTranscriptionHelper.convertBufferToPCM16Data(resampledBuffer)
+                let getPcmData: AudioBufferData = try AudioTranscriptionHelper.convertBufferToPCM16Data(resampledBuffer)
+                
+                let pcmData: Data = getPcmData.data
+                let pcmRms: Float = getPcmData.rms
+                
+                let getAudioLevels = AudioTranscriptionHelper.scaleAudioWaves(rms: pcmRms)
+                
+                Task { @MainActor in
+                    self.audioLevels = CGFloat(getAudioLevels)
+                }
                 
                 Task {
                     try? await self.sendAudioChunk(pcmData)
