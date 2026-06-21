@@ -1112,7 +1112,7 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
         private var transcriptionBoxHeight: CGFloat {
             let verticalPadding: CGFloat = 50
             let minHeight: CGFloat = 50
-            let maxHeight: CGFloat = 270
+            let maxHeight: CGFloat = 250
             
             guard !audioManager.liveTranscription.isEmpty else { return minHeight }
             return min(max(dynamicBoxHieght, verticalPadding + minHeight), maxHeight)
@@ -1245,7 +1245,7 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
                     Spacer(minLength: 15)
                     HStack(spacing: 3) {
                         ForEach(0..<5) { wave in
-                            Capsule().frame(width: 40, height: AudioTranscriptionHelper.waveHeight(for: wave, level: audioManager.audioLevels))
+                            Capsule().frame(width: 40, height: AudioTranscriptionHelper.waveHeight(for: wave, audioLevel: audioManager.audioLevels))
                                 .foregroundStyle(Color.mmDark)
                                 .animation(.spring(response: 0.18, dampingFraction: 0.72), value: audioManager.audioLevels)
                         }
