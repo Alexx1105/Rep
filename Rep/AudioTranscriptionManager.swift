@@ -27,7 +27,10 @@ public final class AudioTranscriptionManager: ObservableObject {
     @Published public var liveTranscription: String = ""
     @Published var finishedTranscript: String = ""
     @Published var isTranscribing: Bool = false
+    @Published var isSummarizing: Bool = false
     @Published var audioLevels: CGFloat = 0
+    @Published var summarizedNotes: String = ""
+    @Published var didStopAudioStream: Bool = false
     
     
     func configAudioSession() throws {
@@ -184,35 +187,40 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     public func stopAudioStream(context: ModelContext, onChunk: @escaping (String) async -> Void) async throws {
         do {
-            
-            defer {
-                webSocketTask?.cancel(with: .normalClosure, reason: .none)
-                webSocketTask = nil
-                isTranscribing = false
-                print("socket fully shut for this session")
-            }
-            
             audioEngine.inputNode.removeTap(onBus: 0)
             audioEngine.stop()
+            print("socket fully shut for this session")
+            
+            await MainActor.run {
+                self.didStopAudioStream = true
+                self.isTranscribing = false
+            }
             
             try await commitAudioChunk()
             try await Task.sleep(for: .milliseconds(300))
             
             for i in 0..<31 {
                 let finished: String = finishedTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-                let live: String = liveTranscription.trimmingCharacters(in: .whitespacesAndNewlines)
                 
-                if finished.isEmpty, !live.isEmpty {
-                    finishedTranscript = liveTranscription
-                }
-                
-                if !finishedTranscript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                if didStopAudioStream && !finished.isEmpty {
                     _ = try await summarizeFinishedTranscript(context: context, onChunk: onChunk)
                     return
                 }
+                
                 try await Task.sleep(for: .milliseconds(300))
                 print("wait loop re-checking: \(i) time(s)")
             }
+            
+            let live: String = liveTranscription.trimmingCharacters(in: .whitespacesAndNewlines)   ///Fallback is retry loop fails
+            
+            if didStopAudioStream && !live.isEmpty {
+                finishedTranscript = liveTranscription
+                _ = try await summarizeFinishedTranscript(context: context, onChunk: onChunk)
+                return
+            }
+            
+            webSocketTask?.cancel(with: .normalClosure, reason: .none)
+            webSocketTask = nil
             
         } catch {
             print("failed to summarize finished transcript", ErrorDesc.callsiteError, error)
@@ -352,7 +360,12 @@ public final class AudioTranscriptionManager: ObservableObject {
                 
                 guard streamDecoder.type == "response.output_text.delta", let delta = streamDecoder.delta else { continue }
                 await onChunk(delta)
-                print("RETURNED CHUNKS: \(delta)")
+             
+                await MainActor.run {
+                    isSummarizing = true
+                    summarizedNotes += delta
+                    print("deltas appended to summarized notes: \(summarizedNotes)")
+                }
             }
             
         } catch {
