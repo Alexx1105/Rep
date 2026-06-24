@@ -1137,9 +1137,44 @@ struct PickerView: View {
 }
 
 
+struct SoftRevealModifier: ViewModifier {
+    let trigger: String
+
+    @State private var isVisible = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isVisible ? 1 : 0)
+            .blur(radius: isVisible ? 0 : 8)
+            .offset(y: isVisible ? 0 : 10)
+            .animation(.easeOut(duration: 0.23), value: isVisible)
+            .onAppear {
+                isVisible = false
+
+                DispatchQueue.main.async {
+                    isVisible = true
+                }
+            }
+            .onChange(of: trigger) { _, _ in
+                isVisible = false
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                    isVisible = true
+                }
+            }
+    }
+}
+
+extension View {
+    func softReveal(trigger: String) -> some View {
+        modifier(SoftRevealModifier(trigger: trigger))
+    }
+}
+
 struct transcriptionSummmaryView: View {
     @ObservedObject private var audioManager = AudioTranscriptionManager.shared
     @State public var defaultSelectedType: PickerView.PickerType = .notes
+    
     
     var body: some View {
         
@@ -1177,6 +1212,7 @@ struct transcriptionSummmaryView: View {
                             .multilineTextAlignment(.leading)
                             .padding(.horizontal)
                             .padding(.top)
+                            .softReveal(trigger: audioManager.finishedTranscript)
                         
                     case .notes:
                         Text(audioManager.summarizedNotes)
@@ -1186,6 +1222,7 @@ struct transcriptionSummmaryView: View {
                             .lineLimit(nil)
                             .multilineTextAlignment(.leading)
                             .padding(.top)
+                            .softReveal(trigger: audioManager.summarizedNotes)
                     }
                     
                     Spacer(minLength: 50)
@@ -1213,7 +1250,12 @@ struct transcriptionSummmaryView: View {
                     PickerView(pickerType: $defaultSelectedType)
                     Spacer(minLength: 5)
                     Button {
-                                //call state here
+                        audioManager.isTranscribing = false
+                        audioManager.isSummarizing = false
+                        audioManager.audioLevels = 0
+                        audioManager.didStopAudioStream = false
+                        audioManager.finishedTranscript = ""
+                        audioManager.liveTranscription = ""
                     } label: {
                         ZStack {
                             Circle().fill(Color.clear).frame(width: 50, height: 50)
@@ -1240,6 +1282,7 @@ struct VoiceTranscriptionView: View {
     @State private var streamingText: String = ""
     @State private var dynamicBoxHieght: CGFloat = 0
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
+    private var transcriptNotesGenerating: String = "Generating notes... "
     
     
     private var transcriptionBoxHeight: CGFloat {
@@ -1325,7 +1368,7 @@ struct VoiceTranscriptionView: View {
                                         
                                         if !audioManager.isTranscribing {
                                             HStack {
-                                                Text(transcriptionPlaceholder).padding(.top, 10)
+                                                Text(audioManager.didStopAudioStream ? transcriptNotesGenerating : transcriptionPlaceholder).padding(.top, 10)
                                                     .font(.system(size: 12, weight: .regular, design: .rounded))
                                                 Spacer(minLength: 30)
                                             }
