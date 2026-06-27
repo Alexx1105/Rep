@@ -19,7 +19,7 @@ public struct AudioBufferData {
 
 final class AudioTranscriptionHelper {
     private init() {}
-    
+
     
     nonisolated public static func resampleBuffer(_ inputBuffer: AVAudioPCMBuffer, converter: AVAudioConverter, outputFormat: AVAudioFormat) throws -> AVAudioPCMBuffer {
         let ratio = outputFormat.sampleRate / inputBuffer.format.sampleRate

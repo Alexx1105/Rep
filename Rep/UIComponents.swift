@@ -722,6 +722,7 @@ struct ChatView: View {
                                     .opacity(isCirclePulsing ? 0.8 : 0.25)
                                     .fontDesign(.rounded)
                                     .fontWeight(.medium)
+                                    
                                 
                                 Spacer()
                             }
@@ -1256,6 +1257,7 @@ struct transcriptionSummmaryView: View {
                         audioManager.didStopAudioStream = false
                         audioManager.finishedTranscript = ""
                         audioManager.liveTranscription = ""
+                        audioManager.isTranscriptFinished = false
                     } label: {
                         ZStack {
                             Circle().fill(Color.clear).frame(width: 50, height: 50)
@@ -1271,7 +1273,7 @@ struct transcriptionSummmaryView: View {
         }
         .frame(maxHeight: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 15))
-     
+        
     }
 }
 
@@ -1281,6 +1283,7 @@ struct VoiceTranscriptionView: View {
     @Environment(\.modelContext) private var context
     @State private var streamingText: String = ""
     @State private var dynamicBoxHieght: CGFloat = 0
+    @State private var isSummarizing: Bool = false
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
     private var transcriptNotesGenerating: String = "Generating notes... "
     
@@ -1330,6 +1333,7 @@ struct VoiceTranscriptionView: View {
         }
     }
     
+    
     @ObservedObject private var audioManager = AudioTranscriptionManager.shared
     
     var body: some View {
@@ -1362,17 +1366,25 @@ struct VoiceTranscriptionView: View {
                     } else {
                         ZStack {
                             RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 15))
+                            
                             ScrollViewReader { proxy in
                                 ScrollView {
                                     VStack(alignment: .leading) {
                                         
-                                        if !audioManager.isTranscribing {
-                                            HStack {
-                                                Text(audioManager.didStopAudioStream ? transcriptNotesGenerating : transcriptionPlaceholder).padding(.top, 10)
-                                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                        
+                                        HStack {
+                                            if audioManager.isSummarizing {
+                                                ShimmerText(text: transcriptNotesGenerating).padding(.top)
+                                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                                                 Spacer(minLength: 30)
+                                                
+                                            } else if !audioManager.isTranscribing {
+                                                Text(transcriptionPlaceholder).padding(.top, 10)
+                                                    .font(.system(size: 12, weight: .regular, design: .rounded))
                                             }
+                                            Spacer(minLength: 30)
                                         }
+                                        
                                         
                                         if audioManager.isTranscribing {
                                             TranscriptionView(transcription: audioManager.liveTranscription)
@@ -1478,10 +1490,12 @@ struct VoiceTranscriptionView: View {
                 
             }.background(Color.mmBackground)
             
-            if audioManager.isSummarizing {
+            if audioManager.isTranscriptFinished {
                 transcriptionSummmaryView().ignoresSafeArea()
+                    .transition(.opacity.combined(with: .scale(scale: 0.985)))
+                    .zIndex(10)
             }
-        }
+        }.animation(.smooth(duration: 0.45), value: audioManager.isTranscriptFinished)
     }
 }
 

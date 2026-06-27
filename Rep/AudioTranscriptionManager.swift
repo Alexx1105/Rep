@@ -26,6 +26,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     @Published public var liveTranscription: String = ""
     @Published var finishedTranscript: String = ""
+    @Published var isTranscriptFinished: Bool = false
     @Published var isTranscribing: Bool = false
     @Published var isSummarizing: Bool = false
     @Published var audioLevels: CGFloat = 0
@@ -194,6 +195,7 @@ public final class AudioTranscriptionManager: ObservableObject {
             await MainActor.run {
                 self.didStopAudioStream = true
                 self.isTranscribing = false
+                self.isSummarizing = true
             }
             
             try await commitAudioChunk()
@@ -362,7 +364,8 @@ public final class AudioTranscriptionManager: ObservableObject {
                 await onChunk(delta)
              
                 await MainActor.run {
-                    isSummarizing = true
+                    isSummarizing = false
+                    isTranscriptFinished = true
                     summarizedNotes += delta
                     print("deltas appended to summarized notes: \(summarizedNotes)")
                 }
