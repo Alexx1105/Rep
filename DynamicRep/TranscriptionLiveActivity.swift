@@ -19,13 +19,11 @@ struct LiveActivityWaveformExpanded: View {
     private let phases: [Double] = [0.18, 0.65, 0.75, 1.08, 1.12, 1.08, 0.75, 0.65, 0.18]
     
     var body: some View {
-        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused)) { timeline in
+        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused || audioLevel <= 0.03)) { timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
-            let minAudioLevel = min(max(audioLevel, 0.0), 1.0)
-            let intensity = minAudioLevel > 0.03 ? minAudioLevel : 0.0
-            let curve = pow(intensity, 0.65)
-            let isActive = isRecording && !isPaused && intensity > 0
-            
+            let isActive = isRecording && !isPaused && audioLevel > 0.03
+            let curve = isActive ? 0.85 : 0.0
+
             HStack(alignment: .center, spacing: 3) {
                 ForEach(0..<9, id: \.self) { index in
                     let phase = phases[index]
@@ -33,12 +31,13 @@ struct LiveActivityWaveformExpanded: View {
                     let normalized = (sine + 1) / 2
                     let idleHeight = 21.0
                     let height = isActive ? idleHeight + normalized * 24.0 * curve : idleHeight
-                    
+
                     Capsule()
                         .frame(width: 10, height: height)
                         .foregroundStyle(.white.opacity(0.8))
                 }
-            }.frame(height: 42, alignment: .center)
+            }
+            .frame(height: 42, alignment: .center)
         }
     }
 }
@@ -52,19 +51,17 @@ struct LiveActivityWaveformMinimal: View {
     private let phases: [Double] = [0.15, 0.55, 0.95, 0.35, 0.75]
     
     var body: some View {
-        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused)) { timeline in
+        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused || audioLevel <= 0.03)) { timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
-            let minAudioLevel = min(max(audioLevel, 0.0), 1.0)
-            let intensity = minAudioLevel > 0.03 ? minAudioLevel : 0.0
-            let curve = pow(intensity, 0.65)
-            let isActive = isRecording && !isPaused && intensity > 0
+            let isActive = isRecording && !isPaused && audioLevel > 0.03
+            let curve = isActive ? 0.85 : 0.0
             
             HStack(alignment: .center, spacing: 1) {
                 ForEach(0..<5, id: \.self) { index in
                     let phase = phases[index]
                     let sine = sin((time * 4.8) + (phase * .pi * 2))
                     let normalized = (sine + 1) / 2
-                    let idleHeight = 6.0
+                    let idleHeight = 4.0
                     let height = isActive ? idleHeight + normalized * 24.0 * curve : idleHeight
                     
                     Capsule()

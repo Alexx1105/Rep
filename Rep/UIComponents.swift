@@ -1320,7 +1320,7 @@ public struct VoiceTranscriptionView: View {
                 startTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: false, audioLevel: audioManager.audioLevels, startedAt: startedAt)
                 try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: audioManager.audioLevels, startedAt: startedAt)
                 
-                print("transcription live activity successfully called in UI ✅")
+                print("transcription live activity start successfully called in UI ✅")
             } catch {
                 print("failed to start/update transcription live activity", ErrorDesc.callsiteError, error)
             }
@@ -1330,9 +1330,13 @@ public struct VoiceTranscriptionView: View {
     private func pushLiveActivity(_ startedAt: Date) {
         Task {
             do {
+                
                 let liveActivityLevel = audioManager.audioLevels > 0.03 ? audioManager.audioLevels : 0.0  ///send 0.0 fallback to reset audio level freq
                 try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: liveActivityLevel, startedAt: startedAt)
-                print("transcription live activity successfully called in UI ✅")
+                
+                print("transcription live activity update successfully called in UI ✅")
+                
+                
             } catch {
                 print("failed to push audio bytes to live activity", ErrorDesc.callsiteError, error)
             }
