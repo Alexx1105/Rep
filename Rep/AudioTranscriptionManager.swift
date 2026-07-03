@@ -11,6 +11,7 @@
 import Foundation
 import Supabase
 import SwiftData
+import KimchiKit
 @preconcurrency import AVFoundation
 
 

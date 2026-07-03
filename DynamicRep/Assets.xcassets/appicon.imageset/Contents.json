@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Rep (redesigned icon) 1024 x 1024 _ Dark.png",
+      "filename" : "Component 24.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Rep (redesigned icon) 1024 x 1024 _ Dark 1.png",
+      "filename" : "Component 25.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Rep (redesigned icon) 1024 x 1024 _ Dark 2.png",
+      "filename" : "Component 26.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

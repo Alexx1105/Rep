@@ -10,6 +10,8 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 import AVFoundation
+import KimchiKit
+import ActivityKit
 
 
 @MainActor
@@ -1278,15 +1280,21 @@ struct transcriptionSummmaryView: View {
 }
 
 
-struct VoiceTranscriptionView: View {
+public struct VoiceTranscriptionView: View {
     @Environment(\.dismiss) var closeAudioTranscriptionSheet
     @Environment(\.modelContext) private var context
+    
     @State private var streamingText: String = ""
     @State private var dynamicBoxHieght: CGFloat = 0
     @State private var isSummarizing: Bool = false
+    @State var transcriptionStartedAt: Date
+    
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
     private var transcriptNotesGenerating: String = "Generating notes... "
     
+    public init(transcriptionStartedAt: Date = Date()) {
+        self.transcriptionStartedAt = transcriptionStartedAt
+    }
     
     private var transcriptionBoxHeight: CGFloat {
         let verticalPadding: CGFloat = 50
@@ -1303,6 +1311,41 @@ struct VoiceTranscriptionView: View {
         
         static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
             value = nextValue()
+        }
+    }
+    
+    private func startLiveActivity(_ startedAt: Date) {
+        Task {
+            do {
+                startTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: false, audioLevel: audioManager.audioLevels, startedAt: startedAt)
+                try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: audioManager.audioLevels, startedAt: startedAt)
+                
+                print("transcription live activity successfully called in UI ✅")
+            } catch {
+                print("failed to start/update transcription live activity", ErrorDesc.callsiteError, error)
+            }
+        }
+    }
+    
+    private func pushLiveActivity(_ startedAt: Date) {
+        Task {
+            do {
+                let liveActivityLevel = audioManager.audioLevels > 0.03 ? audioManager.audioLevels : 0.0  ///send 0.0 fallback to reset audio level freq
+                try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: liveActivityLevel, startedAt: startedAt)
+                print("transcription live activity successfully called in UI ✅")
+            } catch {
+                print("failed to push audio bytes to live activity", ErrorDesc.callsiteError, error)
+            }
+        }
+    }
+    
+    private func stopLiveActivity() {
+        Task {
+            
+            for activity in Activity<TranscriptionLiveActivityAttributes>.activities {
+                await activity.end(nil, dismissalPolicy: .default)
+                print("successfully stopped live activity")
+            }
         }
     }
     
@@ -1336,7 +1379,7 @@ struct VoiceTranscriptionView: View {
     
     @ObservedObject private var audioManager = AudioTranscriptionManager.shared
     
-    var body: some View {
+    public var body: some View {
         ZStack {
             VStack {
                 HStack(alignment: .top) {
@@ -1477,8 +1520,19 @@ struct VoiceTranscriptionView: View {
                                     RoundedRectangle(cornerRadius: 12).fill(Color.red).frame(maxWidth: 45, maxHeight: 45)
                                         .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
                                     
+                                        .task {
+                                            startLiveActivity(transcriptionStartedAt)
+                                        }
+                                    
+                                        .onChange(of: audioManager.audioLevels) { _,_ in
+                                            pushLiveActivity(transcriptionStartedAt)
+                                        }
+                                    
                                 } else {
                                     Circle().fill(Color.red).frame(maxWidth: 70, maxHeight: 70)
+                                        .task {
+                                            stopLiveActivity()
+                                        }
                                 }
                             }
                         }.padding(.top)
@@ -1494,6 +1548,10 @@ struct VoiceTranscriptionView: View {
                 transcriptionSummmaryView().ignoresSafeArea()
                     .transition(.opacity.combined(with: .scale(scale: 0.985)))
                     .zIndex(10)
+                
+                    .task {
+                        stopLiveActivity()
+                    }
             }
         }.animation(.smooth(duration: 0.45), value: audioManager.isTranscriptFinished)
     }
@@ -1520,7 +1578,7 @@ struct VoiceTranscriptionView: View {
 }
 
 #Preview {
-    VoiceTranscriptionView()
+    VoiceTranscriptionView(transcriptionStartedAt: Date())
 }
 
 #Preview {

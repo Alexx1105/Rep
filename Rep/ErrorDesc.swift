@@ -35,6 +35,7 @@ enum ErrorDesc: LocalizedError {        //TODO: log all local errors here
     case permissionDenied
     case floatError
     case configError
+    case liveActivityError
 }
 
 enum ErrorDefinition: Error {
