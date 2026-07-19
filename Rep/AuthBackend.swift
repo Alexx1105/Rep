@@ -67,15 +67,15 @@ public class authBackend: ObservableObject {
                 print("Email:", userCredential.email ?? "No email")
             }
             
-            if let tokenData = userCredential.identityToken,
-               let tokenString = String(data: tokenData, encoding: .utf8) {
+            if let tokenData: Data = userCredential.identityToken,
+               let tokenString: String = String(data: tokenData, encoding: .utf8) {
                 print("Identity token:", tokenString)
                 
                 Task {
                     do {
-                        let session = try await supabaseDBClient.auth.signInWithIdToken(credentials: OpenIDConnectCredentials(provider: .apple, idToken: tokenString))  //TODO: add nonce
+                        let _ = try await supabaseDBClient.auth.signInWithIdToken(credentials: OpenIDConnectCredentials(provider: .apple, idToken: tokenString))  //TODO: add nonce
+                        //try DesktopAppToken.sendTokenToDesktop(session: session)
                         
-                        print("token exchange successful", session)
                     } catch {
                         print("failed to exchange tokens with supabase", ErrorDesc.authTokenError, error)
                     }

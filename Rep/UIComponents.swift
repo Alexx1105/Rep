@@ -1335,8 +1335,6 @@ public struct VoiceTranscriptionView: View {
                 try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: liveActivityLevel, startedAt: startedAt)
                 
                 print("transcription live activity update successfully called in UI ✅")
-                
-                
             } catch {
                 print("failed to push audio bytes to live activity", ErrorDesc.callsiteError, error)
             }

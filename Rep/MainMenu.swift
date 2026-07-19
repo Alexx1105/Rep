@@ -273,6 +273,10 @@ struct MainMenu: View {
                 }
             }
         }
+        
+        .onAppear {
+            RepDesktopPoller.shared.startPollingNotes()
+        }
     }
 }
 
