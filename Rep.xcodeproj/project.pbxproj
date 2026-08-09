@@ -33,6 +33,7 @@
 		B288975F2F9DAD2400423F83 /* ChatRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */; };
 		B2924E2D300C69FE00209D49 /* AudioTranscriptionDesktopPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2924E2C300C69E200209D49 /* AudioTranscriptionDesktopPoller.swift */; };
 		B2924E2F300C702A00209D49 /* AudioTranscriptionStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */; };
+		B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
 		B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */; };
@@ -127,6 +128,7 @@
 		B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRequestManager.swift; sourceTree = "<group>"; };
 		B2924E2C300C69E200209D49 /* AudioTranscriptionDesktopPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionDesktopPoller.swift; sourceTree = "<group>"; };
 		B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionStructs.swift; sourceTree = "<group>"; };
+		B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLiveActivityManager.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
 		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -237,6 +239,7 @@
 				B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */,
 				B26A46662CD04C210064AF46 /* SignOutView.swift */,
 				B26A46622CCFC4250064AF46 /* LaunchScreen.swift */,
+				B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */,
 				B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */,
 				B25A0A472D91D9E300420892 /* DynamicRepTest.swift */,
 				B21427D82F38FB9200D86624 /* SyncController.swift */,
@@ -412,6 +415,7 @@
 				B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */,
 				B2C434EA2FEF68FD00C528CB /* UIAnimations.swift in Sources */,
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
+				B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
