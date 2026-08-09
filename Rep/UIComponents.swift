@@ -1134,31 +1134,51 @@ struct PickerView: View {
 
 struct SoftRevealModifier: ViewModifier {
     let trigger: String
-
-    @State private var isVisible = false
-
+    
+    @State private var opacity: Double = 1
+    @State private var blur: CGFloat = 0
+    @State private var offsetY: CGFloat = 0
+    @State private var lastTrigger: String = ""
+    
     func body(content: Content) -> some View {
         content
-            .opacity(isVisible ? 1 : 0)
-            .blur(radius: isVisible ? 0 : 8)
-            .offset(y: isVisible ? 0 : 10)
-            .animation(.easeOut(duration: 0.23), value: isVisible)
+            .opacity(opacity)
+            .blur(radius: blur)
+            .offset(y: offsetY)
             .onAppear {
-                isVisible = false
-
-                DispatchQueue.main.async {
-                    isVisible = true
-                }
+                lastTrigger = trigger
+                opacity = 1
+                blur = 0
+                offsetY = 0
             }
-            .onChange(of: trigger) { _, _ in
-                isVisible = false
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                    isVisible = true
+            .onChange(of: trigger) { _, newValue in
+                let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                guard !trimmed.isEmpty, newValue != lastTrigger else {
+                    lastTrigger = newValue
+                    return
+                }
+                
+                lastTrigger = newValue
+                
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                
+                withTransaction(transaction) {
+                    opacity = 0
+                    blur = 8
+                    offsetY = 8
+                }
+                
+                withAnimation(.easeOut(duration: 0.32)) {
+                    opacity = 1
+                    blur = 0
+                    offsetY = 0
                 }
             }
     }
 }
+
 
 extension View {
     func softReveal(trigger: String) -> some View {
@@ -1178,19 +1198,6 @@ struct transcriptionSummmaryView: View {
             let fadeHeight: CGFloat = 32
             
             shape.fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 15))
-            
-            VStack(alignment: .center) {
-                ZStack {
-                    Capsule().fill(Color.mmDark)
-                        .frame(width: 180, height: 18)
-                        .foregroundStyle(Color.mmDark).opacity(0.2)
-                    
-                    Text("Notes auto-save to main menu")
-                        .font(.system(size: 10)).fontWeight(.semibold)
-                        .foregroundStyle(Color.mmDark)
-                }
-                Spacer(minLength: 30)
-            }.padding(.top)
             
             ScrollView {
                 VStack(alignment: .leading) {
@@ -1263,11 +1270,24 @@ struct transcriptionSummmaryView: View {
                 }.padding(.bottom)
                     .padding(.bottom)
             }.padding(.horizontal)
-            
         }
         .frame(maxHeight: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 15))
         
+        .overlay {
+            VStack(alignment: .center) {
+                ZStack {
+                    Capsule(style: .continuous).fill(Color.clear).glassEffect(.regular)
+                        .frame(width: 180, height: 18)
+                        
+                    
+                    Text("Notes auto-save to main menu")
+                        .font(.system(size: 10)).fontWeight(.semibold)
+                        .foregroundStyle(Color.mmDark)
+                }
+                Spacer(minLength: 30)
+            }.padding(.top)
+        }
     }
 }
 
@@ -1423,7 +1443,7 @@ public struct VoiceTranscriptionView: View {
                                         proxy.scrollTo("typing-caret", anchor: .bottom)
                                     }
                                     
-                                    Color.clear.frame(height: 1).id("typing-caret")     ///invisible anchor for scroll view to go to
+                                    Color.clear.frame(height: 1).id("typing-caret")
                                     
                                 }.scrollDisabled(audioManager.liveTranscription.isEmpty)
                             }
