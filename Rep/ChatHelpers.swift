@@ -298,3 +298,10 @@ func guessMimeType(for data: Data) -> String {
     return "application/octet-stream"
 }
 
+
+func allowAudioInputAV() async throws {
+    let granted = await AVAudioApplication.requestRecordPermission()
+    guard granted else { throw ErrorDesc.permissionDenied }
+}
+
+

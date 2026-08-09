@@ -24,21 +24,52 @@ struct NotionImportPageView: View {
     @State private var borderOpacity: Double = 1.0
     @State private var showOathWebView: Bool = false
     @State private var showChatView: Bool = false
+    @State private var showAudioTranscriptionView: Bool = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
-
+    
     var body: some View {
         
         VStack(alignment: .center, spacing: 1) {
+            
+            Spacer().frame(maxHeight: 180)
+            
             HStack {
                 Spacer()
-            }
-            .frame(maxWidth: 370)
+                
+                Button {
+                    showAudioTranscriptionView = true
+                } label: {
+                    
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 45))
+                            .frame(width: 130, height: 48)
+                            .padding(.trailing)
+                        
+                        HStack(spacing: 8) {
+                            
+                            Text("Transcribe")
+                                .foregroundStyle(Color.mmDark)
+                                .opacity(textOpacity)
+                                .font(.system(size: 16))
+                                .fontWeight(.medium)
+                            
+                            Image(systemName: "microphone.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(Color.mmDark)
+                                .opacity(textOpacity)
+                            
+                        }.padding(.trailing)
+                    }
+                }
+                
+            }.frame(maxWidth: .infinity)
             
-            Spacer()
+            Spacer().frame(maxHeight: 5)
+            
             ZStack(alignment: .center) {
                 Rectangle()
                     .fill(Color.clear)
@@ -67,7 +98,8 @@ struct NotionImportPageView: View {
                 }
                 
                 .padding(.top)
-                VStack {
+                VStack() {
+                    
                     Spacer()
                     ZStack {
                         Button {
@@ -94,6 +126,10 @@ struct NotionImportPageView: View {
                                 .font(.system(size: 16))
                                 .padding(.bottom)
                         }
+                    }.sheet(isPresented: $showAudioTranscriptionView) {
+                        if showAudioTranscriptionView {
+                            VoiceTranscriptionView()
+                        }
                     }
                 }.frame(maxHeight: 165)
                     .padding()
@@ -116,7 +152,7 @@ struct NotionImportPageView: View {
                                 .frame(width: 25, height: 25)
                                 .foregroundStyle(Color.mmDark)
                                 .opacity(textOpacity)
-                               
+                            
                             
                             Text("Generate With AI")
                                 .foregroundStyle(Color.mmDark)

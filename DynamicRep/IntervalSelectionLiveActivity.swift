@@ -27,8 +27,7 @@ struct IntervalLiveActivity: Widget {
                             .fontWeight(.regular)
                             .font(.system(size: 14))
                             .foregroundStyle(Color.gray)
-                        
-                      
+    
                         
                         Text("You’ll get flashcards every")
                             .fontWeight(.regular)

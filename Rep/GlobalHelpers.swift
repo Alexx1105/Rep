@@ -91,3 +91,34 @@ public final class PageDeletionManager {
         }
     }
 }
+
+
+//public final class DesktopAppToken {
+//    public static func sendTokenToDesktop(session: Session) throws {
+//        
+//        let pairingCode: String = UUID().uuidString
+//        let desktopAccessToken: String = session.accessToken
+//        
+//        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!)
+//        request.httpMethod = "POST"
+//        request.setValue("Bearer \(desktopAccessToken)", forHTTPHeaderField: "Authorization")
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//        
+//        let body: [String : String] = ["pairing_code" : pairingCode]
+//      
+//        guard !body.isEmpty else { throw ErrorDesc.nilValue }
+//        
+//        Task {
+//            do {
+//                try request.httpBody = JSONSerialization.data(withJSONObject: body)
+//                let (_,response) = try await URLSession.shared.data(for: request)
+//                
+//                guard let httpResponse = response as? HTTPURLResponse else { throw ErrorDesc.responseError }
+//                
+//                print("access token successfully sent to edge for desktop helper ✅", httpResponse.statusCode)
+//            } catch {
+//                print("error sending token", ErrorDesc.authTokenError, error)
+//            }
+//        }
+//    }
+//}
