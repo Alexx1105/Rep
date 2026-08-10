@@ -88,6 +88,16 @@ struct ImportedNotes: View {
                                 .padding(.trailing)
                                 .opacity(textOpacity)
                         }
+                        
+                    case .repDesktopTranscription(let desktopNotes):
+                        if !desktopNotes.fullNotes.isEmpty {
+                            
+                            Text(desktopNotes.fullNotes)
+                                .fontWeight(.semibold)
+                                .truncationMode(.middle)
+                                .lineLimit(1)
+                            
+                        }
                     }
                     Spacer()
                 }
@@ -123,7 +133,7 @@ struct ImportedNotes: View {
                         bottomBlur
                         
                     case .openaiChatContent(let openaiChatContent):
-                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter { !$0.isEmpty }
+                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).map{ $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
                         if chatLines.isEmpty {
                             VStack(spacing: -10) {
                                 ForEach(0..<13) { _ in
@@ -141,6 +151,29 @@ struct ImportedNotes: View {
                                         .lineHeight(.loose)
                                         .textSelection(.enabled)
                                     
+                                }.padding(.bottom)
+                            }
+                        }
+                        bottomBlur
+                        
+                    case .repDesktopTranscription(let repDesktopTranscription):
+                        let transcriptLines = repDesktopTranscription.fullNotes.components(separatedBy: .newlines).map{ $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+                        if transcriptLines.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            ScrollView {
+                                ForEach(transcriptLines, id: \.self) { line in
+                                    Text(line)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading)
+                                        .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
+                                        .lineLimit(nil)
+                                        .lineHeight(.loose)
+                                        .textSelection(.enabled)
                                 }.padding(.bottom)
                             }
                         }

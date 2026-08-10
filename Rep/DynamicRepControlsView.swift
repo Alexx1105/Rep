@@ -80,7 +80,8 @@ struct DynamicRepControlsView: View {
             return notionPage.pageID
         case .openaiChatContent(let openaiChat):
             return openaiChat.openaiId
-            
+        case .repDesktopTranscription(let desktopTranscription):
+            return desktopTranscription.userId
         }
     }
     
@@ -90,6 +91,8 @@ struct DynamicRepControlsView: View {
             return notion.text
         case .openaiChatContent(let openai):
             return String(openai.content.prefix(20))
+        case .repDesktopTranscription(let desktopAudio):
+            return String(desktopAudio.fullNotes.prefix(20))
         }
     }
     
@@ -240,6 +243,19 @@ struct DynamicRepControlsView: View {
                             .background(Capsule()
                                 .frame(height: 25)
                                 .glassEffect(.regular))
+                        
+                    case .repDesktopTranscription(let desktopTranscriptionNotes):
+                        Text(desktopTranscriptionNotes.fullNotes)
+                            .font(.system(size: 14))
+                            .fontWeight(.regular)
+                            .truncationMode(.tail)
+                            .lineLimit(1)
+                            .padding()
+                        
+                            .background(Capsule()
+                                .frame(height: 25)
+                                .glassEffect(.regular))
+                        
                     }
                 }
             }.frame(maxWidth: .infinity)

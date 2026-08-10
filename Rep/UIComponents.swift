@@ -117,6 +117,7 @@ struct MainMenuTab: View {
     
     let userPageTitle: UserPageTitle?
     let openaiChatTitle: OpenAIChat?
+    let repDesktopAudioTitle: RepDesktopTranscription?
     
     let dataSource: CombinedDataSource
     
@@ -178,6 +179,18 @@ struct MainMenuTab: View {
                             .opacity(textOpacity)
                         
                         Text(userPageTitle?.text ?? "")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
+                    
+                    if repDesktopAudioTitle?.fullNotes != nil {
+                        Image(systemName: "waveform.mid").font(.system(size: 25))
+                            .opacity(textOpacity)
+                        
+                        Text(repDesktopAudioTitle?.fullNotes ?? "")
                             .fontWeight(.medium)
                             .foregroundStyle(Color.mmDark)
                             .lineLimit(1)
@@ -635,8 +648,12 @@ struct ChatDialogToast: View {
 }
 
 #Preview {
-    MainMenuTab(userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄"),
-                openaiChatTitle: OpenAIChat(content: "", openaiId: ""), dataSource: .notionContent(UserPageTitle(pageID: "", text: "")))   ///page tab
+    MainMenuTab(
+        userPageTitle: UserPageTitle(pageID: "page ID", text: "title", emoji: "😄"),
+        openaiChatTitle: OpenAIChat(content: "", openaiId: ""),
+        repDesktopAudioTitle: nil,
+        dataSource: .notionContent(UserPageTitle(pageID: "", text: ""))
+    )
 }
 
 
@@ -1063,7 +1080,7 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
                         .navigationBarBackButtonHidden(true)
                     
                 } label: {
-                    MainMenuTab(userPageTitle: pageTitle, openaiChatTitle: nil, dataSource: title)
+                    MainMenuTab(userPageTitle: pageTitle, openaiChatTitle: nil, repDesktopAudioTitle: nil , dataSource: title)
                 }
                 .allowsHitTesting(!tabSlideOver)
             }
@@ -1088,7 +1105,31 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
                     ImportedNotes(pageID: chatTitle.content, titleSource: title)
                         .navigationBarBackButtonHidden(true)
                 } label: {
-                    MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle, dataSource: title)
+                    MainMenuTab(userPageTitle: nil, openaiChatTitle: chatTitle, repDesktopAudioTitle: nil,  dataSource: title)
+                }.allowsHitTesting(!tabSlideOver)
+            }
+            
+        case .repDesktopTranscription(let desktopAudioTitle):
+            if tabSlideOver {
+                Button {
+                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
+                    if deleteMultipleTabs.contains(desktopAudioTitle.userId) {
+                        deleteMultipleTabs.remove(desktopAudioTitle.userId)
+                    } else {
+                        deleteMultipleTabs.insert(desktopAudioTitle.userId)
+                    }
+                    
+                } label: {
+                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(desktopAudioTitle.userId))
+                }
+            }
+            
+            if !desktopAudioTitle.fullNotes.isEmpty {
+                NavigationLink {
+                    ImportedNotes(pageID: desktopAudioTitle.userId, titleSource: title)
+                        .navigationBarBackButtonHidden(true)
+                } label: {
+                    MainMenuTab(userPageTitle: nil, openaiChatTitle: nil, repDesktopAudioTitle: desktopAudioTitle , dataSource: title)
                 }.allowsHitTesting(!tabSlideOver)
             }
         }

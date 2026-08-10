@@ -116,3 +116,17 @@ import SwiftUI
         self.status = status
     }
 }
+
+@Model final class RepDesktopTranscription {
+    @Attribute(.unique) public var userId: String
+    var fullTranscript: String
+    var fullNotes: String
+    var createdAt: String
+    
+    init(userId: String, fullTranscript: String, fullNotes: String, createdAt: String) {
+        self.userId = userId
+        self.fullTranscript = fullTranscript
+        self.fullNotes = fullNotes
+        self.createdAt = createdAt
+    }
+}

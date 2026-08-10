@@ -5,8 +5,8 @@
 //  Created by alex haidar on 7/18/26.
 //
 /* A task management and and notes polling class that pulls transcripted
- notes + transcript from the rep desktop app and adds them to the mobile
- app for use with the LiveActivity flashcards */
+   notes + transcript from the rep desktop helper app and adds them
+   to the mobile app for use with the LiveActivity flashcards */
 import Foundation
 import Supabase
 import SwiftUI
@@ -25,7 +25,7 @@ final class RepDesktopPoller: ObservableObject {
         task = Task {
             while !Task.isCancelled {
                 do {
-                    try await getQueuedNotes()
+                    try await getQueuedDesktopNotes()
                     try? await Task.sleep(for: .seconds(10))
                 } catch {
                     print("failed to start polling", ErrorDesc.taskError, error)
@@ -44,7 +44,7 @@ final class RepDesktopPoller: ObservableObject {
     }
     
     
-    func getQueuedNotes() async throws {
+    func getQueuedDesktopNotes() async throws {
         do {
             let session: Session = try await supabaseDBClient.auth.session
             guard !session.isExpired else { throw ErrorDesc.authTokenError }
@@ -77,3 +77,4 @@ final class RepDesktopPoller: ObservableObject {
     }
 }
 
+//TODO: call supabase persistance + SwiftData model context!
