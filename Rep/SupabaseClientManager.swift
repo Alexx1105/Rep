@@ -4,7 +4,8 @@
 //
 //  Created by alex haidar on 3/28/26.
 
-
+/* Upsert functions to supabase push token
+ server for all data soruces run through here */
 import Foundation
 import Supabase
 import CryptoKit
@@ -34,6 +35,22 @@ public struct PushToSupabaseOpenAi: Encodable {
         case openaiID = "page_id"
         case content = "page_data"
         case title = "page_title"
+        case contentHash = "content_hash"
+    }
+}
+
+public struct PushToSupabaseRepDesktopNotes: Encodable {
+    let token: String
+    let userId: String
+    let title: String
+    let fullNotes: String
+    let contentHash: String
+    
+    enum CodingKeys: String, CodingKey {
+        case token = "token"
+        case userId = "user_id"
+        case title = "page_title"
+        case fullNotes = "page_data"
         case contentHash = "content_hash"
     }
 }
@@ -74,5 +91,20 @@ public final class SupabaseClientManager: ObservableObject {
         } catch {
             print("[openai chat] supabse insertion errror ❗️", SupabaseError.upsertError, error)
         }
+    }
+    
+    
+    public func supabaseRepDesktopNotesUpsert(userId: String, title: String, fullNotes: String, token: String) async throws {
+        
+        let hash: Data = Data(fullNotes.utf8)
+        let hashed = SHA256.hash(data: hash).map { String(format: "%02x", $0) }.joined()
+        print("generated local hash:", hashed)
+        
+        guard !userId.isEmpty && !title.isEmpty && !fullNotes.isEmpty else { throw ErrorDesc.nilValue }
+        
+        let schema: PushToSupabaseRepDesktopNotes = PushToSupabaseRepDesktopNotes(token: token, userId: userId, title: title, fullNotes: fullNotes, contentHash: hashed)
+        let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
+        
+        print("==========\npage data successfully inserted ✅:", send)
     }
 }

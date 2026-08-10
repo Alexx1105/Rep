@@ -275,7 +275,7 @@ struct MainMenu: View {
         }
         
         .onAppear {
-            RepDesktopPoller.shared.startPollingNotes()
+            RepDesktopPoller.shared.startPollingNotes(context: context)
         }
     }
 }

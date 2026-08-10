@@ -5,11 +5,13 @@
 //  Created by alex haidar on 7/18/26.
 //
 /* A task management and and notes polling class that pulls transcripted
-   notes + transcript from the rep desktop helper app and adds them
-   to the mobile app for use with the LiveActivity flashcards */
+   notes + transcript from the rep desktop helper app and adds them to
+   the mobile app for use with the LiveActivity flashcards + caches locally
+   and upserts to the supabase db */
 import Foundation
 import Supabase
 import SwiftUI
+import SwiftData
 
 
 @MainActor
@@ -19,13 +21,13 @@ final class RepDesktopPoller: ObservableObject {
     static let shared = RepDesktopPoller()
     private var task: Task<Void, Never>?
     
-    func startPollingNotes() {
+    func startPollingNotes(context: ModelContext) {
         task?.cancel()
         
         task = Task {
             while !Task.isCancelled {
                 do {
-                    try await getQueuedDesktopNotes()
+                    try await getQueuedDesktopNotes(context: context)
                     try? await Task.sleep(for: .seconds(10))
                 } catch {
                     print("failed to start polling", ErrorDesc.taskError, error)
@@ -44,37 +46,58 @@ final class RepDesktopPoller: ObservableObject {
     }
     
     
-    func getQueuedDesktopNotes() async throws {
-        do {
-            let session: Session = try await supabaseDBClient.auth.session
-            guard !session.isExpired else { throw ErrorDesc.authTokenError }
+    func getQueuedDesktopNotes(context: ModelContext) async throws {
+        
+        let session: Session = try await supabaseDBClient.auth.session
+        guard !session.isExpired else { throw ErrorDesc.authTokenError }
+        
+        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("desktop_notes", forHTTPHeaderField: "x-rep-action")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let urlResponse = response as? HTTPURLResponse, urlResponse.statusCode == 200 else { throw ErrorDesc.urlResponseError }
+        
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(DesktopNotes.self, from: data)
+        
+        guard let firstNote = result.notes.first else { return }
+        
+        let fullTranscript: String = firstNote.transcript ?? "no transcript"
+        let fullNotes: String = firstNote.notes ?? "no notes"
+        let userId: String = firstNote.id
+        let createdAt: String = firstNote.created_at
+        let title =  String(fullNotes.prefix(20))
+        
+        print("FULL TRANSCRIPT: \(fullTranscript)")
+        print("FULL NOTES: \(fullNotes)")
+        print("user id: \(userId) | created at: \(createdAt)")
+        print("title: \(title)")
+        
+        let repDesktopTranscription: RepDesktopTranscription = RepDesktopTranscription(userId: userId, fullTranscript: fullTranscript, fullNotes: fullNotes, createdAt: createdAt)
+        context.insert(repDesktopTranscription)
+        try context.save()
+        
+        if !fullNotes.isEmpty && !userId.isEmpty {
+            try await upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
+        }
+    }  //TODO: fix upsert + persistance issue
+    
+    
+    func upsertRepDesktopNotes(fullNotes: String, userId: String, title: String) async throws {
+        guard !fullNotes.isEmpty && !userId.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
+        
+        let token: String = await PushTokenManager.generatePushToken()
+        
+        for transcribedNote in fullNotes.split(separator: "\n") {
+            let desktopNote = String(transcribedNote).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !desktopNote.isEmpty else { continue }
             
-            var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!)
-            request.httpMethod = "GET"
-            request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-            request.setValue("desktop_notes", forHTTPHeaderField: "x-rep-action")
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let urlResponse = response as? HTTPURLResponse, urlResponse.statusCode == 200 else { throw ErrorDesc.urlResponseError }
-            
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(DesktopNotes.self, from: data)
-            
-            guard let firstNote = result.notes.first else { throw ErrorDesc.nilValue }
-
-            let fullTranscript: String = firstNote.transcript ?? "no transcript"
-            let fullNotes: String = firstNote.notes ?? "no notes"
-            let userId: String = firstNote.id
-            let createdAt: String = firstNote.created_at
-            
-            print("FULL TRANSCRIPT: \(fullTranscript)")
-            print("FULL NOTES: \(fullNotes)")
-            print("user id: \(userId) | created at: \(createdAt)")
-            
-        } catch {
-            print("failed to get queued transcripted notes from rep desktop helper", ErrorDesc.callsiteError, error)
+            try await SupabaseClientManager.shared.supabaseRepDesktopNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
+            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
         }
     }
 }
 
-//TODO: call supabase persistance + SwiftData model context!
+
