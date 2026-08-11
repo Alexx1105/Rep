@@ -189,6 +189,8 @@ struct ImportedNotes: View {
             .background(Color.mmBackground)
         }
         .task {
+            guard case .notionContent(_) = titleSource else { return }
+
             do {
                 pageBlocks = try ImportedNotesFetch.fetchPageContent(context: context, pageID: pageID)
                 print("content fetched... \(pageBlocks.count)")
