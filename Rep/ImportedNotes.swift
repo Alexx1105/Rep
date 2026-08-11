@@ -97,6 +97,8 @@ struct ImportedNotes: View {
                                 .truncationMode(.middle)
                                 .lineLimit(1)
                             
+                            Image(systemName: "waveform.mid").foregroundStyle(Color.mmDark)
+                            
                         }
                     }
                     Spacer()

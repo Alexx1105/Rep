@@ -188,7 +188,7 @@ struct MainMenuTab: View {
                     
                     if repDesktopAudioTitle?.fullNotes != nil {
                         Image(systemName: "waveform.mid").font(.system(size: 25))
-                            .opacity(textOpacity)
+                            .foregroundStyle(Color.mmDark)
                         
                         Text(repDesktopAudioTitle?.fullNotes ?? "")
                             .fontWeight(.medium)

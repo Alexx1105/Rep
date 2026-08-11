@@ -68,7 +68,7 @@ final class RepDesktopPoller: ObservableObject {
         let fullNotes: String = firstNote.notes ?? "no notes"
         let userId: String = firstNote.id
         let createdAt: String = firstNote.created_at
-        let title =  String(fullNotes.prefix(20))
+        let title =  String(fullNotes.prefix(30))
         
         print("FULL TRANSCRIPT: \(fullTranscript)")
         print("FULL NOTES: \(fullNotes)")
@@ -82,7 +82,7 @@ final class RepDesktopPoller: ObservableObject {
         if !fullNotes.isEmpty && !userId.isEmpty {
             try await upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
         }
-    }  //TODO: fix upsert + persistance issue
+    }
     
     
     func upsertRepDesktopNotes(fullNotes: String, userId: String, title: String) async throws {

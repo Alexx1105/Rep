@@ -22,6 +22,7 @@ struct MainMenu: View {
     var pageTitles: [UserPageTitle]
     @Query var showUserEmail: [UserEmail]
     @Query var openaiChat: [OpenAIChat]
+    @Query var repDesktopTranscriptions: [RepDesktopTranscription]
     
     var pageID: String
     
@@ -67,7 +68,8 @@ struct MainMenu: View {
     @State private var taskController: TaskController?
     
     var mainMenuSources: [CombinedDataSource] {
-        pageTitles.map{.notionContent($0)} + openaiChat.map {.openaiChatContent($0)}
+        pageTitles.map{ .notionContent($0)} + openaiChat.map {.openaiChatContent($0)} +
+                        repDesktopTranscriptions.map { .repDesktopTranscription($0) }
     }
     
     var body: some View {
