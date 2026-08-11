@@ -100,6 +100,18 @@ struct ImportedNotes: View {
                             Image(systemName: "waveform.mid").foregroundStyle(Color.mmDark)
                             
                         }
+                        
+                    case .repMobileTranscription(let mobileNotes):
+                        
+                        if !mobileNotes.fullNotes.isEmpty {
+                            
+                            Text(mobileNotes.fullNotes)
+                                .fontWeight(.semibold)
+                                .truncationMode(.middle)
+                                .lineLimit(1)
+                            
+                            Image(systemName: "waveform.mid").foregroundStyle(Color.mmDark)
+                        }
                     }
                     Spacer()
                 }
@@ -129,6 +141,7 @@ struct ImportedNotes: View {
                                     .multilineTextAlignment(.leading)
                                     .padding(.bottom)
                                     .textSelection(.enabled)
+                                    .padding(.trailing)
                             }
                             .listStyle(.plain)
                         }
@@ -152,6 +165,7 @@ struct ImportedNotes: View {
                                         .lineLimit(nil)
                                         .lineHeight(.loose)
                                         .textSelection(.enabled)
+                                        .padding(.trailing)
                                     
                                 }.padding(.bottom)
                             }
@@ -176,6 +190,31 @@ struct ImportedNotes: View {
                                         .lineLimit(nil)
                                         .lineHeight(.loose)
                                         .textSelection(.enabled)
+                                        .padding(.trailing)
+                                }.padding(.bottom)
+                            }
+                        }
+                        bottomBlur
+                        
+                    case .repMobileTranscription(let repMobileTranscription):
+                        let transcriptLines = repMobileTranscription.fullNotes.components(separatedBy: .newlines).map{ $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+                        if transcriptLines.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            ScrollView {
+                                ForEach(transcriptLines, id: \.self) { line in
+                                    Text(line)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading)
+                                        .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
+                                        .lineLimit(nil)
+                                        .lineHeight(.loose)
+                                        .textSelection(.enabled)
+                                        .padding(.trailing)
                                 }.padding(.bottom)
                             }
                         }
@@ -205,7 +244,7 @@ struct ImportedNotes: View {
 
 #Preview {
     ImportedNotes(pageID: "", titleSource:
-            .openaiChatContent(OpenAIChat(content: "Preview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content\nPreview chat content", openaiId: "preview-id")))
+            .openaiChatContent(OpenAIChat(content: "Rep turns dense notes into lightweight memory loops that are easy to revisit throughout the day. This preview text is intentionally long so the imported notes screen can be tested with realistic wrapping, scrolling, spacing, and selection behavior. A good note view should handle full paragraphs gracefully, keep line height comfortable, avoid clipping long sentences, and still feel readable when the content stretches across multiple screens. Use this sample to check how the header truncates, how the body text flows, and whether the bottom blur, padding, and scroll behavior still feel smooth with a larger block of study material. It should also reveal how the interface behaves when a note includes several related ideas in one continuous passage, like a meeting summary, lecture recap, or study reflection. The layout should remain calm and readable while preserving enough density for quick scanning, so users can move through their imported notes without feeling like the text is cramped, floating, or fighting the surrounding controls.", openaiId: "preview-id")))
 }
 
 

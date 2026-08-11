@@ -13,6 +13,7 @@ enum CombinedDataSource: Identifiable {
     case notionContent(UserPageTitle)
     case openaiChatContent(OpenAIChat)
     case repDesktopTranscription(RepDesktopTranscription)
+    case repMobileTranscription(RepMobileTranscription)
 
     
     var id: String {            //TODO: add support for anthropic, and other data sources
@@ -23,6 +24,8 @@ enum CombinedDataSource: Identifiable {
             return "openai-\(chat.openaiId)"
         case .repDesktopTranscription(let desktopNotes):
             return "desktopNotes-\(desktopNotes.userId)"
+        case .repMobileTranscription(let mobileNotes):
+            return "mobileNotes-\(mobileNotes.userId)"
         }
     }
 }

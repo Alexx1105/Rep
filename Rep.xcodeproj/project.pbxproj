@@ -12,6 +12,7 @@
 		B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */; };
 		B21427D92F38FB9200D86624 /* SyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21427D82F38FB9200D86624 /* SyncController.swift */; };
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
+		B2270333302BA69C00F308B9 /* SupabaseDataSourceStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
 		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
@@ -106,6 +107,7 @@
 		B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHelpers.swift; sourceTree = "<group>"; };
 		B21427D82F38FB9200D86624 /* SyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncController.swift; sourceTree = "<group>"; };
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDataSourceStructs.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
 		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -212,6 +214,7 @@
 				B2575D102EE269B500B82793 /* Rep pro tier.storekit */,
 				B24A69832F57D97D00FBB5FB /* TosPage.swift */,
 				B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */,
+				B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */,
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponents.swift */,
@@ -396,6 +399,7 @@
 				B2F82DAC2E9F330800006533 /* UIComponents.swift in Sources */,
 				B2924E2D300C69FE00209D49 /* AudioTranscriptionDesktopPoller.swift in Sources */,
 				B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */,
+				B2270333302BA69C00F308B9 /* SupabaseDataSourceStructs.swift in Sources */,
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
 				B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */,
 				B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */,

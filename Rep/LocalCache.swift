@@ -130,3 +130,18 @@ import SwiftUI
         self.createdAt = createdAt
     }
 }
+
+@Model final class RepMobileTranscription {
+    @Attribute(.unique) public var userId: String
+    var fullNotes: String
+    var fullTranscript: String
+    var title: String
+    
+    init(userId: String, fullNotes: String, title: String, fullTranscript: String) {
+        self.userId = userId
+        self.fullNotes = fullNotes
+        self.fullTranscript = fullTranscript
+        self.title = title
+    }
+}
+

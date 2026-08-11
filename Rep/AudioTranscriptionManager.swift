@@ -21,7 +21,6 @@ public final class AudioTranscriptionManager: ObservableObject {
     private init() {}
     public static let shared = AudioTranscriptionManager()
     
-    
     private var webSocketTask: URLSessionWebSocketTask?
     typealias MessageTranscription = URLSessionWebSocketTask.Message
     
@@ -361,14 +360,32 @@ public final class AudioTranscriptionManager: ObservableObject {
                 guard let streamData = ssePayload.data(using: .utf8) else { continue }
                 let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
                 
-                guard streamDecoder.type == "response.output_text.delta", let delta = streamDecoder.delta else { continue }
-                await onChunk(delta)
-             
-                await MainActor.run {
-                    isSummarizing = false
-                    isTranscriptFinished = true
-                    summarizedNotes += delta
-                    print("deltas appended to summarized notes: \(summarizedNotes)")
+                if let delta: String = streamDecoder.delta {
+                    await onChunk(delta)
+                    await MainActor.run {
+                        summarizedNotes += delta
+                        print("deltas appended to summarized notes: \(summarizedNotes)")
+                    }
+                }
+                
+                let fullNotes: String = summarizedNotes
+                let fullTranscript: String = finishedTranscript
+                let title: String = String(summarizedNotes.prefix(30))
+                let userId: String = streamDecoder.response?.id ?? UUID().uuidString
+                
+                if streamDecoder.type == "response.completed" {
+                    await MainActor.run {
+                        isSummarizing = false
+                        isTranscriptFinished = true
+                        
+                        let repMobileTranscription: RepMobileTranscription = RepMobileTranscription(userId: userId, fullNotes: fullNotes, title: title, fullTranscript: fullTranscript)
+                        context.insert(repMobileTranscription)
+                        try? context.save()
+                    }
+                    
+                    if !fullNotes.isEmpty && !userId.isEmpty {
+                        try await SupabaseClientManager.shared.upsertRepMobileNotes(fullNotes: fullNotes, userId: userId, title: title)
+                    }
                 }
             }
             

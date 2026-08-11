@@ -80,22 +80,7 @@ final class RepDesktopPoller: ObservableObject {
         try context.save()
         
         if !fullNotes.isEmpty && !userId.isEmpty {
-            try await upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
-        }
-    }
-    
-    
-    func upsertRepDesktopNotes(fullNotes: String, userId: String, title: String) async throws {
-        guard !fullNotes.isEmpty && !userId.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
-        
-        let token: String = await PushTokenManager.generatePushToken()
-        
-        for transcribedNote in fullNotes.split(separator: "\n") {
-            let desktopNote = String(transcribedNote).trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !desktopNote.isEmpty else { continue }
-            
-            try await SupabaseClientManager.shared.supabaseRepDesktopNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
-            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
+            try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
         }
     }
 }

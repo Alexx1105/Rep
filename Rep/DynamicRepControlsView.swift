@@ -82,6 +82,8 @@ struct DynamicRepControlsView: View {
             return openaiChat.openaiId
         case .repDesktopTranscription(let desktopTranscription):
             return desktopTranscription.userId
+        case .repMobileTranscription(let mobileTranscription):
+            return mobileTranscription.userId
         }
     }
     
@@ -92,7 +94,9 @@ struct DynamicRepControlsView: View {
         case .openaiChatContent(let openai):
             return String(openai.content.prefix(20))
         case .repDesktopTranscription(let desktopAudio):
-            return String(desktopAudio.fullNotes.prefix(20))
+            return String(desktopAudio.fullNotes.prefix(30))
+        case .repMobileTranscription(let mobileAudio):
+            return String(mobileAudio.fullNotes.prefix(30))
         }
     }
     
@@ -256,6 +260,17 @@ struct DynamicRepControlsView: View {
                                 .frame(height: 25)
                                 .glassEffect(.regular))
                         
+                    case .repMobileTranscription(let mobileTranscriptionNotes):
+                        Text(mobileTranscriptionNotes.fullNotes)
+                            .font(.system(size: 14))
+                            .fontWeight(.regular)
+                            .truncationMode(.tail)
+                            .lineLimit(1)
+                            .padding()
+                        
+                            .background(Capsule()
+                                .frame(height: 25)
+                                .glassEffect(.regular))
                     }
                 }
             }.frame(maxWidth: .infinity)
