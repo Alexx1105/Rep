@@ -25,6 +25,8 @@ struct MainMenu: View {
     @Query var repDesktopTranscriptions: [RepDesktopTranscription]
     @Query var repMobileTranscriptions: [RepMobileTranscription]
     
+    @AppStorage("desktop.pollingEnabled") private var isPollingEnabled = false
+    
     var pageID: String
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
@@ -320,7 +322,9 @@ struct MainMenu: View {
         }
         
         .onAppear {
-            RepDesktopPoller.shared.startPollingNotes(context: context)
+            if isPollingEnabled {
+                RepDesktopPoller.shared.startPollingNotes(context: context)
+            }
         }
     }
 }

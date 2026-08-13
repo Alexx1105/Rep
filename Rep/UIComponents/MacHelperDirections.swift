@@ -51,22 +51,31 @@ struct MacHelperDirections: View {
             }.padding(.top)
             
             VStack(alignment: .leading, spacing: 14) {
-                Text("1.  Open App Store on Mac")
-                
-                Text("2.  Search for Rep Desktop Helper and download")
-                
-                Text("3.  Sign in with Apple ID to auto sync Rep between your Mac and iPhone to receive summarized notes")
-                    .fixedSize(horizontal: false, vertical: true)
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("4.  Allow accessibility permissions")
+                    Text("1.  Enable Rep Desktop toggle in settings")
+                    
+                    Image(systemName: "switch.2")
+                        .font(.system(size: 15, weight: .regular))
+                }
+                
+                Text("2.  Open App Store on Mac")
+                
+                Text("3.  Search for Rep Desktop Helper and download")
+                
+                Text("4.  Sign in with Apple ID to auto sync Rep between your Mac and iPhone to receive summarized notes")
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
+                
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("5.  Allow accessibility permissions")
                     
                     Image(systemName: "accessibility")
                         .font(.system(size: 15, weight: .regular))
                 }
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("5.  Enable Notifications for Rep on Mac")
+                    Text("6.  Enable Notifications for Rep on Mac")
                     
                     Image(systemName: "bell.badge")
                         .font(.system(size: 15, weight: .regular))

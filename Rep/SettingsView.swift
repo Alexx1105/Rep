@@ -10,16 +10,16 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissSettingsTab
+    @Environment(\.modelContext) var context
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
+    @AppStorage("desktop.pollingEnabled") private var isPollingEnabled = false
+    
     @ObservedObject var AutoSync = SyncController.shared
-   
-  
-    @Environment(\.modelContext) var modelContext
      
     var showUserEmail: [UserEmail] = []
     
@@ -120,8 +120,37 @@ struct SettingsView: View {
                         .opacity(0.50)
                         .padding(.leading)
                     
-                    Divider()
+                    Divider().padding(.bottom, 7)
+                    HStack(alignment: .top ) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "macbook.and.iphone").font(.system(size: 15))
+                                .opacity(textOpacity)
+                            
+                            Toggle("Rep Desktop", isOn: $isPollingEnabled)
+                                .fontWeight(.semibold)
+                                .opacity(textOpacity)
+                                .tint(.blue)
+                                .onChange(of: isPollingEnabled) { _, enabled in
+                                    if enabled {
+                                        RepDesktopPoller.shared.startPollingNotes(context: context)
+                                    } else {
+                                        RepDesktopPoller.shared.stopPollingNotes()
+                                    }
+                                }
+                            
+                        }.frame(alignment: .leading)
+                        
+                    }.frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                       
                     
+                    Text("Toggle to receive transcripts and notes from\nmeetings recorded with Rep Desktop on your\nMac, directly on your iPhone.")
+                        .font(.system(size: 14)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.50)
+                        .padding(.leading)
+                    
+                    Divider()
                 }
                 Spacer()
                 
