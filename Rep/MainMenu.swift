@@ -29,6 +29,34 @@ struct MainMenu: View {
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+
+    private var notesTopBlur: some View {
+        LinearGradient(
+            colors: [
+                Color.mmBackground,
+                Color.mmBackground.opacity(0.6),
+                Color.mmBackground.opacity(0)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 20)
+        .allowsHitTesting(false)
+    }
+
+    private var notesBottomBlur: some View {
+        LinearGradient(
+            colors: [
+                Color.mmBackground.opacity(0),
+                Color.mmBackground.opacity(0.6),
+                Color.mmBackground
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 80)
+        .allowsHitTesting(false)
+    }
     
     @State private var loading = false
     @State private var didLoad = false
@@ -223,15 +251,25 @@ struct MainMenu: View {
             Spacer()
             
             VStack {
-                ScrollView {
-                    
-                    Spacer()
-                    ForEach(mainMenuSources, id:\.id) { title in
-                        HStack(spacing: 20) {
-                            MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
+                ZStack {
+                    ScrollView {
+                        Spacer()
+                        ForEach(mainMenuSources, id:\.id) { title in
+                            HStack(spacing: 20) {
+                                MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
+                            }
                         }
                     }
-                }.frame(maxHeight: .infinity)
+                    .frame(maxHeight: .infinity)
+                    .contentMargins(.top, 20, for: .scrollContent)
+                    .contentMargins(.bottom, 80, for: .scrollContent)
+
+                    VStack(spacing: 0) {
+                        notesTopBlur
+                        Spacer()
+                        notesBottomBlur
+                    }
+                }
                 .padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))

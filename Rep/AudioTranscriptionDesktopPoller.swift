@@ -5,9 +5,9 @@
 //  Created by alex haidar on 7/18/26.
 //
 /* A task management and and notes polling class that pulls transcripted
-   notes + transcript from the rep desktop helper app and adds them to
-   the mobile app for use with the LiveActivity flashcards + caches locally
-   and upserts to the supabase db */
+ notes + transcript from the rep desktop helper app and adds them to
+ the mobile app for use with the LiveActivity flashcards + caches locally
+ and upserts to the supabase db */
 import Foundation
 import Supabase
 import SwiftUI
@@ -17,7 +17,9 @@ import SwiftData
 @MainActor
 final class RepDesktopPoller: ObservableObject {
     private init() {}
-
+    
+    @Published var didPollerReturnDesktopNotes: Bool = false
+    
     static let shared = RepDesktopPoller()
     private var task: Task<Void, Never>?
     
@@ -62,25 +64,30 @@ final class RepDesktopPoller: ObservableObject {
         let decoder = JSONDecoder()
         let result = try decoder.decode(DesktopNotes.self, from: data)
         
-        guard let firstNote = result.notes.first else { return }
-        
-        let fullTranscript: String = firstNote.transcript ?? "no transcript"
-        let fullNotes: String = firstNote.notes ?? "no notes"
-        let userId: String = firstNote.id
-        let createdAt: String = firstNote.created_at
-        let title =  String(fullNotes.prefix(30))
-        
-        print("FULL TRANSCRIPT: \(fullTranscript)")
-        print("FULL NOTES: \(fullNotes)")
-        print("user id: \(userId) | created at: \(createdAt)")
-        print("title: \(title)")
-        
-        let repDesktopTranscription: RepDesktopTranscription = RepDesktopTranscription(userId: userId, fullTranscript: fullTranscript, fullNotes: fullNotes, createdAt: createdAt)
-        context.insert(repDesktopTranscription)
-        try context.save()
-        
-        if !fullNotes.isEmpty && !userId.isEmpty {
-            try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
+        for note in result.notes {
+            let fullTranscript: String = note.transcript ?? "no transcript"
+            let fullNotes: String = note.notes ?? "no notes"
+            let userId: String = note.id
+            let createdAt: String = note.created_at
+            let title = String(fullNotes.prefix(30))
+            
+            print("FULL TRANSCRIPT: \(fullTranscript)")
+            print("FULL NOTES: \(fullNotes)")
+            print("user id: \(userId) | created at: \(createdAt)")
+            print("title: \(title)")
+            
+            let existingNote = FetchDescriptor<RepDesktopTranscription>(predicate: #Predicate { $0.userId == userId })
+            guard try context.fetch(existingNote).isEmpty else { continue }
+            
+            let repDesktopTranscription: RepDesktopTranscription = RepDesktopTranscription(userId: userId, fullTranscript: fullTranscript, fullNotes: fullNotes, createdAt: createdAt)
+            context.insert(repDesktopTranscription)
+            try context.save()
+            
+            didPollerReturnDesktopNotes = true
+            
+            if !fullNotes.isEmpty && !userId.isEmpty {
+                try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
+            }
         }
     }
 }

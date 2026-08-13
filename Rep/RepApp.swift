@@ -15,6 +15,7 @@ struct ContainerView: View {
     @StateObject var navigationPath = NavPath.shared
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
     
+    
     var body: some View {
         Group {
             if !isUserAuthed {
@@ -84,21 +85,25 @@ struct MuscleMemoryApp: App {
         }
     }
     
+    
     let centralContainer: ModelContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self,
                                                                AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self,
-                                                               DeletedPage.self, OpenAIChat.self, OpenAIMeta.self, RepDesktopTranscription.self, RepMobileTranscription.self)
+                                                               DeletedPage.self, OpenAIChat.self, OpenAIMeta.self, RepDesktopTranscription.self,
+                                                               RepMobileTranscription.self)
     
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
-    @StateObject private var paymentStore = PaymentStore()
     
+    @StateObject private var paymentStore = PaymentStore()
+    @StateObject var desktopNotesPoller = RepDesktopPoller.shared
+    
+    @State private var isPresented: Bool = false
     var body: some Scene {
         
         WindowGroup {
             ZStack {
                 RootTabs()
                     .disabled(!isUserAuthed)
-                
                 if !isUserAuthed {
                     AuthView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -108,6 +113,7 @@ struct MuscleMemoryApp: App {
                         .contentShape(Rectangle())
                         .allowsHitTesting(true)
                 }
+                PolledDesktopNotesPopover(isPresented: $desktopNotesPoller.didPollerReturnDesktopNotes)
             }
             .onOpenURL { url in
                 if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true) {

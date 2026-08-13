@@ -58,8 +58,8 @@ public final class SupabaseClientManager: ObservableObject {
         guard !userId.isEmpty && !title.isEmpty && !fullNotes.isEmpty else { throw ErrorDesc.nilValue }
         
         let schema: PushToSupabaseRepDesktopNotes = PushToSupabaseRepDesktopNotes(token: token, userId: userId, title: title, fullNotes: fullNotes, contentHash: hashed)
-        print("==========\npage data successfully inserted ✅:", send)
         let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
+        print("==========\npage data successfully inserted ✅:", send)
     }
     
     
@@ -72,8 +72,8 @@ public final class SupabaseClientManager: ObservableObject {
             let desktopNote = String(transcribedNote).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !desktopNote.isEmpty else { continue }
             
-            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
             try await supabaseAudioTranscriptionNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
+            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
         }
     }
     
@@ -87,8 +87,8 @@ public final class SupabaseClientManager: ObservableObject {
             let desktopNote = String(transcribedNote).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !desktopNote.isEmpty else { continue }
             
-            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
             try await supabaseAudioTranscriptionNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
+            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
         }
     }
 }
