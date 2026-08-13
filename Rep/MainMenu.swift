@@ -22,11 +22,41 @@ struct MainMenu: View {
     var pageTitles: [UserPageTitle]
     @Query var showUserEmail: [UserEmail]
     @Query var openaiChat: [OpenAIChat]
+    @Query var repDesktopTranscriptions: [RepDesktopTranscription]
+    @Query var repMobileTranscriptions: [RepMobileTranscription]
     
     var pageID: String
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+
+    private var notesTopBlur: some View {
+        LinearGradient(
+            colors: [
+                Color.mmBackground,
+                Color.mmBackground.opacity(0.6),
+                Color.mmBackground.opacity(0)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 20)
+        .allowsHitTesting(false)
+    }
+
+    private var notesBottomBlur: some View {
+        LinearGradient(
+            colors: [
+                Color.mmBackground.opacity(0),
+                Color.mmBackground.opacity(0.6),
+                Color.mmBackground
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 80)
+        .allowsHitTesting(false)
+    }
     
     @State private var loading = false
     @State private var didLoad = false
@@ -67,7 +97,8 @@ struct MainMenu: View {
     @State private var taskController: TaskController?
     
     var mainMenuSources: [CombinedDataSource] {
-        pageTitles.map{.notionContent($0)} + openaiChat.map {.openaiChatContent($0)}
+        pageTitles.map{ .notionContent($0)} + openaiChat.map {.openaiChatContent($0)} +
+        repDesktopTranscriptions.map { .repDesktopTranscription($0)} + repMobileTranscriptions.map { .repMobileTranscription($0)}
     }
     
     var body: some View {
@@ -169,6 +200,10 @@ struct MainMenu: View {
                             try context.delete(model: UserPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             try context.delete(model: UserPageContent.self, where: #Predicate {deleteTabIDs.contains($0.userPageId)})
                             try context.delete(model: OpenAIChat.self, where: #Predicate{deleteTabIDs.contains($0.openaiId)})
+                            try context.delete(model: RepDesktopTranscription.self, where: #Predicate {deleteTabIDs.contains($0.userId)})
+                            try context.delete(model: RepMobileTranscription.self, where: #Predicate {deleteTabIDs.contains($0.userId)})
+                            
+                            
                             
                             let fetchDesc = FetchDescriptor<SyncUserContentPage>(predicate: #Predicate {deleteTabIDs.contains($0.pageID)})
                             for i in try context.fetch(fetchDesc) {
@@ -216,15 +251,25 @@ struct MainMenu: View {
             Spacer()
             
             VStack {
-                ScrollView {
-                    
-                    Spacer()
-                    ForEach(mainMenuSources, id:\.id) { title in
-                        HStack(spacing: 20) {
-                            MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
+                ZStack {
+                    ScrollView {
+                        Spacer()
+                        ForEach(mainMenuSources, id:\.id) { title in
+                            HStack(spacing: 20) {
+                                MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
+                            }
                         }
                     }
-                }.frame(maxHeight: .infinity)
+                    .frame(maxHeight: .infinity)
+                    .contentMargins(.top, 20, for: .scrollContent)
+                    .contentMargins(.bottom, 80, for: .scrollContent)
+
+                    VStack(spacing: 0) {
+                        notesTopBlur
+                        Spacer()
+                        notesBottomBlur
+                    }
+                }
                 .padding()
             }
             .foregroundStyle(Color.white.opacity(0.8))
@@ -275,7 +320,7 @@ struct MainMenu: View {
         }
         
         .onAppear {
-            RepDesktopPoller.shared.startPollingNotes()
+            RepDesktopPoller.shared.startPollingNotes(context: context)
         }
     }
 }

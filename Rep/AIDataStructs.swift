@@ -3,7 +3,7 @@
 //  Rep
 //
 //  Created by alex haidar on 5/2/26.
-//structs and types for all the AI features defined here
+/* structs and types for all the AI features defined here */
 
 
 

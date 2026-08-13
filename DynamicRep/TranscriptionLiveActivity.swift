@@ -19,10 +19,11 @@ struct LiveActivityWaveformExpanded: View {
     private let phases: [Double] = [0.18, 0.65, 0.75, 1.08, 1.12, 1.08, 0.75, 0.65, 0.18]
     
     var body: some View {
-        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused || audioLevel <= 0.03)) { timeline in
+        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused)) { timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
-            let isActive = isRecording && !isPaused && audioLevel > 0.03
-            let curve = isActive ? 0.85 : 0.0
+            let isActive = isRecording && !isPaused
+            let level = min(max(audioLevel, 0.12), 1.0)
+            let curve = isActive ? 0.25 + (level * 0.75) : 0.0
 
             HStack(alignment: .center, spacing: 3) {
                 ForEach(0..<9, id: \.self) { index in
@@ -51,10 +52,11 @@ struct LiveActivityWaveformMinimal: View {
     private let phases: [Double] = [0.15, 0.55, 0.95, 0.35, 0.75]
     
     var body: some View {
-        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused || audioLevel <= 0.03)) { timeline in
+        TimelineView(.animation(minimumInterval: 0.15, paused: !isRecording || isPaused)) { timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
-            let isActive = isRecording && !isPaused && audioLevel > 0.03
-            let curve = isActive ? 0.85 : 0.0
+            let isActive = isRecording && !isPaused
+            let level = min(max(audioLevel, 0.12), 1.0)
+            let curve = isActive ? 0.25 + (level * 0.75) : 0.0
             
             HStack(alignment: .center, spacing: 1) {
                 ForEach(0..<5, id: \.self) { index in
