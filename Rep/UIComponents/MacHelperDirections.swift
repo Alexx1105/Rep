@@ -80,6 +80,23 @@ struct MacHelperDirections: View {
                     Image(systemName: "bell.badge")
                         .font(.system(size: 15, weight: .regular))
                 }
+                
+                let appStoreURL: URL = URL(string: "testing")!  //TODO: replace with app store url
+                ShareLink(item: appStoreURL) {
+                    ZStack {
+                        Capsule(style: .continuous)
+                            .fill(Color.intervalBlue)
+                            .frame(width: 145, height: 30)
+                            .glassEffect(.clear)
+                        
+                        HStack(spacing: 5) {
+                            Text("Mac Download")
+                            Image(systemName: "arrow.up.right")
+                        }
+                        .foregroundStyle(Color.kimchiLabs)
+                    }
+                }
+                .buttonStyle(.plain)
             }
             .font(.system(size: 14, weight: .regular, design: .rounded))
             .foregroundStyle(Color.mmDark)

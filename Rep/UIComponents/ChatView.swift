@@ -23,12 +23,11 @@ struct ChatView: View {
     @State public var isNewChat: Bool = false
     @State var isGenerating: Bool = false
     @State private var keyboardHeight: CGFloat = 0
-    @State private var isCircleVisible: Bool = false
-    @State private var isCirclePulsing: Bool = false
+    @State private var isShimmerTextVisible: Bool = false
+    @State private var isTextShimmering: Bool = false
     @State var showEmptyState: Bool = false
-
+    @State var task: Task<Void, Never>?
     @FocusState private var isChatFocused: Bool
-    
     @AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
 
 
@@ -40,33 +39,6 @@ struct ChatView: View {
                     VStack {
                         Spacer(minLength: 65)
                         
-                        if isCircleVisible {
-                            HStack(alignment: .top, spacing: 10) {
-                                Circle()
-                                    .frame(width: 18, height: 18)
-                                    .opacity(isCirclePulsing ? 1.0 : 0.25)
-                                    .scaleEffect(isCirclePulsing ? 1.2 : 0.8)
-                                
-                                Text("Generating...")
-                                    .opacity(isCirclePulsing ? 0.8 : 0.25)
-                                    .fontDesign(.rounded)
-                                    .fontWeight(.medium)
-                                    
-                                
-                                Spacer()
-                            }
-                            .padding(.top)
-                            .padding(.leading)
-                            .onAppear {
-                                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                                    isCirclePulsing.toggle()
-                                }
-                            }
-                            .onDisappear {
-                                isCirclePulsing = false
-                            }
-                        }
-                        
                         ForEach(Chat.shared.responseMessage, id: \.id) { response in
                             Text(response.text)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -76,7 +48,28 @@ struct ChatView: View {
                                 .lineLimit(nil)
                                 .transition(.opacity.combined(with: .blurReplace))
                                 .textSelection(.enabled)
+                                .tint(.white)
                         }.animation(.easeOut(duration: 0.3), value: Chat.shared.responseMessage.count)
+                        
+                        if isShimmerTextVisible {
+                            HStack(alignment: .top, spacing: 10) {
+                                ShimmerText(text: "Generating notes ...")
+                                    .fontDesign(.rounded)
+                                    .fontWeight(.medium)
+                                
+                                Spacer()
+                            }
+                            .padding(.top)
+                            .padding(.leading)
+                            .onAppear {
+                                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                                    isTextShimmering.toggle()
+                                }
+                            }
+                            .onDisappear {
+                                isTextShimmering = false
+                            }
+                        }
                         
                         Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 150 : 135)
                         Color.clear.frame(height: 1).id("chat-bottom")
@@ -86,10 +79,15 @@ struct ChatView: View {
                     
                 }.frame(maxWidth: .infinity, alignment: .leading)
                     .onChange(of: Chat.shared.responseMessage.last?.text) { _, _ in
-                        Task { @MainActor in
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                proxy.scrollTo("chat-bottom", anchor: .bottom)
-                            }
+                        
+                        guard task == nil else { return }
+                        
+                        task = Task { @MainActor in
+                            guard !Task.isCancelled else { return }
+                            
+                            try? await Task.sleep(for: .milliseconds(700))
+                            proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            task = nil
                         }
                     }
                 }
@@ -245,15 +243,15 @@ struct ChatView: View {
                             let photos: [PhotosPickerItem] = selectedPhotos
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
                             isEmptyStateSeen = true
-                            isCircleVisible = true
-                            isCirclePulsing = true
+                            isShimmerTextVisible = true
+                            isTextShimmering = true
                             fileUrls.removeAll()
                             selectedPhotos.removeAll()
                             
                         }.onChange(of: Chat.shared.responseMessage.last?.text) { _, newValue in
                             if let presentText = newValue, !presentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                isCircleVisible = false
-                                isCirclePulsing = false
+                                isShimmerTextVisible = false
+                                isTextShimmering = false
                             }
                         }
                     
@@ -318,8 +316,8 @@ struct ChatView: View {
                         Spacer()
                         Button {
                             isEmptyStateSeen = true
-                            isCircleVisible = true
-                            isCirclePulsing = true
+                            isShimmerTextVisible = true
+                            isTextShimmering = true
                             
                             let photos: [PhotosPickerItem] = selectedPhotos
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
