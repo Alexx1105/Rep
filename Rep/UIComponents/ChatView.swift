@@ -26,9 +26,8 @@ struct ChatView: View {
     @State private var isCircleVisible: Bool = false
     @State private var isCirclePulsing: Bool = false
     @State var showEmptyState: Bool = false
-
+    @State var task: Task<Void, Never>?
     @FocusState private var isChatFocused: Bool
-    
     @AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
 
 
@@ -51,7 +50,7 @@ struct ChatView: View {
                                     .opacity(isCirclePulsing ? 0.8 : 0.25)
                                     .fontDesign(.rounded)
                                     .fontWeight(.medium)
-                                    
+                                
                                 
                                 Spacer()
                             }
@@ -76,6 +75,7 @@ struct ChatView: View {
                                 .lineLimit(nil)
                                 .transition(.opacity.combined(with: .blurReplace))
                                 .textSelection(.enabled)
+                                .tint(.white)
                         }.animation(.easeOut(duration: 0.3), value: Chat.shared.responseMessage.count)
                         
                         Spacer(minLength: keyboardHeight > 0 ? keyboardHeight + 150 : 135)
@@ -86,10 +86,15 @@ struct ChatView: View {
                     
                 }.frame(maxWidth: .infinity, alignment: .leading)
                     .onChange(of: Chat.shared.responseMessage.last?.text) { _, _ in
-                        Task { @MainActor in
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                proxy.scrollTo("chat-bottom", anchor: .bottom)
-                            }
+                        
+                        guard task == nil else { return }
+                        
+                        task = Task { @MainActor in
+                            guard !Task.isCancelled else { return }
+                            
+                            try? await Task.sleep(for: .milliseconds(300))
+                            proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            task = nil
                         }
                     }
                 }

@@ -143,20 +143,26 @@ struct ImportedNotes: View {
                                 }
                             }
                         } else {
-                            List(pageBlocks, id: \.self) { block in
-                                Text(block.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
+                            let noteText = pageBlocks
+                                .compactMap { $0.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                                .filter { !$0.isEmpty }
+                                .joined(separator: "\n\n")
+                            ScrollView {
+                                Text(noteText)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading)
                                     .font(.system(size: 16)).lineSpacing(5)
-                                    .listRowBackground(Color.mmBackground)
-                                    .listRowSeparator(.hidden)
                                     .multilineTextAlignment(.leading)
                                     .textSelection(.enabled)
+                                    .tint(.white)
                                     .padding(.trailing)
+                                    .padding(.top)
+                                Spacer().frame(height: 30)
                             }
-                            .listStyle(.plain)
                         }
                     case .openaiChatContent(let openaiChatContent):
-                        let chatLines = openaiChatContent.content.components(separatedBy: .newlines).map{ $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
-                        if chatLines.isEmpty {
+                        let chatText = openaiChatContent.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if chatText.isEmpty {
                             VStack(spacing: -10) {
                                 ForEach(0..<13) { _ in
                                     SkeletonLoader()
@@ -164,67 +170,64 @@ struct ImportedNotes: View {
                             }
                         } else {
                             ScrollView {
-                                ForEach(chatLines, id: \.self) { line in
-                                    Text(line)
+                                Text(chatText)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading)
+                                    .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
+                                    .lineLimit(nil)
+                                    .lineHeight(.loose)
+                                    .textSelection(.enabled)
+                                    .tint(.white)
+                                    .padding(.trailing)
+                                    .padding(.top)
+                                Spacer().frame(height: 30)
+                            }
+                        }
+                    case .repDesktopTranscription(let repDesktopTranscription):
+                        let noteText = repDesktopTranscription.fullNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let transcriptText = repDesktopTranscription.fullTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if transcriptText.isEmpty || noteText.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            ScrollView {
+                                if selectedTab == .notes {
+                                    Text(noteText)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .padding(.leading)
                                         .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
                                         .lineLimit(nil)
                                         .lineHeight(.loose)
                                         .textSelection(.enabled)
+                                        .tint(.white)
                                         .padding(.trailing)
                                         .padding(.top)
-                                }
-                                Spacer().frame(height: 30)
-                            }
-                        }
-                    case .repDesktopTranscription(let repDesktopTranscription):
-                        let noteLines = repDesktopTranscription.fullNotes.components(separatedBy: .newlines).map{ $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
-                        let transcriptLines = repDesktopTranscription.fullTranscript.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter{ !$0.isEmpty }
-                        if transcriptLines.isEmpty || noteLines.isEmpty {
-                            VStack(spacing: -10) {
-                                ForEach(0..<13) { _ in
-                                    SkeletonLoader()
-                                }
-                            }
-                        } else {
-                            ScrollView {
-                                if selectedTab == .notes {
-                                    ForEach(noteLines, id: \.self) { line in
-                                        Text(line)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.leading)
-                                            .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                            .lineLimit(nil)
-                                            .lineHeight(.loose)
-                                            .textSelection(.enabled)
-                                            .padding(.trailing)
-                                            .padding(.top)
-                                    }
                                     Spacer().frame(height: 50)
                                 }
                                 
                                 if selectedTab == .transcript {
-                                    ForEach(transcriptLines, id: \.self) { line in
-                                        Text(line)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.leading)
-                                            .font(.system(size: 16)).lineSpacing(1).fontWeight(.regular).fontDesign(.monospaced)
-                                            .lineLimit(nil)
-                                            .lineHeight(.loose)
-                                            .textSelection(.enabled)
-                                            .padding(.trailing)
-                                            .padding(.top)
-                                            .opacity(0.5)
-                                    }
+                                    Text(transcriptText)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading)
+                                        .font(.system(size: 16)).lineSpacing(1).fontWeight(.regular).fontDesign(.monospaced)
+                                        .lineLimit(nil)
+                                        .lineHeight(.loose)
+                                        .textSelection(.enabled)
+                                        .tint(.white)
+                                        .padding(.trailing)
+                                        .padding(.top)
+                                        .opacity(0.5)
                                     Spacer().frame(height: 50)
                                 }
                             }
                         }
                     case .repMobileTranscription(let repMobileTranscription):
-                        let noteLines = repMobileTranscription.fullNotes.components(separatedBy: .newlines).map{ $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
-                        let transcriptLines = repMobileTranscription.fullTranscript.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter{ !$0.isEmpty }
-                        if noteLines.isEmpty || transcriptLines.isEmpty {
+                        let noteText = repMobileTranscription.fullNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let transcriptText = repMobileTranscription.fullTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if noteText.isEmpty || transcriptText.isEmpty {
                             VStack(spacing: -10) {
                                 ForEach(0..<13) { _ in
                                     SkeletonLoader()
@@ -233,33 +236,31 @@ struct ImportedNotes: View {
                         } else {
                             ScrollView {
                                 if selectedTab == .notes {
-                                    ForEach(noteLines, id: \.self) { line in
-                                        Text(line)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.leading)
-                                            .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                            .lineLimit(nil)
-                                            .lineHeight(.loose)
-                                            .textSelection(.enabled)
-                                            .padding(.trailing)
-                                            .padding(.top)
-                                    }
+                                    Text(noteText)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading)
+                                        .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
+                                        .lineLimit(nil)
+                                        .lineHeight(.loose)
+                                        .textSelection(.enabled)
+                                        .tint(.white)
+                                        .padding(.trailing)
+                                        .padding(.top)
                                     Spacer().frame(height: 50)
                                 }
                                 
                                 if selectedTab == .transcript {
-                                    ForEach(transcriptLines, id: \.self) { line in
-                                        Text(line)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.leading)
-                                            .font(.system(size: 16)).lineSpacing(1).fontWeight(.regular).fontDesign(.monospaced)
-                                            .lineLimit(nil)
-                                            .lineHeight(.loose)
-                                            .textSelection(.enabled)
-                                            .padding(.trailing)
-                                            .padding(.top)
-                                            .opacity(0.5)
-                                    }
+                                    Text(transcriptText)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading)
+                                        .font(.system(size: 16)).lineSpacing(1).fontWeight(.regular).fontDesign(.monospaced)
+                                        .lineLimit(nil)
+                                        .lineHeight(.loose)
+                                        .textSelection(.enabled)
+                                        .tint(.white)
+                                        .padding(.trailing)
+                                        .padding(.top)
+                                        .opacity(0.5)
                                     Spacer().frame(height: 50)
                                 }
                             }
@@ -437,5 +438,4 @@ extension CombinedDataSource {
         )
     )
 }
-
 
