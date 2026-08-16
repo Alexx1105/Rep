@@ -42,6 +42,7 @@
 		B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C62BCB102F00BBC748 /* RepApp.swift */; };
 		B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */; };
 		B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2B837CA2BCB103000BBC748 /* Assets.xcassets */; };
+		B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */; };
 		B2C2A9A72E87A9F000816A0B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B205A9582D73B62D00FFF047 /* WidgetKit.framework */; };
 		B2C2A9AA2E87A9F200816A0B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D220DD2BD981B800E55834 /* SwiftUI.framework */; };
 		B2C2A9AE2E88911A00816A0B /* DynamicRepExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -93,6 +94,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = B25A0A932D94FE3300420892;
 			remoteInfo = DynamicRepExtension;
+		};
+		B2BBED433032140E00526E22 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2B837BB2BCB102F00BBC748 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2B837C22BCB102F00BBC748;
+			remoteInfo = Rep;
 		};
 		B2C2A9AC2E888D7000816A0B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -155,6 +163,8 @@
 		B2B837C62BCB102F00BBC748 /* RepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepApp.swift; sourceTree = "<group>"; };
 		B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedNotes.swift; sourceTree = "<group>"; };
 		B2B837CA2BCB103000BBC748 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStoreBillingStructs.swift; sourceTree = "<group>"; };
+		B2BBED3F3032140E00526E22 /* RepTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2C434E92FEF68F600C528CB /* UIAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAnimations.swift; sourceTree = "<group>"; };
 		B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHelpers.swift; sourceTree = "<group>"; };
 		B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataManager.swift; sourceTree = "<group>"; };
@@ -195,6 +205,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B25A0A972D94FE3300420892 /* DynamicRep */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (B25A0AA82D94FE3400420892 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = DynamicRep; sourceTree = "<group>"; };
+		B2BBED403032140E00526E22 /* RepTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RepTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +229,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B2BBED3C3032140E00526E22 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -226,6 +244,7 @@
 			children = (
 				B2B837C52BCB102F00BBC748 /* Rep */,
 				B25A0A972D94FE3300420892 /* DynamicRep */,
+				B2BBED403032140E00526E22 /* RepTests */,
 				B2D220DA2BD981B800E55834 /* Frameworks */,
 				B2B837C42BCB102F00BBC748 /* Products */,
 			);
@@ -236,6 +255,7 @@
 			children = (
 				B2B837C32BCB102F00BBC748 /* Rep.app */,
 				B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */,
+				B2BBED3F3032140E00526E22 /* RepTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -251,6 +271,7 @@
 				B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */,
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
+				B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */,
 				B2C434E92FEF68F600C528CB /* UIAnimations.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */,
 				B3ED98CF4BC35A3484ED0C10 /* UIComponents */,
@@ -371,6 +392,29 @@
 			productReference = B2B837C32BCB102F00BBC748 /* Rep.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B2BBED3E3032140E00526E22 /* RepTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2BBED453032140E00526E22 /* Build configuration list for PBXNativeTarget "RepTests" */;
+			buildPhases = (
+				B2BBED3B3032140E00526E22 /* Sources */,
+				B2BBED3C3032140E00526E22 /* Frameworks */,
+				B2BBED3D3032140E00526E22 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2BBED443032140E00526E22 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B2BBED403032140E00526E22 /* RepTests */,
+			);
+			name = RepTests;
+			packageProductDependencies = (
+			);
+			productName = RepTests;
+			productReference = B2BBED3F3032140E00526E22 /* RepTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -378,7 +422,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					B25A0A932D94FE3300420892 = {
@@ -386,6 +430,10 @@
 					};
 					B2B837C22BCB102F00BBC748 = {
 						CreatedOnToolsVersion = 15.3;
+					};
+					B2BBED3E3032140E00526E22 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = B2B837C22BCB102F00BBC748;
 					};
 				};
 			};
@@ -408,6 +456,7 @@
 			targets = (
 				B2B837C22BCB102F00BBC748 /* Rep */,
 				B25A0A932D94FE3300420892 /* DynamicRepExtension */,
+				B2BBED3E3032140E00526E22 /* RepTests */,
 			);
 		};
 /* End PBXProject section */
@@ -428,6 +477,13 @@
 				B2575D112EE269B500B82793 /* Rep pro tier.storekit in Resources */,
 				B2D362FF2E2C856400C3012C /* .gitignore in Resources */,
 				B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2BBED3D3032140E00526E22 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -497,6 +553,14 @@
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
+				B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2BBED3B3032140E00526E22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,6 +581,11 @@
 			isa = PBXTargetDependency;
 			target = B25A0A932D94FE3300420892 /* DynamicRepExtension */;
 			targetProxy = B2997BDA2E564E36004AF870 /* PBXContainerItemProxy */;
+		};
+		B2BBED443032140E00526E22 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2B837C22BCB102F00BBC748 /* Rep */;
+			targetProxy = B2BBED433032140E00526E22 /* PBXContainerItemProxy */;
 		};
 		B2C2A9AD2E888D7000816A0B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -808,6 +877,58 @@
 			};
 			name = Release;
 		};
+		B2BBED463032140E00526E22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kimchilabs.rep.RepTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rep.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rep";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		B2BBED473032140E00526E22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kimchilabs.rep.RepTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rep.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rep";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -834,6 +955,15 @@
 			buildConfigurations = (
 				B2B837E82BCB103000BBC748 /* Debug */,
 				B2B837E92BCB103000BBC748 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B2BBED453032140E00526E22 /* Build configuration list for PBXNativeTarget "RepTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2BBED463032140E00526E22 /* Debug */,
+				B2BBED473032140E00526E22 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

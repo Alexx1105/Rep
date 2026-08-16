@@ -1,0 +1,146 @@
+//
+//  PaymentStoreBillingStructs.swift
+//  Rep
+//
+//  Created by alex haidar on 8/15/26.
+//
+/* Billing sturct definitions for the payment store here */
+import Foundation
+
+
+
+enum BillingPlan: String, Codable, Sendable {
+    case free
+    case pro
+    case aiMax = "ai_max"
+
+
+    init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(String.self)
+        self = BillingPlan(rawValue: value) ?? .free
+    }
+}
+
+
+enum BillingSubscriptionStatus: String, Codable, Sendable {
+    case active
+    case grace_period = "grace_period"
+    case billing_retry = "billing_retry"
+    case expired
+    case revoked
+    case refunded
+    case pending
+
+    init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(String.self)
+        self = BillingSubscriptionStatus(rawValue: value) ?? .pending
+    }
+}
+
+
+struct EntitlementSnapshot: Codable, Sendable {
+    let plan: BillingPlan
+    let status: BillingSubscriptionStatus
+    let productId: String?
+    let effectiveFrom: String
+    let effectiveUntil: String?
+    let willAutoRenew: Bool?
+    let version: Int
+}
+
+
+struct UsageSnapshot: Codable, Sendable {
+    let feature: String
+    let allowance: Decimal
+    let consumed: Decimal
+    let reserved: Decimal
+    let remaining: Decimal
+    let periodStart: String?
+    let periodEnd: String?
+}
+
+
+struct PurchaseSyncResponse: Codable, Sendable {
+    let entitlement: EntitlementSnapshot
+    let usage: UsageSnapshot
+}
+
+
+enum PaymentState: Equatable, Sendable {
+    case idle
+    case loading
+    case ready
+    case purchasing(productID: String)
+    case pending
+    case cancelled
+    case failed(message: String)
+}
+
+
+enum PaymentStoreError: LocalizedError, Sendable {
+    case noAuthenticatedUser
+    case billingCustomerNotFound
+    case invalidAppAccountToken
+    case noProductsAvailable
+    case productNotFound(String)
+    case unverifiedTransaction(String)
+    case backend(code: String, message: String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .noAuthenticatedUser:
+            return "Sign in before loading or purchasing a subscription."
+        case .billingCustomerNotFound:
+            return "Rep could not find a billing profile for this account."
+        case .invalidAppAccountToken:
+            return "Rep received an invalid StoreKit account token."
+        case .noProductsAvailable:
+            return "No active StoreKit products are available."
+        case .productNotFound(let productID):
+            return "StoreKit product \(productID) is unavailable."
+        case .unverifiedTransaction(let message):
+            return "StoreKit could not verify this transaction: \(message)"
+        case .backend(_, let message):
+            return message
+        }
+    }
+}
+
+
+struct ResolvedEntitlementRow: Decodable, Sendable {
+    let effective_plan_key: BillingPlan
+    let subscription_status: BillingSubscriptionStatus
+    let effective_at: String
+    let expires_at: String?
+    let auto_renew_enabled: Bool?
+    let entitlement_version: Int
+}
+
+
+struct BillingCustomerRow: Decodable, Sendable {
+    let app_account_token: UUID
+}
+
+
+struct BillingProductRow: Decodable, Sendable {
+    let storekit_product_id: String
+}
+
+
+struct ResolveEntitlementParameters: Encodable, Sendable {
+    let p_user_id: UUID
+}
+
+
+struct PurchaseSyncRequest: Encodable, Sendable {
+    let signedTransaction: String
+}
+
+struct ErrorEnvelope: Decodable {
+    struct ErrorBody: Decodable {
+        let errorCode: String
+        let message: String
+    }
+
+    let error: ErrorBody
+}

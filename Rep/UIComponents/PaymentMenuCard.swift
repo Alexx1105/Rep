@@ -7,7 +7,7 @@ import ActivityKit
 
 struct PaymentMenuCard: View {
     @Binding var isPresented: Bool
-    //@StateObject private var paymentStore = PaymentStore()
+    @EnvironmentObject private var paymentStore: PaymentStore
     var body: some View {
         
         
@@ -133,10 +133,10 @@ struct PaymentMenuCard: View {
                     
                     
                     Button {
-                        Task {
-                            try await PaymentStore().runPaymentFlow()
-                        }
-                    } label: {
+                            Task {
+                                try await paymentStore.runPaymentFlow()
+                            }
+                        } label: {
                         RoundedRectangle(cornerRadius: 30).glassEffect()
                             .frame(maxWidth: 350, maxHeight: 48)
                             .foregroundStyle(Color.intervalBlue)
@@ -165,5 +165,6 @@ struct PaymentMenuCard: View {
 }
 
 #Preview {
-    PaymentMenuCard(isPresented:  .constant(true))
+    PaymentMenuCard(isPresented: .constant(true))
+        .environmentObject(PaymentStore())
 }
