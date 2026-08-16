@@ -4,12 +4,15 @@
 //
 //  Created by alex haidar on 12/3/25.
 //
-
+/* Payment store client for observing transactions,
+   updating entitlements via rpc, handling payment
+   failure cases, loading products, preparing new purchases,
+   and fetching products already paid for by user */
 import Foundation
 import StoreKit
 import Supabase
 
-
+    
 
 @MainActor
 final class PaymentStore: ObservableObject {
