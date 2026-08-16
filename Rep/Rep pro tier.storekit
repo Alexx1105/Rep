@@ -17,17 +17,14 @@
 
   ],
   "settings" : {
-    "_applicationInternalID" : "6755852969",
     "_askToBuyEnabled" : false,
     "_billingGracePeriodEnabled" : false,
     "_billingIssuesEnabled" : false,
     "_compatibilityTimeRate" : {
       "3" : 4
     },
-    "_developerTeamID" : "L96XRPBK46",
     "_disableDialogs" : true,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 787457088.89750302,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : true,
     "_storefront" : "USA",
@@ -51,9 +48,9 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "8.99",
+          "displayPrice" : "8.00",
           "familyShareable" : false,
-          "groupNumber" : 1,
+          "groupNumber" : 2,
           "internalID" : "6756088134",
           "introductoryOffer" : null,
           "localizations" : [
@@ -63,9 +60,93 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "kimchilabs.pro",
+          "productID" : "kimchilabs.rep.pro.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Rep (Pro Tier)",
+          "referenceName" : "Rep Pro Monthly",
+          "subscriptionGroupID" : "21849675",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "72.00",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6296A92C",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kimchilabs.rep.pro.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Rep Pro Annual",
+          "subscriptionGroupID" : "21849675",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "18.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "00BCF85D",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kimchilabs.rep.ai_max.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Rep AI Max Monthly",
+          "subscriptionGroupID" : "21849675",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "180.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "55E2CC42",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kimchilabs.rep.ai_max.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Rep AI Max Annual",
           "subscriptionGroupID" : "21849675",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
