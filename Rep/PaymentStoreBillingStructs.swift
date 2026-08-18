@@ -4,7 +4,7 @@
 //
 //  Created by alex haidar on 8/15/26.
 //
-/* Billing sturct definitions for the payment store here */
+/* Billing struct definitions for the payment store here */
 import Foundation
 
 
@@ -13,8 +13,8 @@ enum BillingPlan: String, Codable, Sendable {
     case free
     case pro
     case aiMax = "ai_max"
-
-
+    
+    
     init(from decoder: Decoder) throws {
         let value = try decoder.singleValueContainer().decode(String.self)
         self = BillingPlan(rawValue: value) ?? .free
@@ -30,7 +30,7 @@ enum BillingSubscriptionStatus: String, Codable, Sendable {
     case revoked
     case refunded
     case pending
-
+    
     init(from decoder: Decoder) throws {
         let value = try decoder.singleValueContainer().decode(String.self)
         self = BillingSubscriptionStatus(rawValue: value) ?? .pending
@@ -141,6 +141,41 @@ struct ErrorEnvelope: Decodable {
         let errorCode: String
         let message: String
     }
-
+    
     let error: ErrorBody
+}
+
+
+struct BillingPlanRow: Identifiable, Codable {
+    let id: UUID
+    let plan_key: BillingPlan
+    let display_name: String
+    let tier_order: Int
+    let is_active: Bool
+}
+
+
+struct BillingBucket: Identifiable, Codable {
+    let id: UUID
+    let user_id: UUID
+    let plan_id: UUID
+    let feature_key: BillingFeature
+    let bucket_type: CreditBucketType
+    
+    let allowance: Int
+    let consumed: Int
+    let reserved: Int
+    
+    let period_start: Date
+    let period_end: Date?
+}
+
+enum BillingFeature: String, Codable {
+    case ai_credits
+    case notion_auto_sync
+}
+
+enum CreditBucketType: String, Codable {
+    case lifetime
+    case billing_period
 }

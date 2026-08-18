@@ -5,14 +5,14 @@
 //  Created by alex haidar on 12/3/25.
 //
 /* Payment store client for observing transactions,
-   updating entitlements via rpc, handling payment
-   failure cases, loading products, preparing new purchases,
-   and fetching products already paid for by user */
+ updating entitlements via rpc, handling payment
+ failure cases, loading products, preparing new purchases,
+ and fetching products already paid for by user */
 import Foundation
 import StoreKit
 import Supabase
+import SwiftUI
 
-    
 
 @MainActor
 final class PaymentStore: ObservableObject {
@@ -20,6 +20,9 @@ final class PaymentStore: ObservableObject {
     @Published private(set) var entitlement: EntitlementSnapshot?
     @Published private(set) var usage: UsageSnapshot?
     @Published private(set) var state: PaymentState = .idle
+    
+    let creditBucketsManager = CreditBucketsManager.shared
+    static let shared = PaymentStore()
     
     private var appAccountToken: UUID?
     private var transactionUpdates: Task<Void, Never>?
@@ -50,6 +53,26 @@ final class PaymentStore: ObservableObject {
     }
     
     
+    func resetForSignOut() {            //TODO: add a sign out option and call
+        self.appAccountToken = nil
+        self.products = []
+        self.entitlement = nil
+        self.usage = nil
+        self.inFlightTransactionIDs.removeAll()
+        
+        self.creditBucketsManager.reset()
+        self.state = .idle
+    }
+    
+    
+    func refreshCreditsRollover() async throws {
+        try await refreshResolvedEntitlement()
+        try await creditBucketsManager.refreshBillingCredits(plan: currentPlan)
+        
+        //TODO: call credit refresh bucket functions here
+    }
+    
+    
     func prepareForAuthenticatedUser() async {
         state = .loading
         
@@ -63,6 +86,7 @@ final class PaymentStore: ObservableObject {
             await processUnfinishedTransactions()
             await processCurrentEntitlements()
             try await refreshResolvedEntitlement()
+            try await creditBucketsManager.refreshBillingCredits(plan: self.currentPlan)
             
             state = .ready
         } catch {
@@ -100,7 +124,7 @@ final class PaymentStore: ObservableObject {
         }
     }
     
-
+    
     func runPaymentFlow() async throws {
         if appAccountToken == nil {
             self.appAccountToken = try await supabase.loadAppAccountToken()
@@ -166,14 +190,6 @@ final class PaymentStore: ObservableObject {
                                           version: resolved.entitlement_version)
     }
     
-    func resetForSignOut() {
-        appAccountToken = nil
-        products = []
-        entitlement = nil
-        usage = nil
-        inFlightTransactionIDs.removeAll()
-        state = .idle
-    }
     
     private func observeTransactionUpdates() -> Task<Void, Never> {
         Task { [weak self] in
@@ -192,7 +208,7 @@ final class PaymentStore: ObservableObject {
     
     
     @discardableResult
-    private func process(_ verification: VerificationResult<Transaction>, finishAfterSync: Bool) async throws -> PurchaseSyncResponse? {
+    private func process(_ verification: VerificationResult<StoreKit.Transaction>, finishAfterSync: Bool) async throws -> PurchaseSyncResponse? {
         switch verification {
             
         case .verified(let transaction):

@@ -47,3 +47,22 @@ public enum SupabaseError: LocalizedError {
     case upsertError
     case nilDataError
 }
+
+enum CreditBucketError: LocalizedError, Sendable {
+    case invalidCreditAmount
+    case noCurrentBucket
+    case insufficientCredits(required: Int, remaining: Int)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidCreditAmount:
+            return "Credit cost must be greater than zero."
+
+        case .noCurrentBucket:
+            return "Rep could not find a current AI credit bucket."
+
+        case .insufficientCredits(let required, let remaining):
+            return "This action requires \(required) credits, but only \(remaining) remain."
+        }
+    }
+}

@@ -43,6 +43,7 @@
 		B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */; };
 		B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2B837CA2BCB103000BBC748 /* Assets.xcassets */; };
 		B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */; };
+		B2BBED493032A6E900526E22 /* PaymentStoreCreditsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */; };
 		B2C2A9A72E87A9F000816A0B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B205A9582D73B62D00FFF047 /* WidgetKit.framework */; };
 		B2C2A9AA2E87A9F200816A0B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D220DD2BD981B800E55834 /* SwiftUI.framework */; };
 		B2C2A9AE2E88911A00816A0B /* DynamicRepExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -165,6 +166,7 @@
 		B2B837CA2BCB103000BBC748 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStoreBillingStructs.swift; sourceTree = "<group>"; };
 		B2BBED3F3032140E00526E22 /* RepTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStoreCreditsManager.swift; sourceTree = "<group>"; };
 		B2C434E92FEF68F600C528CB /* UIAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAnimations.swift; sourceTree = "<group>"; };
 		B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHelpers.swift; sourceTree = "<group>"; };
 		B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataManager.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */,
+				B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */,
 				B2C434E92FEF68F600C528CB /* UIAnimations.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */,
 				B3ED98CF4BC35A3484ED0C10 /* UIComponents */,
@@ -501,6 +504,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2BBED493032A6E900526E22 /* PaymentStoreCreditsManager.swift in Sources */,
 				B281FE392FA6492A00C3EEC5 /* AIDataStructs.swift in Sources */,
 				B2924E2F300C702A00209D49 /* AudioTranscriptionStructs.swift in Sources */,
 				B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */,
