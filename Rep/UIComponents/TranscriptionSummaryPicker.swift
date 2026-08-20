@@ -1,9 +1,6 @@
 import SwiftUI
 import SwiftData
-import PhotosUI
-import AVFoundation
-import KimchiKit
-import ActivityKit
+
 
 struct TranscriptionSummaryPicker: View {
     @Binding var transcriptTab: TrancriptTab

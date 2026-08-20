@@ -14,16 +14,15 @@ struct SettingsView: View {
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-   
+    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
     @AppStorage("desktop.pollingEnabled") private var isPollingEnabled = false
     
     @ObservedObject var AutoSync = SyncController.shared
-     
-    var showUserEmail: [UserEmail] = []
     
-    @State private var presentPopover: Bool = false
+    @State private var isPresented: Bool = false
+    @State private var billingPlanTab: PaymentMenuCard.BillingInterval = .monthly
     
     var body: some View {
         
@@ -40,7 +39,7 @@ struct SettingsView: View {
                     
                 }.padding(.leading)
                 
-                HStack(spacing: 13) {
+                HStack {
                     
                     Text("Settings")
                         .fontWeight(.semibold)
@@ -48,21 +47,22 @@ struct SettingsView: View {
                         .padding(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-              
-//                    Button("Upgrade Plan") {
-//                        withAnimation {
-//                            presentPopover = true
-//                        }
-//                    }
-//                    .fontWeight(.semibold)
-//                    .font(.system(size: 12))
-//                    .buttonStyle(.glassProminent)
-//                    .padding(.trailing)
+                    Spacer()
+                    
+                    Button("Upgrade Plan") {
+                        self.isPresented = true
+                    }
+                    .fontWeight(.semibold)
+                    .font(.system(size: 12))
+                    .buttonStyle(.glassProminent)
+                    .padding(.trailing, 7)
+                    
+                    PaymentMenuCard(isPresented: $isPresented, billingPlanTab: $billingPlanTab)
                 }
                 .frame(maxWidth: .infinity, maxHeight: 150)
-                 
-              
-               
+                
+                
+                
                 
                 
                 VStack(alignment: .leading) {
@@ -88,7 +88,7 @@ struct SettingsView: View {
                         .fontWeight(.medium)
                         .opacity(0.50)
                         .padding(.leading)
-                       
+                    
                     
                     Divider()
                     
@@ -142,7 +142,7 @@ struct SettingsView: View {
                         
                     }.frame(maxWidth: .infinity)
                         .padding(.horizontal)
-                       
+                    
                     
                     Text("Toggle to receive transcripts and notes from\nmeetings recorded with Rep Desktop on your\nMac, directly on your iPhone.")
                         .font(.system(size: 14)).lineSpacing(3)
@@ -153,16 +153,9 @@ struct SettingsView: View {
                     Divider()
                 }
                 Spacer()
-                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.mmBackground)
-            .overlay {
-                if presentPopover {
-                    PaymentMenuCard(isPresented: $presentPopover)
-                        .transition(.move(edge: .bottom))
-                }
-            }
         }
     }
 }

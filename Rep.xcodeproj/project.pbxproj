@@ -63,7 +63,7 @@
 		B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3043C921D38E360E9E22AF1 /* VoiceTranscriptionView.swift */; };
 		B359F1882320AC1AE6D0A4F2 /* SliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36DD4E8C61EA857EC222289 /* SliderView.swift */; };
 		B36ECA7BF1CA617BFFA0E766 /* RootTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3CAAAD1F260F8D5F94AB36B /* RootTabs.swift */; };
-		B37F900F71ED3C744896BDF7 /* PaymentMenuCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36B23B52A5A7161361C3160 /* PaymentMenuCard.swift */; };
+		B37F900F71ED3C744896BDF7 /* PaymentMenuSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */; };
 		B3D3BD8D45064655708BF23E /* ChatDialogToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B380EFA55CDCC0BF88AAE605 /* ChatDialogToast.swift */; };
 		B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */; };
 		B3D928544D2C101A23894C79 /* MacHelperDirections.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */; };
@@ -182,7 +182,7 @@
 		B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacHelperDirections.swift; sourceTree = "<group>"; };
 		B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionSummaryPicker.swift; sourceTree = "<group>"; };
 		B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperToggleCard.swift; sourceTree = "<group>"; };
-		B36B23B52A5A7161361C3160 /* PaymentMenuCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMenuCard.swift; sourceTree = "<group>"; };
+		B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMenuSheet.swift; sourceTree = "<group>"; };
 		B36DD4E8C61EA857EC222289 /* SliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderView.swift; sourceTree = "<group>"; };
 		B380EFA55CDCC0BF88AAE605 /* ChatDialogToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDialogToast.swift; sourceTree = "<group>"; };
 		B3A06C8C01B5FC3E84026961 /* transcriptionSummmaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = transcriptionSummmaryView.swift; sourceTree = "<group>"; };
@@ -330,7 +330,7 @@
 				B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */,
 				B30709FB764900BE992DFBFA /* MainMenuTab.swift */,
 				B36DD4E8C61EA857EC222289 /* SliderView.swift */,
-				B36B23B52A5A7161361C3160 /* PaymentMenuCard.swift */,
+				B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */,
 				B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */,
 				B3CFF79DB455B634A844A062 /* SkeletonLoader.swift */,
 				B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */,
@@ -520,7 +520,7 @@
 				B3EF374DAB89329BAE2519B4 /* TabSelectionCircle.swift in Sources */,
 				B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */,
 				B359F1882320AC1AE6D0A4F2 /* SliderView.swift in Sources */,
-				B37F900F71ED3C744896BDF7 /* PaymentMenuCard.swift in Sources */,
+				B37F900F71ED3C744896BDF7 /* PaymentMenuSheet.swift in Sources */,
 				B304C27FAA75682CFAB44F27 /* HyperToggleCard.swift in Sources */,
 				B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */,
 				B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */,
