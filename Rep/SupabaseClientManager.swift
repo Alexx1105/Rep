@@ -99,7 +99,7 @@ public final class SupabaseClientManager: ObservableObject {
         
         let productIDs = Set(configuredProducts.map(\.storekit_product_id))
         guard !productIDs.isEmpty else { throw PaymentStoreError.noProductsAvailable }
-        
+    
         let fetchedProducts = try await Product.products(for: productIDs)
         let products = fetchedProducts.sorted { lhs, rhs in
             if lhs.price == rhs.price {
@@ -126,15 +126,13 @@ public final class SupabaseClientManager: ObservableObject {
     
     
     func fetchPreferredProductId() async throws -> String {
-        let product: BillingProductRow = try await supabaseDBClient.from("billing_products").select("storekit_product_id").eq("is_active", value: true).eq("is_default", value: true).single().execute().value
-        
+        let product: BillingProductRow = try await supabaseDBClient.from("billing_products").select("storekit_product_id").eq("is_active", value: true).limit(1).single().execute().value
         return product.storekit_product_id
     }
     
     
     func fetchBillingPlanTiers(plan: BillingPlan) async throws -> BillingPlanRow {
         let billing: BillingPlanRow = try await supabaseDBClient.from("billing_plans").select().eq("plan_key", value: plan.rawValue).eq("is_active", value: true).single().execute().value
-        
         return billing
     }
     

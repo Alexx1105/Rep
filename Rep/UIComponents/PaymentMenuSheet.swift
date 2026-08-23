@@ -138,7 +138,7 @@ struct PaymentMenuCard: View {
                         .foregroundStyle(Color.mmDark)
                     
                     HStack(spacing: 5) {
-                        Text(self.billingPlanTab == .monthly ? "$8" : "$72")
+                        Text(self.billingPlanTab == .monthly ? "$7.99" : "$79.99")
                             .font(.system(size: 36))
                             .fontWeight(.black)
                             .foregroundStyle(Color.mmDark)
@@ -182,7 +182,13 @@ struct PaymentMenuCard: View {
                 tierBreadcrumb
                 
                 Button {
-                  
+                    Task {
+                        do {
+                            try await paymentStore.runPaymentFlow()
+                        } catch {
+                            print("failure to run payment flow", ErrorDesc.callsiteError, error)
+                        }
+                    }
                 } label: {
                     ZStack {
                         Capsule()
@@ -291,7 +297,7 @@ struct PaymentMenuCard: View {
                         .foregroundStyle(Color.mmDark)
                     
                     HStack(spacing: 5) {
-                        Text(self.billingPlanTab == .monthly ? "$18" : "$180")
+                        Text(self.billingPlanTab == .monthly ? "$19.99" : "$99.99")
                             .font(.system(size: 36))
                             .fontWeight(.black)
                             .foregroundStyle(Color.mmDark)
@@ -335,7 +341,9 @@ struct PaymentMenuCard: View {
                 tierBreadcrumb
                 
                 Button {
-                  
+                    Task {
+                        try await paymentStore.runPaymentFlow()
+                    }
                 } label: {
                     ZStack {
                         Capsule()

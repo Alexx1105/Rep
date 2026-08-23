@@ -93,7 +93,7 @@
          </EnvironmentVariable>
       </EnvironmentVariables>
       <StoreKitConfigurationFileReference
-         identifier = "../../Rep/Rep pro tier.storekit">
+         identifier = "../../Rep Billing Products.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

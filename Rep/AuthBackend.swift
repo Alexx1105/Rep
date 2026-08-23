@@ -69,11 +69,11 @@ public class authBackend: ObservableObject {
             
             if let tokenData: Data = userCredential.identityToken,
                let tokenString: String = String(data: tokenData, encoding: .utf8) {
-                print("Identity token:", tokenString)
                 
                 Task {
                     do {
                         let _ = try await supabaseDBClient.auth.signInWithIdToken(credentials: OpenIDConnectCredentials(provider: .apple, idToken: tokenString))  //TODO: add nonce
+                        await PaymentStore.shared.prepareForAuthenticatedUser()
                         //try DesktopAppToken.sendTokenToDesktop(session: session)
                         
                     } catch {

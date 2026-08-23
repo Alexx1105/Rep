@@ -238,12 +238,11 @@ final class PaymentStore: ObservableObject {
         
         do {
             let response: PurchaseSyncResponse = try await supabaseDBClient.functions.invoke("user_purchase_sync", options: FunctionInvokeOptions(body: PurchaseSyncRequest(signedTransaction: signedTransaction)))
-            
             return response
+            
         } catch FunctionsError.httpError(_, let data) {
             if let envelope = try? JSONDecoder().decode(ErrorEnvelope.self, from: data) { throw PaymentStoreError.backend(code: envelope.error.errorCode, message: envelope.error.message)
             }
-            
             throw PaymentStoreError.backend(code: "purchase_sync_failed", message: "Rep could not synchronize the StoreKit purchase.")
         }
     }

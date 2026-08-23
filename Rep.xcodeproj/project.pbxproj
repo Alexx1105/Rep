@@ -20,7 +20,6 @@
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
 		B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2575D0C2EE120D900B82793 /* PaymentStore.swift */; };
 		B2575D0F2EE123A000B82793 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2575D0E2EE123A000B82793 /* StoreKit.framework */; };
-		B2575D112EE269B500B82793 /* Rep pro tier.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B2575D102EE269B500B82793 /* Rep pro tier.storekit */; };
 		B25D6AEB2FD5AFD8004801B7 /* AudioTranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */; };
 		B26842D12CC704DB00471001 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26842CE2CC704DB00471001 /* MainMenu.swift */; };
 		B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26842D22CC9F5FC00471001 /* SettingsView.swift */; };
@@ -142,7 +141,6 @@
 		B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPermissions.swift; sourceTree = "<group>"; };
 		B2575D0C2EE120D900B82793 /* PaymentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStore.swift; sourceTree = "<group>"; };
 		B2575D0E2EE123A000B82793 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		B2575D102EE269B500B82793 /* Rep pro tier.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep pro tier.storekit"; sourceTree = "<group>"; };
 		B25A0A472D91D9E300420892 /* DynamicRepTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepTest.swift; sourceTree = "<group>"; };
 		B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DynamicRepExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionManager.swift; sourceTree = "<group>"; };
@@ -157,6 +155,7 @@
 		B2924E2C300C69E200209D49 /* AudioTranscriptionDesktopPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionDesktopPoller.swift; sourceTree = "<group>"; };
 		B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionStructs.swift; sourceTree = "<group>"; };
 		B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLiveActivityManager.swift; sourceTree = "<group>"; };
+		B29A1208303A9EC9000A0031 /* Rep Billing Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep Billing Products.storekit"; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
 		B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolledDesktopNotesPopover.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
@@ -244,6 +243,7 @@
 		B2B837BA2BCB102F00BBC748 = {
 			isa = PBXGroup;
 			children = (
+				B29A1208303A9EC9000A0031 /* Rep Billing Products.storekit */,
 				B2B837C52BCB102F00BBC748 /* Rep */,
 				B25A0A972D94FE3300420892 /* DynamicRep */,
 				B2BBED403032140E00526E22 /* RepTests */,
@@ -267,7 +267,6 @@
 			children = (
 				B2D362FE2E2C855900C3012C /* .gitignore */,
 				B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */,
-				B2575D102EE269B500B82793 /* Rep pro tier.storekit */,
 				B24A69832F57D97D00FBB5FB /* TosPage.swift */,
 				B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */,
 				B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */,
@@ -477,7 +476,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B26D98A92EE26CDB003DEA64 /* StoreKitTestCertificate.cer in Resources */,
-				B2575D112EE269B500B82793 /* Rep pro tier.storekit in Resources */,
 				B2D362FF2E2C856400C3012C /* .gitignore in Resources */,
 				B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */,
 			);
