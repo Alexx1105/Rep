@@ -125,12 +125,6 @@ public final class SupabaseClientManager: ObservableObject {
     }
     
     
-    func fetchPreferredProductId() async throws -> String {
-        let product: BillingProductRow = try await supabaseDBClient.from("billing_products").select("storekit_product_id").eq("is_active", value: true).limit(1).single().execute().value
-        return product.storekit_product_id
-    }
-    
-    
     func fetchBillingPlanTiers(plan: BillingPlan) async throws -> BillingPlanRow {
         let billing: BillingPlanRow = try await supabaseDBClient.from("billing_plans").select().eq("plan_key", value: plan.rawValue).eq("is_active", value: true).single().execute().value
         return billing

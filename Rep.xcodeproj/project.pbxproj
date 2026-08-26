@@ -34,6 +34,7 @@
 		B2924E2D300C69FE00209D49 /* AudioTranscriptionDesktopPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2924E2C300C69E200209D49 /* AudioTranscriptionDesktopPoller.swift */; };
 		B2924E2F300C702A00209D49 /* AudioTranscriptionStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */; };
 		B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */; };
+		B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */; };
 		B2A2C73D302CE71F000D6977 /* PolledDesktopNotesPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
@@ -156,6 +157,7 @@
 		B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionStructs.swift; sourceTree = "<group>"; };
 		B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLiveActivityManager.swift; sourceTree = "<group>"; };
 		B29A1208303A9EC9000A0031 /* Rep Billing Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep Billing Products.storekit"; sourceTree = "<group>"; };
+		B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentPricingCoordinator.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
 		B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolledDesktopNotesPopover.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */,
 				B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */,
+				B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */,
 				B2C434E92FEF68F600C528CB /* UIAnimations.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */,
 				B3ED98CF4BC35A3484ED0C10 /* UIComponents */,
@@ -526,6 +529,7 @@
 				B337C6418EFD8CA5DE9847BA /* ChatView.swift in Sources */,
 				B3DF5FDBE44CD85DC6EB0B63 /* MainMenuDataSourceList.swift in Sources */,
 				B316D301EC078AFF6FBC7A64 /* PickerView.swift in Sources */,
+				B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */,
 				B3E4DFB146BC0B9897B2758C /* transcriptionSummmaryView.swift in Sources */,
 				B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */,
 				B3D928544D2C101A23894C79 /* MacHelperDirections.swift in Sources */,

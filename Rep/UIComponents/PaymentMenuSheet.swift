@@ -3,37 +3,14 @@ import SwiftData
 
 struct PaymentMenuCard: View {
     @Binding var isPresented: Bool
-    @Binding var billingPlanTab: BillingInterval
+    @Binding var billingPlanTab: PaymentPricingCoordinator.BillingInterval
     @EnvironmentObject var paymentStore: PaymentStore
     @Environment(\.dismiss) var closePaymentSheet
-
-    @State private var selectedTier: PaywallTier = .pro
-
-    enum BillingInterval {
-        case monthly
-        case annual
-    }
-
-    enum PaywallTier: Int, CaseIterable, Identifiable {
-        case free
-        case pro
-        case aiMax
-
-        var id: Self { self }
-
-        var title: String {
-            switch self {
-            case .free:
-                return "Free"
-            case .pro:
-                return "Pro"
-            case .aiMax:
-                return "AI Max"
-            }
-        }
-    }
-
-
+    
+    @State private var selectedTier: PaymentPricingCoordinator.PaywallTier = .pro
+    
+    let coordinator = PaymentPricingCoordinator.shared
+    
     private let repFreeFeatures = ["Unlimited Notion page imports",
                                    "3 lifetime AI credits(3 AI generations)",
                                    "60 minutes of audio transcription — one time"]
@@ -45,7 +22,7 @@ struct PaymentMenuCard: View {
         "Automatic Notion sync",
         "Credits refresh every billing month"
     ]
-
+    
     private let repAiMaxFeatures = [
         "1,000 AI credits every month",
         "Up to 16 hours of audio transcription",
@@ -53,32 +30,32 @@ struct PaymentMenuCard: View {
         "Use credits for Rep AI chat, card generation, and audio transcription",
         "Credits refresh every billing month"
     ]
-  
-
+    
+    
     var body: some View {
         VStack {}
             .frame(width: 0, height: 0)
             .sheet(isPresented: $isPresented) {
                 VStack(spacing: 20) {
-                
+                    
                     if selectedTier.id != .free {
                         Picker("", selection: $billingPlanTab) {
-                            Text("Monthly").tag(BillingInterval.monthly)
-                            Text("Annual").tag(BillingInterval.annual)
+                            Text("Monthly").tag(PaymentPricingCoordinator.BillingInterval.monthly)
+                            Text("Annual").tag(PaymentPricingCoordinator.BillingInterval.annual)
                         }
                         .pickerStyle(.segmented)
                         .frame(width: 200)
                     }
-
+                    
                     TabView(selection: $selectedTier) {
                         freeTier(title: "Rep Free")
-                            .tag(PaywallTier.free)
-
+                            .tag(PaymentPricingCoordinator.PaywallTier.free)
+                        
                         proPlanPage
-                            .tag(PaywallTier.pro)
-
+                            .tag(PaymentPricingCoordinator.PaywallTier.pro)
+                        
                         maxTier(title: "Rep AI Max")
-                            .tag(PaywallTier.aiMax)
+                            .tag(PaymentPricingCoordinator.PaywallTier.aiMax)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                 }
@@ -86,10 +63,10 @@ struct PaymentMenuCard: View {
                 .presentationDetents([.fraction(0.7)])
             }
     }
-
+    
     private var tierBreadcrumb: some View {
         HStack(spacing: 16) {
-            ForEach(PaywallTier.allCases) { tier in
+            ForEach(PaymentPricingCoordinator.PaywallTier.allCases) { tier in
                 Button {
                     withAnimation(.snappy) {
                         self.selectedTier = tier
@@ -102,12 +79,12 @@ struct PaymentMenuCard: View {
                             .foregroundStyle(
                                 Color.mmDark.opacity(self.selectedTier == tier ? 1 : 0.4)
                             )
-
+                        
                         Capsule()
                             .fill(
                                 self.selectedTier == tier
-                                    ? Color.mmDark
-                                    : Color.mmDark.opacity(0.15)
+                                ? Color.mmDark
+                                : Color.mmDark.opacity(0.15)
                             )
                             .frame(
                                 width: self.selectedTier == tier ? 28 : 8,
@@ -120,7 +97,81 @@ struct PaymentMenuCard: View {
         }
         .animation(.snappy, value: self.selectedTier)
     }
-
+    
+    
+    private func freeTier(title: String) -> some View {
+        VStack(spacing: 30) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 30)
+                    .foregroundStyle(Color.gray)
+                    .opacity(0.2)
+                    .frame(maxWidth: .infinity, maxHeight: 100)
+                    .padding(.horizontal)
+                
+                VStack(spacing: 5) {
+                    Text("Free")
+                        .font(.system(.headline))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.mmDark)
+                    
+                    HStack(spacing: 5) {
+                        Text("$0")
+                            .font(.system(size: 36))
+                            .fontWeight(.black)
+                            .foregroundStyle(Color.mmDark)
+                        
+                        Text(self.billingPlanTab == .monthly ? "/month" : "/year")
+                            .font(.system(size: 24))
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .opacity(0.5)
+                    }
+                }
+                .padding(.vertical)
+            }
+            
+            VStack(alignment: .leading, spacing: 15) {
+                Text("Everything included in the free tier")
+                    .font(.system(.headline))
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.mmDark)
+                    .padding(.leading)
+                
+                ForEach(self.repFreeFeatures, id: \.self) { feature in
+                    HStack(alignment: .top) {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.mmDark)
+                            .opacity(0.5)
+                        
+                        Text(feature)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(Color.mmDark)
+                            .opacity(0.5)
+                            .fontWeight(.medium)
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Spacer()
+            
+            VStack(alignment: .center, spacing: 20) {
+                tierBreadcrumb
+                
+                HStack(spacing: 10) {
+                    Text("Already Included")
+                        .font(.system(.headline))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.intervalBlue)
+                    
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.intervalBlue)
+                }
+            }
+        }.padding(.top)
+    }
+    
     
     private var proPlanPage: some View {
         VStack(spacing: 30) {
@@ -184,9 +235,10 @@ struct PaymentMenuCard: View {
                 Button {
                     Task {
                         do {
-                            try await paymentStore.runPaymentFlow()
+                            guard let productId = coordinator.fetchProductId(tier: selectedTier, interval: billingPlanTab) else { return }
+                            try await paymentStore.runPaymentFlow(productId: productId)
                         } catch {
-                            print("failure to run payment flow", ErrorDesc.callsiteError, error)
+                            print("failure to run payment flow | Pro tier", ErrorDesc.callsiteError, error)
                         }
                     }
                 } label: {
@@ -205,79 +257,6 @@ struct PaymentMenuCard: View {
                 }
             }
         }
-    }
-
-    private func freeTier(title: String) -> some View {
-        VStack(spacing: 30) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 30)
-                    .foregroundStyle(Color.gray)
-                    .opacity(0.2)
-                    .frame(maxWidth: .infinity, maxHeight: 100)
-                    .padding(.horizontal)
-                
-                VStack(spacing: 5) {
-                    Text("Free")
-                        .font(.system(.headline))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.mmDark)
-                    
-                    HStack(spacing: 5) {
-                        Text("$0")
-                            .font(.system(size: 36))
-                            .fontWeight(.black)
-                            .foregroundStyle(Color.mmDark)
-                        
-                        Text(self.billingPlanTab == .monthly ? "/month" : "/year")
-                            .font(.system(size: 24))
-                            .fontWeight(.medium)
-                            .foregroundStyle(Color.mmDark)
-                            .opacity(0.5)
-                    }
-                }
-                .padding(.vertical)
-            }
-            
-            VStack(alignment: .leading, spacing: 15) {
-                Text("Everything included in the free tier")
-                    .font(.system(.headline))
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.mmDark)
-                    .padding(.leading)
-                
-                ForEach(self.repFreeFeatures, id: \.self) { feature in
-                    HStack(alignment: .top) {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(Color.mmDark)
-                            .opacity(0.5)
-                        
-                        Text(feature)
-                            .font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(Color.mmDark)
-                            .opacity(0.5)
-                            .fontWeight(.medium)
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Spacer()
-            
-            VStack(alignment: .center, spacing: 20) {
-                tierBreadcrumb
-               
-                HStack(spacing: 10) {
-                    Text("Already Included")
-                        .font(.system(.headline))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.intervalBlue)
-                    
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.intervalBlue)
-                }
-            }
-        }.padding(.top)
     }
     
     
@@ -342,7 +321,12 @@ struct PaymentMenuCard: View {
                 
                 Button {
                     Task {
-                        try await paymentStore.runPaymentFlow()
+                        do {
+                            guard let productId = coordinator.fetchProductId(tier: selectedTier, interval: billingPlanTab) else { return }
+                            try await paymentStore.runPaymentFlow(productId: productId)
+                        } catch {
+                            print("failed to initiate payment flow | Max tier", ErrorDesc.callsiteError, error)
+                        }
                     }
                 } label: {
                     ZStack {
@@ -363,10 +347,10 @@ struct PaymentMenuCard: View {
     }
 }
 
+
+
+
 #Preview {
-    PaymentMenuCard(
-        isPresented: .constant(true),
-        billingPlanTab: .constant(.monthly)
-    )
-    .environmentObject(PaymentStore.shared)
+    PaymentMenuCard(isPresented: .constant(true), billingPlanTab: .constant(.monthly))
+        .environmentObject(PaymentStore.shared)
 }

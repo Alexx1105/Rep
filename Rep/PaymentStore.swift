@@ -125,7 +125,7 @@ final class PaymentStore: ObservableObject {
     }
     
     
-    func runPaymentFlow() async throws {
+    func runPaymentFlow(productId: String) async throws {
         if appAccountToken == nil {
             self.appAccountToken = try await supabase.loadAppAccountToken()
         }
@@ -134,8 +134,7 @@ final class PaymentStore: ObservableObject {
             self.products = try await supabase.getBillingProducts()
         }
         
-        let preferredProductID = try await supabase.fetchPreferredProductId()
-        guard let product = products.first(where: { $0.id == preferredProductID }) else { throw PaymentStoreError.productNotFound(preferredProductID) }
+        guard let product = products.first(where: { $0.id == productId }) else { throw PaymentStoreError.productNotFound(productId) }
         try await self.purchase(product)
     }
     

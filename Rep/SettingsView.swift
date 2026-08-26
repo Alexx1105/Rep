@@ -22,7 +22,7 @@ struct SettingsView: View {
     @ObservedObject var AutoSync = SyncController.shared
     
     @State private var isPresented: Bool = false
-    @State private var billingPlanTab: PaymentMenuCard.BillingInterval = .monthly
+    @State private var billingPlanTab: PaymentPricingCoordinator.BillingInterval = .monthly
     
     var body: some View {
         
