@@ -242,19 +242,18 @@ struct PaymentMenuCard: View {
                         }
                     }
                 } label: {
-                    ZStack {
-                        Capsule()
-                            .frame(maxWidth: .infinity, maxHeight: 55)
-                            .foregroundStyle(Color.mmDark)
-                            .glassEffect(.clear)
-                            .padding(.horizontal)
-                        
                         Text("Purchase")
                             .font(.system(.headline))
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.mmBackground)
-                    }
-                }
+                            .frame(maxWidth: .infinity, maxHeight: 45)
+                        
+                }.buttonStyle(.glassProminent)
+                 .tint(Color.mmDark)
+                 .padding(.horizontal)
+                
+
+             
             }
         }
     }

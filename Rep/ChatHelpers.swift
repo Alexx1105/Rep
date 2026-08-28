@@ -38,8 +38,6 @@ actor chatBuffer {
     }
 }
 
-let chatBufferInstance = chatBuffer()
-
 
 struct PhotoTransfer: Transferable {         ///shared wrapper to allow images types to play well with .loadTransferable(_)
     let photo: Data
@@ -105,14 +103,21 @@ public class Chat: ObservableObject {
             }
             
             var metadataText: String = ""
+            var pendingUIText: String = ""
+            let requestBuffer = chatBuffer()
             try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context) { chunk in
                 
-                await chatBufferInstance.append(chunk)
-                let format: String = chunk
+                await requestBuffer.append(chunk)
+                pendingUIText += chunk
+                
+                guard pendingUIText.count >= 16 else { return }
+                
+                let format = pendingUIText
+                pendingUIText.removeAll(keepingCapacity: true)
                 
                 await MainActor.run {
                     if let addLastRawChunk = shared.responseMessage.indices.last {
-                        shared.responseMessage[addLastRawChunk].text += format
+                        shared.responseMessage[addLastRawChunk].text.append(format)
                     }
                 }
             }
@@ -122,7 +127,13 @@ public class Chat: ObservableObject {
             }
             
             
-            let fullSnapahot: String = await chatBufferInstance.chunkSnapshot().trimmingCharacters(in: .whitespacesAndNewlines)
+            let fullSnapahot: String = await requestBuffer.chunkSnapshot().trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            await MainActor.run {
+                if let messageIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) {
+                    shared.responseMessage[messageIndex].text = fullSnapahot
+                }
+            }
             guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
             
             do {

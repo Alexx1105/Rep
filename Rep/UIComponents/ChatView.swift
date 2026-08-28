@@ -28,7 +28,7 @@ struct ChatView: View {
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
     @FocusState private var isChatFocused: Bool
-    @AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
+    //@AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
 
 
     var body: some View {
@@ -36,7 +36,7 @@ struct ChatView: View {
             Color.mmBackground.ignoresSafeArea()
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack {
+                    LazyVStack {
                         Spacer(minLength: 65)
                         
                         ForEach(Chat.shared.responseMessage, id: \.id) { response in
@@ -46,10 +46,12 @@ struct ChatView: View {
                                 .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
                                 .listRowBackground(Color.mmBackground)
                                 .lineLimit(nil)
-                                .transition(.opacity.combined(with: .blurReplace))
                                 .textSelection(.enabled)
                                 .tint(.white)
-                        }.animation(.easeOut(duration: 0.3), value: Chat.shared.responseMessage.count)
+                                .transition(
+                                            .opacity.combined(with: .move(edge: .bottom))
+                                        )
+                        }
                         
                         if isShimmerTextVisible {
                             HStack(alignment: .top, spacing: 10) {
@@ -168,7 +170,7 @@ struct ChatView: View {
                     .padding(.horizontal)
                 
                 
-                if !isEmptyStateSeen && Chat.shared.responseMessage.isEmpty {
+                if Chat.shared.responseMessage.isEmpty {
                     VStack(spacing: 20) {
                         VStack(spacing: 5) {
                             
@@ -219,7 +221,7 @@ struct ChatView: View {
                     .offset(y: showEmptyState ? 0 : 12)
                     .animation(.easeOut(duration: 0.45), value: showEmptyState)
                     .onAppear {
-                        guard !isEmptyStateSeen else { return }
+                        //guard !isEmptyStateSeen else { return }
                         
                         withAnimation(.easeOut(duration: 0.45)) {
                             showEmptyState = true
@@ -242,7 +244,7 @@ struct ChatView: View {
                             showEmptyState = false
                             let photos: [PhotosPickerItem] = selectedPhotos
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
-                            isEmptyStateSeen = true
+                            //isEmptyStateSeen = true
                             isShimmerTextVisible = true
                             isTextShimmering = true
                             fileUrls.removeAll()
@@ -315,7 +317,7 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
-                            isEmptyStateSeen = true
+                            //isEmptyStateSeen = true
                             isShimmerTextVisible = true
                             isTextShimmering = true
                             
