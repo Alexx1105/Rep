@@ -33,7 +33,7 @@ struct ContainerView: View {
                 
             } else {
                 NavigationStack(path: $navigationPath.path) {
-                    MainMenu(pageID: "")
+                    MainMenu(isUserAuthed: $isUserAuthed, pageID: "")
                         .task {
                             if navigationPath.path.isEmpty {
                                 navigationPath.path.append(NavPathItem.home)
@@ -42,7 +42,7 @@ struct ContainerView: View {
                         .navigationDestination(for: NavPathItem.self) { navigationPathItem in
                             switch navigationPathItem {
                             case .home:
-                                MainMenu(pageID: "")
+                                MainMenu(isUserAuthed: $isUserAuthed, pageID: "")
                             case .settings:
                                 SettingsView()
                             case .importPage:
@@ -94,7 +94,7 @@ struct MuscleMemoryApp: App {
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
     
-    @StateObject private var paymentStore = PaymentStore()
+    @StateObject private var paymentStore = PaymentStore.shared
     @StateObject var desktopNotesPoller = RepDesktopPoller.shared
     
     @State private var isPresented: Bool = false
@@ -102,7 +102,7 @@ struct MuscleMemoryApp: App {
         
         WindowGroup {
             ZStack {
-                RootTabs()
+                RootTabs(isUserAuthed: $isUserAuthed)
                     .disabled(!isUserAuthed)
                 if !isUserAuthed {
                     AuthView()

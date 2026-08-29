@@ -5,9 +5,9 @@
 //  Created by alex haidar on 12/3/25.
 //
 /* Payment store client for observing transactions,
- updating entitlements via rpc, handling payment
- failure cases, loading products, preparing new purchases,
- and fetching products already paid for by user */
+   updating entitlements via rpc, handling payment
+   failure cases, loading products, preparing new purchases,
+   and fetching products already paid for by user */
 import Foundation
 import StoreKit
 import Supabase
@@ -68,8 +68,7 @@ final class PaymentStore: ObservableObject {
     func refreshCreditsRollover() async throws {
         try await refreshResolvedEntitlement()
         try await creditBucketsManager.refreshBillingCredits(plan: currentPlan)
-        
-        //TODO: call credit refresh bucket functions here
+        //TODO: call credit refresh bucket functions here anc call this func too 
     }
     
     
@@ -91,6 +90,7 @@ final class PaymentStore: ObservableObject {
             state = .ready
         } catch {
             state = .failed(message: error.localizedDescription)
+            print("failed to get users entitlements", PaymentStoreError.entitlementsFailure, error)
         }
     }
     

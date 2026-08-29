@@ -126,15 +126,23 @@ public final class SupabaseClientManager: ObservableObject {
     
     
     func fetchBillingPlanTiers(plan: BillingPlan) async throws -> BillingPlanRow {
-        let billing: BillingPlanRow = try await supabaseDBClient.from("billing_plans").select().eq("plan_key", value: plan.rawValue).eq("is_active", value: true).single().execute().value
-        return billing
+        return try await supabaseDBClient.from("billing_plans").select().eq("plan_key", value: plan.rawValue).eq("is_active", value: true).single().execute().value
     }
     
     
-    func fetchBillingBucketForCrediting(planID: UUID) async throws -> [BillingBucket] {
+    func fetchBillingFeatureId(feature: BillingFeature) async throws -> UUID {
+        let feature: BillingFeautureId = try await supabaseDBClient.from("billing_features").select("id").eq("feature_key", value: feature.rawValue).single().execute().value
+        return feature.id
+    }
+    
+    
+    func fetchBillingBucketForCrediting(featureId: UUID) async throws -> BillingBucketCredits {
         let session = try await supabaseDBClient.auth.session
-        let bucket: [BillingBucket] = try await supabaseDBClient.from("usage_buckets").select().eq("user_id", value: session.user.id.uuidString).eq("plan_id", value: planID.uuidString).eq("feature_key", value: BillingFeature.ai_credits.rawValue).order("period_start", ascending: false).execute().value
         
-        return bucket
+        return try await supabaseDBClient.from("usage_buckets").select("""
+                                                                id, user_id, feature_id, bucket_type, allowance,
+                                                                consumed:consumed_units, reserved:reserved_units, period_start, period_end
+                                                                """).eq("user_id", value: session.user.id.uuidString).eq("feature_id", value: featureId.uuidString)
+                                                                    .order("period_start", ascending: false).limit(1).single().execute().value
     }
 }

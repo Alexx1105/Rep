@@ -20,8 +20,8 @@ final class CreditBucketsManager: ObservableObject {
     let supabase = SupabaseClientManager.shared
     
     @Published private(set) var current_plan: BillingPlanRow?
-    @Published private(set) var buckets: [BillingBucket] = []
-    @Published private(set) var current_bucket: BillingBucket?
+    @Published private(set) var buckets: [BillingBucketCredits] = []
+    @Published private(set) var current_bucket: BillingBucketCredits?
     
     
     var remaining_credits: Int {
@@ -47,17 +47,20 @@ final class CreditBucketsManager: ObservableObject {
         guard credits > 0 else { throw CreditBucketError.invalidCreditAmount }
         
         guard self.current_bucket != nil else { throw CreditBucketError.noCurrentBucket }
-        guard self.canAfford(credits: credits) else { throw CreditBucketError.insufficientCredits(required: credits, remaining: self.remaining_credits)}
+        guard self.canAfford(credits: credits) else {
+            throw CreditBucketError.insufficientCredits(
+                required: credits,
+                remaining: self.remaining_credits
+            )
+        }
     }
     
     
-    func isBucketCurrent(bucket: BillingBucket, plan: BillingPlanRow, date: Date = Date()) -> Bool {
-        guard bucket.plan_id == plan.id else { return false }
-        guard bucket.feature_key == .ai_credits else { return false }
+    func isBucketCurrent(bucket: BillingBucketCredits, date: Date = Date()) -> Bool {
         guard bucket.period_start <= date else { return false }
         
-        if let period_end = bucket.period_end {
-            return date < period_end
+        if let periodEnd = bucket.period_end {
+            return date < periodEnd
         }
         
         return bucket.bucket_type == .lifetime
@@ -66,25 +69,23 @@ final class CreditBucketsManager: ObservableObject {
     
     func refreshBillingCredits(plan: BillingPlan) async throws {
         let billingPlan = try await self.supabase.fetchBillingPlanTiers(plan: plan)
-        let billingBuckets = try await self.supabase.fetchBillingBucketForCrediting(planID: billingPlan.id)
+        let featureId = try await self.supabase.fetchBillingFeatureId(feature: .ai_credits)
+        let billingBucket = try await self.supabase.fetchBillingBucketForCrediting(featureId: featureId)
         
-        guard let currentBucket = billingBuckets.first(where: {
-            self.isBucketCurrent(bucket: $0, plan: billingPlan)}) else {
+        guard self.isBucketCurrent(bucket: billingBucket) else {
             self.current_plan = billingPlan
-            self.buckets = billingBuckets
+            self.buckets = [billingBucket]
             self.current_bucket = nil
             throw CreditBucketError.noCurrentBucket
         }
         
         self.current_plan = billingPlan
-        self.buckets = billingBuckets
-        self.current_bucket = currentBucket
+        self.buckets = [billingBucket]
+        self.current_bucket = billingBucket
     }
     
     
-    func applyUpdatedBucket(_ bucket: BillingBucket) {
-        guard bucket.feature_key == .ai_credits else { return }
-        
+    func applyUpdatedBucket(_ bucket: BillingBucketCredits) { //TODO: call
         if let index = self.buckets.firstIndex(where: {
             $0.id == bucket.id
         }) {
@@ -93,7 +94,7 @@ final class CreditBucketsManager: ObservableObject {
             self.buckets.insert(bucket, at: 0)
         }
         
-        if let current_plan, self.isBucketCurrent(bucket: bucket, plan: current_plan) {
+        if self.isBucketCurrent(bucket: bucket) {
             self.current_bucket = bucket
         }
     }
@@ -105,4 +106,3 @@ final class CreditBucketsManager: ObservableObject {
         self.buckets = []
     }
 }
-

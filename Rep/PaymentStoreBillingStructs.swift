@@ -82,6 +82,7 @@ enum PaymentStoreError: LocalizedError, Sendable {
     case billingCustomerNotFound
     case invalidAppAccountToken
     case noProductsAvailable
+    case entitlementsFailure
     case productNotFound(String)
     case unverifiedTransaction(String)
     case backend(code: String, message: String)
@@ -100,6 +101,8 @@ enum PaymentStoreError: LocalizedError, Sendable {
             return "StoreKit product \(productID) is unavailable."
         case .unverifiedTransaction(let message):
             return "StoreKit could not verify this transaction: \(message)"
+        case .entitlementsFailure:
+            return "failed to return user entitlements"
         case .backend(_, let message):
             return message
         }
@@ -155,13 +158,11 @@ struct BillingPlanRow: Identifiable, Codable {
 }
 
 
-struct BillingBucket: Identifiable, Codable {
+struct BillingBucketCredits: Identifiable, Codable {
     let id: UUID
     let user_id: UUID
-    let plan_id: UUID
-    let feature_key: BillingFeature
+    let feature_id: UUID
     let bucket_type: CreditBucketType
-    
     let allowance: Int
     let consumed: Int
     let reserved: Int
@@ -179,3 +180,9 @@ enum CreditBucketType: String, Codable {
     case lifetime
     case billing_period
 }
+
+struct BillingFeautureId: Identifiable, Codable {
+    let id: UUID
+}
+
+
