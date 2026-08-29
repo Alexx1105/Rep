@@ -251,9 +251,6 @@ struct PaymentMenuCard: View {
                 }.buttonStyle(.glassProminent)
                  .tint(Color.mmDark)
                  .padding(.horizontal)
-                
-
-             
             }
         }
     }

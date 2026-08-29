@@ -28,7 +28,6 @@ struct ChatView: View {
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
     @FocusState private var isChatFocused: Bool
-    //@AppStorage("hasSeenEmptyState") var isEmptyStateSeen: Bool = false
 
 
     var body: some View {
@@ -221,8 +220,6 @@ struct ChatView: View {
                     .offset(y: showEmptyState ? 0 : 12)
                     .animation(.easeOut(duration: 0.45), value: showEmptyState)
                     .onAppear {
-                        //guard !isEmptyStateSeen else { return }
-                        
                         withAnimation(.easeOut(duration: 0.45)) {
                             showEmptyState = true
                         }
@@ -244,7 +241,6 @@ struct ChatView: View {
                             showEmptyState = false
                             let photos: [PhotosPickerItem] = selectedPhotos
                             Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
-                            //isEmptyStateSeen = true
                             isShimmerTextVisible = true
                             isTextShimmering = true
                             fileUrls.removeAll()
@@ -317,7 +313,6 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
-                            //isEmptyStateSeen = true
                             isShimmerTextVisible = true
                             isTextShimmering = true
                             
