@@ -26,7 +26,6 @@ final class CreditBucketsManager: ObservableObject {
     
     var remaining_credits: Int {
         guard let current_bucket else { return 0 }
-        
         return max(current_bucket.allowance - current_bucket.consumed - current_bucket.reserved, 0)
     }
     
@@ -43,7 +42,7 @@ final class CreditBucketsManager: ObservableObject {
     }
     
     
-    func requireCredits(_ credits: Int) throws {
+    func requireCredits(_ credits: Int) throws {   //TODO: call so user will have to purchase more
         guard credits > 0 else { throw CreditBucketError.invalidCreditAmount }
         
         guard self.current_bucket != nil else { throw CreditBucketError.noCurrentBucket }
@@ -86,9 +85,7 @@ final class CreditBucketsManager: ObservableObject {
     
     
     func applyUpdatedBucket(_ bucket: BillingBucketCredits) { //TODO: call
-        if let index = self.buckets.firstIndex(where: {
-            $0.id == bucket.id
-        }) {
+        if let index = self.buckets.firstIndex(where: { $0.id == bucket.id }) {
             self.buckets[index] = bucket
         } else {
             self.buckets.insert(bucket, at: 0)

@@ -19,7 +19,7 @@ struct PaymentMenuCard: View {
         "250 AI credits every month",
         "Up to 4 hours of audio transcription",
         "Use credits for Rep AI chat, card generation, and audio transcription",
-        "Automatic Notion sync",
+        "Notion Auto Sync access",
         "Credits refresh every billing month"
     ]
     
@@ -30,6 +30,15 @@ struct PaymentMenuCard: View {
         "Use credits for Rep AI chat, card generation, and audio transcription",
         "Credits refresh every billing month"
     ]
+
+    private var hasPurchasedSelectedTier: Bool {
+        switch (selectedTier, paymentStore.currentPlan) {
+        case (.free, .free), (.pro, .pro), (.aiMax, .aiMax):
+            return true
+        default:
+            return false
+        }
+    }
     
     
     var body: some View {
@@ -242,7 +251,7 @@ struct PaymentMenuCard: View {
                         }
                     }
                 } label: {
-                        Text("Purchase")
+                        Text(hasPurchasedSelectedTier ? "Current Plan" : "Purchase")
                             .font(.system(.headline))
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.mmBackground)
@@ -251,6 +260,7 @@ struct PaymentMenuCard: View {
                 }.buttonStyle(.glassProminent)
                  .tint(Color.mmDark)
                  .padding(.horizontal)
+                 .disabled(hasPurchasedSelectedTier)
             }
         }
     }
@@ -332,12 +342,13 @@ struct PaymentMenuCard: View {
                             .glassEffect(.clear)
                             .padding(.horizontal)
                         
-                        Text("Purchase")
+                        Text(hasPurchasedSelectedTier ? "Current Plan" : "Purchase")
                             .font(.system(.headline))
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.kimchiLabs)
                     }
                 }
+                .disabled(hasPurchasedSelectedTier)
             }
         }
     }

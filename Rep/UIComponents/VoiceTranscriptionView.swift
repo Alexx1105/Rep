@@ -13,6 +13,7 @@ public struct VoiceTranscriptionView: View {
     @State private var dynamicBoxHieght: CGFloat = 0
     @State private var isSummarizing: Bool = false
     @State var transcriptionStartedAt: Date
+    @State var isMoreCreditsNeeded: Bool = true
     
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
     private var transcriptNotesGenerating: String = "Generating notes... "
@@ -267,6 +268,7 @@ public struct VoiceTranscriptionView: View {
                         transcriptionLiveActivity.stopLiveActivity()
                     }
             }
+            UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeAudioTranscriptionSheet() })
         }.animation(.smooth(duration: 0.45), value: audioManager.isTranscriptFinished)
     }
 }

@@ -12,6 +12,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismissSettingsTab
     @Environment(\.modelContext) var context
     
+    @EnvironmentObject private var paymentStore: PaymentStore
+    
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
@@ -102,6 +104,7 @@ struct SettingsView: View {
                                 .opacity(textOpacity)
                             
                             Toggle("Auto Sync", isOn: $AutoSync.isAutoSync)
+                                .disabled(!paymentStore.hasPaidAccess)
                                 .fontWeight(.semibold)
                                 .opacity(textOpacity)
                                 .tint(.blue)
@@ -165,5 +168,6 @@ struct SettingsView: View {
 #Preview {
     SettingsView()
         .environment(\.sizeCategory, .large)
+        .environmentObject(PaymentStore())
 }
 

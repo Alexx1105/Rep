@@ -65,13 +65,6 @@ final class PaymentStore: ObservableObject {
     }
     
     
-    func refreshCreditsRollover() async throws {
-        try await refreshResolvedEntitlement()
-        try await creditBucketsManager.refreshBillingCredits(plan: currentPlan)
-        //TODO: call credit refresh bucket functions here anc call this func too 
-    }
-    
-    
     func prepareForAuthenticatedUser() async {
         state = .loading
         
@@ -110,6 +103,8 @@ final class PaymentStore: ObservableObject {
             switch result {
             case .success(let verification):
                 _ = try await process(verification, finishAfterSync: true)
+                try await creditBucketsManager.refreshBillingCredits(plan: currentPlan)
+                
                 state = .ready
             case .pending:
                 state = .pending
@@ -200,6 +195,7 @@ final class PaymentStore: ObservableObject {
                     self.state = .ready
                 } catch {
                     self.state = .failed(message: error.localizedDescription)
+                    print("failed to observe new transactions", PaymentStoreError.unverifiedTransaction(""), error)
                 }
             }
         }

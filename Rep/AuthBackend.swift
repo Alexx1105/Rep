@@ -73,9 +73,8 @@ public class authBackend: ObservableObject {
                 Task {
                     do {
                         let _ = try await supabaseDBClient.auth.signInWithIdToken(credentials: OpenIDConnectCredentials(provider: .apple, idToken: tokenString))  //TODO: add nonce
-                        await PaymentStore.shared.prepareForAuthenticatedUser()
-                        //try DesktopAppToken.sendTokenToDesktop(session: session)
                         
+                        print("sign in success")
                     } catch {
                         print("failed to exchange tokens with supabase", ErrorDesc.authTokenError, error)
                     }

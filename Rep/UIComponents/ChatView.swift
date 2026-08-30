@@ -27,9 +27,10 @@ struct ChatView: View {
     @State private var isTextShimmering: Bool = false
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
+    @State var isMoreCreditsNeeded: Bool = true
     @FocusState private var isChatFocused: Bool
-
-
+    
+    
     var body: some View {
         ZStack {
             Color.mmBackground.ignoresSafeArea()
@@ -48,8 +49,8 @@ struct ChatView: View {
                                 .textSelection(.enabled)
                                 .tint(.white)
                                 .transition(
-                                            .opacity.combined(with: .move(edge: .bottom))
-                                        )
+                                    .opacity.combined(with: .move(edge: .bottom))
+                                )
                         }
                         
                         if isShimmerTextVisible {
@@ -91,7 +92,7 @@ struct ChatView: View {
                             task = nil
                         }
                     }
-                }
+            }
             
             LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
                                                       .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
@@ -139,12 +140,6 @@ struct ChatView: View {
                                         .font(.system(size: 5))
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
-                                
-                                //                                Button {
-                                //
-                                //                                } label: {
-                                //                                    Label("GPT-5.4", image: "")      //TODO: explain that its more detailed, will add support for this model later
-                                //                                }
                                 
                             } label: {
                                 Image(systemName: "ellipsis")
@@ -225,7 +220,7 @@ struct ChatView: View {
                         }
                     }
                 }
-                 
+                
                 
                 Spacer(minLength: 60)
                 VStack(alignment: .leading, spacing: 20) {
@@ -340,9 +335,9 @@ struct ChatView: View {
                     .padding(.bottom)
                 
             }
+            UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeChatSheet() })
         }.sheet(isPresented: $showPhotoPicker) {
             PhotoPicker(selectedPhotos: $selectedPhotos)
-            
         }
         .sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
