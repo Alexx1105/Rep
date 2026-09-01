@@ -5,6 +5,7 @@ import AVFoundation
 import KimchiKit
 import ActivityKit
 
+
 public struct VoiceTranscriptionView: View {
     @Environment(\.dismiss) var closeAudioTranscriptionSheet
     @Environment(\.modelContext) private var context
@@ -13,13 +14,15 @@ public struct VoiceTranscriptionView: View {
     @State private var dynamicBoxHieght: CGFloat = 0
     @State private var isSummarizing: Bool = false
     @State var transcriptionStartedAt: Date
-    @State var isMoreCreditsNeeded: Bool = true
+    @State var isMoreCreditsNeeded: Bool = false
+    @State private var idempotentKey: UUID
     
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
     private var transcriptNotesGenerating: String = "Generating notes... "
     
-    public init(transcriptionStartedAt: Date = Date()) {
+    public init(transcriptionStartedAt: Date = Date(), idempotentKey: UUID) {
         self.transcriptionStartedAt = transcriptionStartedAt
+        self.idempotentKey = idempotentKey
     }
     
     private var transcriptionBoxHeight: CGFloat {
@@ -72,6 +75,8 @@ public struct VoiceTranscriptionView: View {
     @State private var showMacDirections: Bool = false
     
     let transcriptionLiveActivity = LocalLiveActivityManager.shared
+    let creditBucket = CreditBucketsManager.shared
+    let paymentStore = PaymentStore.shared
     
     public var body: some View {
         ZStack {
@@ -208,20 +213,34 @@ public struct VoiceTranscriptionView: View {
                             audioManager.isTranscribing.toggle()
                             
                             Task {
-                                let impact = UIImpactFeedbackGenerator(style: .medium)
-                                impact.prepare()
-                                impact.impactOccurred()
-                                
-                                if audioManager.isTranscribing {
-                                    try await allowAudioInputAV()
-                                    let session = try await audioManager.openAudioSession()
-                                    try await audioManager.startAudioStream(session: session)
-                                } else {
-                                    try await audioManager.stopAudioStream(context: context) { delta in
-                                        streamingText += delta
-                                    }
-                                    audioManager.liveTranscription.removeAll()
+                                do {
+                                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                                    impact.prepare()
+                                    impact.impactOccurred()
                                     
+                                    if audioManager.isTranscribing {
+                                        try await allowAudioInputAV()
+                                        
+                                        try await creditBucket.ensureUserHasCredits(plan: paymentStore.currentPlan)
+                                        let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
+                                        try await audioManager.startAudioStream(session: session)
+                                    } else {
+                                        try await audioManager.stopAudioStream(context: context) { delta in
+                                            streamingText += delta
+                                        }
+                                        audioManager.liveTranscription.removeAll()
+                                    }
+                                    
+                                } catch PaymentStoreError.insufficientTokens {
+                                    isMoreCreditsNeeded = true
+                                } catch CreditBucketError.invalidCreditAmount {
+                                    isMoreCreditsNeeded = true
+                                } catch CreditBucketError.insufficientCredits(_, _) {
+                                    isMoreCreditsNeeded = true
+                                } catch CreditBucketError.noCurrentBucket {
+                                    isMoreCreditsNeeded = true
+                                } catch {
+                                    print("failed to start audio session", ErrorDesc.callsiteError, error)
                                 }
                             }
                             
@@ -273,6 +292,8 @@ public struct VoiceTranscriptionView: View {
     }
 }
 
+
+
 #Preview {
-    VoiceTranscriptionView(transcriptionStartedAt: Date())
+    VoiceTranscriptionView(transcriptionStartedAt: Date(), idempotentKey: UUID())
 }

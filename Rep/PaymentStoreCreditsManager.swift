@@ -22,9 +22,9 @@ final class CreditBucketsManager: ObservableObject {
     @Published private(set) var current_plan: BillingPlanRow?
     @Published private(set) var buckets: [BillingBucketCredits] = []
     @Published private(set) var current_bucket: BillingBucketCredits?
+
     
-    
-    var remaining_credits: Int {
+    var remaining_credits: Decimal {
         guard let current_bucket else { return 0 }
         return max(current_bucket.allowance - current_bucket.consumed - current_bucket.reserved, 0)
     }
@@ -34,7 +34,15 @@ final class CreditBucketsManager: ObservableObject {
     }
     
     
-    func canAfford(credits: Int) -> Bool {
+    func ensureUserHasCredits(plan: BillingPlan) async throws {
+        if CreditBucketsManager.shared.current_bucket == nil {
+            try await CreditBucketsManager.shared.refreshBillingCredits(plan: plan)
+        }
+        try CreditBucketsManager.shared.requireCredits(1)
+    }
+    
+    
+    func canAfford(credits: Decimal) -> Bool {
         guard credits > 0 else {
             return false
         }
@@ -42,16 +50,11 @@ final class CreditBucketsManager: ObservableObject {
     }
     
     
-    func requireCredits(_ credits: Int) throws {   //TODO: call so user will have to purchase more
+    func requireCredits(_ credits: Decimal) throws {
         guard credits > 0 else { throw CreditBucketError.invalidCreditAmount }
         
         guard self.current_bucket != nil else { throw CreditBucketError.noCurrentBucket }
-        guard self.canAfford(credits: credits) else {
-            throw CreditBucketError.insufficientCredits(
-                required: credits,
-                remaining: self.remaining_credits
-            )
-        }
+        guard self.canAfford(credits: credits) else { throw CreditBucketError.insufficientCredits(required: credits, remaining: self.remaining_credits) }
     }
     
     
@@ -84,7 +87,7 @@ final class CreditBucketsManager: ObservableObject {
     }
     
     
-    func applyUpdatedBucket(_ bucket: BillingBucketCredits) { //TODO: call
+    func applyUpdatedBucket(_ bucket: BillingBucketCredits) { 
         if let index = self.buckets.firstIndex(where: { $0.id == bucket.id }) {
             self.buckets[index] = bucket
         } else {

@@ -77,39 +77,6 @@ enum PaymentState: Equatable, Sendable {
 }
 
 
-enum PaymentStoreError: LocalizedError, Sendable {
-    case noAuthenticatedUser
-    case billingCustomerNotFound
-    case invalidAppAccountToken
-    case noProductsAvailable
-    case entitlementsFailure
-    case productNotFound(String)
-    case unverifiedTransaction(String)
-    case backend(code: String, message: String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .noAuthenticatedUser:
-            return "Sign in before loading or purchasing a subscription."
-        case .billingCustomerNotFound:
-            return "Rep could not find a billing profile for this account."
-        case .invalidAppAccountToken:
-            return "Rep received an invalid StoreKit account token."
-        case .noProductsAvailable:
-            return "No active StoreKit products are available."
-        case .productNotFound(let productID):
-            return "StoreKit product \(productID) is unavailable."
-        case .unverifiedTransaction(let message):
-            return "StoreKit could not verify this transaction: \(message)"
-        case .entitlementsFailure:
-            return "failed to return user entitlements"
-        case .backend(_, let message):
-            return message
-        }
-    }
-}
-
-
 struct ResolvedEntitlementRow: Decodable, Sendable {
     let effective_plan_key: BillingPlan
     let subscription_status: BillingSubscriptionStatus
@@ -163,9 +130,9 @@ struct BillingBucketCredits: Identifiable, Codable {
     let user_id: UUID
     let feature_id: UUID
     let bucket_type: CreditBucketType
-    let allowance: Int
-    let consumed: Int
-    let reserved: Int
+    let allowance: Decimal
+    let consumed: Decimal
+    let reserved: Decimal
     
     let period_start: Date
     let period_end: Date?
@@ -181,8 +148,23 @@ enum CreditBucketType: String, Codable {
     case billing_period
 }
 
+struct BillingSseResponse: Decodable {
+    let rep_billing: BillingResponseBody
+}
+
+struct BillingResponseBody: Decodable {
+    let bucket: BillingBucketCredits
+}
+
 struct BillingFeautureId: Identifiable, Codable {
     let id: UUID
+}
+
+struct AudioStartResponse: Decodable {      ///unified wrapper for both audio billing and audio session
+    let session: AudioSession.SessionData
+    let bucket: BillingBucketCredits
+    let idempotency_key: UUID
+    let authorized_duration_seconds: Decimal
 }
 
 

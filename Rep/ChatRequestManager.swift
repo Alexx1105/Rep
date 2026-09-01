@@ -16,6 +16,8 @@ public final class AIRequestManager: ObservableObject {
     public static let shared = AIRequestManager()
     private init() {}
     
+    let paymentStoreCredits = CreditBucketsManager.shared
+    
     struct aiModels: Codable {
         let userMessage: String
         let gptModel: String
@@ -61,10 +63,10 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
+    public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
-        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
+        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
         
         let session = try await supabaseDBClient.auth.session
@@ -75,6 +77,7 @@ public final class AIRequestManager: ObservableObject {
         urlRequest.setValue("multipart/form-data; boundary=\(fileIdentifier)", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(supabaseAccessToken)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("chat", forHTTPHeaderField: "x-rep-action")
+        urlRequest.setValue(idempotentKey.uuidString, forHTTPHeaderField: "x-idempotency-key")
         urlRequest.httpMethod = "POST"
         
         var multipartReqBody: Data = Data()
@@ -102,18 +105,28 @@ public final class AIRequestManager: ObservableObject {
         urlRequest.httpBody = multipartReqBody
         
         do {
-            let (bytes, _) = try await URLSession.shared.bytes(for: urlRequest)
+            let (bytes, response) = try await URLSession.shared.bytes(for: urlRequest)
             print("EDGE FUNCTION OPENAI RESPONSE: \(bytes)")
+            
+            guard let billingResponse = response as? HTTPURLResponse else { throw PaymentStoreError.billingCustomerNotFound }
+            if billingResponse.statusCode == 402 { throw PaymentStoreError.insufficientTokens }
             
             for try await stream in bytes.lines {
                 
                 guard stream.hasPrefix("data:") else { continue }
-                let ssePayload = String(stream.dropFirst(6))    ///strip the "data:" field from the sse payload line
+                let ssePayload = String(stream.dropFirst(6))
                 if ssePayload == "[DONE]" { break }
                 
                 guard let streamData = ssePayload.data(using: .utf8) else { continue }
-                let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
                 
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                if let billingDecoder = try? decoder.decode(BillingSseResponse.self, from: streamData) {
+                    paymentStoreCredits.applyUpdatedBucket(billingDecoder.rep_billing.bucket)
+                    continue
+                }
+                
+                let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
                 if streamDecoder.response != nil {
                     let meta = try await AIRequestManager.shared.extractChatMetadata(aiResponse: streamDecoder, context: context)
                     onMeta(meta)
@@ -122,8 +135,11 @@ public final class AIRequestManager: ObservableObject {
                 await onChunk(delta)
             }
             
-        } catch {
-            print("failed to decode request from supabase", ErrorDesc.decodeError, error)
+        } catch PaymentStoreError.insufficientTokens {
+            throw PaymentStoreError.insufficientTokens
+            
+        } catch is DecodingError {
+            print("failed to decode request from supabase", ErrorDesc.decodeError)
             throw ErrorDesc.decodeError
         }
         self.isNotesGenerated = true

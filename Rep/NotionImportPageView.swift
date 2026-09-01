@@ -128,7 +128,7 @@ struct NotionImportPageView: View {
                         }
                     }.sheet(isPresented: $showAudioTranscriptionView) {
                         if showAudioTranscriptionView {
-                            VoiceTranscriptionView()
+                            VoiceTranscriptionView(idempotentKey: UUID())
                         }
                     }
                 }.frame(maxHeight: 165)

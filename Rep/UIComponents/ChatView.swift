@@ -27,7 +27,7 @@ struct ChatView: View {
     @State private var isTextShimmering: Bool = false
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
-    @State var isMoreCreditsNeeded: Bool = true
+    @State var isMoreCreditsNeeded: Bool = false
     @FocusState private var isChatFocused: Bool
     
     
@@ -235,7 +235,9 @@ struct ChatView: View {
                         .onSubmit {
                             showEmptyState = false
                             let photos: [PhotosPickerItem] = selectedPhotos
-                            Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
+                            Task {
+                                try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                            }
                             isShimmerTextVisible = true
                             isTextShimmering = true
                             fileUrls.removeAll()
@@ -312,16 +314,17 @@ struct ChatView: View {
                             isTextShimmering = true
                             
                             let photos: [PhotosPickerItem] = selectedPhotos
-                            Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos)
+                            Task {
+                                try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                            }
                             fileUrls.removeAll()
                             selectedPhotos.removeAll()
                         } label: {
-                            ZStack {
+                            ZStack {    
                                 Circle().fill(Color.mmDark)
                                     .frame(maxWidth: 30, maxHeight: 30)
                                 
                                 Image(systemName: "arrow.up").foregroundStyle(Color.checkmark)
-                                
                             }
                         }.padding(.trailing)
                         

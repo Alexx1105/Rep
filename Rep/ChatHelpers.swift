@@ -74,7 +74,8 @@ public class Chat: ObservableObject {
     
     
     @MainActor
-    public static func sendChatMessage(userFile: URL?, context: ModelContext, selectedPhotos: [PhotosPickerItem]) {
+    public static func sendChatMessage(userFile: URL?, context: ModelContext, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
+        let idempotentKey: UUID = UUID()
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
         print("sending chat: \(trimUserInput)")
@@ -82,30 +83,36 @@ public class Chat: ObservableObject {
         Chat.shared.chat = ""
         let localId: String = UUID().uuidString
         
-        Task {
-            await MainActor.run {
-                shared.responseMessage.append(messageModel(id: localId, text: ""))
-            }
-            
-            if let userFile { print("sending selected file: \(userFile)") }
-            
-            let userPhotoData: Data?
-            if let userPhoto = selectedPhotos.compactMap({ $0 }).first {
-                if let transferPhoto = try await userPhoto.loadTransferable(type: PhotoTransfer.self) {
-                    userPhotoData = transferPhoto.photo
-                    
-                    print("photo passed down: \(userPhotoData?.count ?? 0)")
-                } else {
-                    userPhotoData = nil
-                }
+        
+        await MainActor.run {
+            shared.responseMessage.append(messageModel(id: localId, text: ""))
+        }
+        
+        if let userFile { print("sending selected file: \(userFile)") }
+        
+        let userPhotoData: Data?
+        if let userPhoto = selectedPhotos.compactMap({ $0 }).first {
+            if let transferPhoto = try await userPhoto.loadTransferable(type: PhotoTransfer.self) {
+                userPhotoData = transferPhoto.photo
+                
+                print("photo passed down: \(userPhotoData?.count ?? 0)")
             } else {
                 userPhotoData = nil
             }
-            
-            var metadataText: String = ""
-            var pendingUIText: String = ""
-            let requestBuffer = chatBuffer()
-            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context) { chunk in
+        } else {
+            userPhotoData = nil
+        }
+        
+        var metadataText: String = ""
+        var pendingUIText: String = ""
+        let requestBuffer = chatBuffer()
+        
+        let creditBucket = CreditBucketsManager.shared
+        let paymentStore = PaymentStore.shared
+        
+        do {
+            try await creditBucket.ensureUserHasCredits(plan: paymentStore.currentPlan)
+            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context, idempotentKey: idempotentKey) { chunk in
                 
                 await requestBuffer.append(chunk)
                 pendingUIText += chunk
@@ -120,37 +127,52 @@ public class Chat: ObservableObject {
                         shared.responseMessage[addLastRawChunk].text.append(format)
                     }
                 }
+                
             }
+            
             onMeta: { meta in
                 metadataText = meta
                 print("metadata:", metadataText)
             }
             
-            
-            let fullSnapahot: String = await requestBuffer.chunkSnapshot().trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            await MainActor.run {
-                if let messageIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) {
-                    shared.responseMessage[messageIndex].text = fullSnapahot
-                }
+        } catch CreditBucketError.insufficientCredits(_, _ ) {
+            onCreditsNeeded()
+            return
+        } catch PaymentStoreError.insufficientTokens {
+            onCreditsNeeded()
+            return
+        } catch CreditBucketError.noCurrentBucket {
+            onCreditsNeeded()
+            return
+        } catch {
+            print("billing or function call failure", ErrorDesc.callsiteError, error)
+            return
+        }
+        
+        
+        let fullSnapahot: String = await requestBuffer.chunkSnapshot().trimmingCharacters(in: .whitespacesAndNewlines)
+        await MainActor.run {
+            if let messageIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) {
+                shared.responseMessage[messageIndex].text = fullSnapahot
             }
-            guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
+        }
+        
+        guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
+        
+        do {
+            let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)
+            context.insert(cacheChat)
+            try context.save()
             
-            do {
-                let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)
-                context.insert(cacheChat)
-                try context.save()
-                
-                let title: String = String(fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines).prefix(20))
-                let trimmedText: String = fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines)
-                
-                guard !title.isEmpty && !trimmedText.isEmpty else { throw ErrorDesc.nilValue }
-                try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: localId, title: title)
-                
-                print("chat session saved...")
-            } catch {
-                print("failed to persist chat session ❗️", ErrorDesc.persistenceError, error)
-            }
+            let title: String = String(fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines).prefix(20))
+            let trimmedText: String = fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            guard !title.isEmpty && !trimmedText.isEmpty else { throw ErrorDesc.nilValue }
+            try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: localId, title: title)
+            
+            print("chat session saved...")
+        } catch {
+            print("failed to persist chat session ❗️", ErrorDesc.persistenceError, error)
         }
     }
 }

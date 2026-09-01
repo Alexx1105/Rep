@@ -53,7 +53,7 @@ final class RepDesktopPoller: ObservableObject {
         let session: Session = try await supabaseDBClient.auth.session
         guard !session.isExpired else { throw ErrorDesc.authTokenError }
         
-        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!)
+        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!)  //TODO: flip to prod
         request.httpMethod = "GET"
         request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("desktop_notes", forHTTPHeaderField: "x-rep-action")

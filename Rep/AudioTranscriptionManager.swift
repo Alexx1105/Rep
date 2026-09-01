@@ -4,8 +4,9 @@
 //
 //  Created by alex haidar on 6/7/26.
 //
-/* All requests to the supabase edge functions for the Voice
- transcription with gpt-4o-mini-transcribe or future models will be handled here  */
+/* All requests to the supabase edge functions
+   for the voice transcription with gpt-4o-mini-transcribe
+   or future models will be handled here  */
 
 
 import Foundation
@@ -19,7 +20,9 @@ import KimchiKit
 @MainActor
 public final class AudioTranscriptionManager: ObservableObject {
     private init() {}
+   
     public static let shared = AudioTranscriptionManager()
+    let paymentStoreCredits = CreditBucketsManager.shared
     
     private var webSocketTask: URLSessionWebSocketTask?
     typealias MessageTranscription = URLSessionWebSocketTask.Message
@@ -87,8 +90,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     }
     
     
-    public func openAudioSession() async throws -> AudioSession.SessionData {
-        
+    public func openAudioSession(idempotentKey: UUID) async throws -> AudioSession.SessionData {
         let url: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!  //TODO: change back to prod endpoint after edge function is in prod
         var urlRequest: URLRequest = URLRequest(url: url)
         
@@ -98,6 +100,7 @@ public final class AudioTranscriptionManager: ObservableObject {
         
         urlRequest.setValue("Bearer \(supabaseAccessToken)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("audio", forHTTPHeaderField: "x-rep-action")
+        urlRequest.setValue(idempotentKey.uuidString, forHTTPHeaderField: "x-idempotency-key")
         urlRequest.httpMethod = "POST"
         
         do {
@@ -107,10 +110,18 @@ public final class AudioTranscriptionManager: ObservableObject {
             guard let urlResponse = response as? HTTPURLResponse else { throw ErrorDesc.serverError }
             let _ = String(data: data, encoding: .utf8)
             
+            if urlResponse.statusCode == 402 { throw PaymentStoreError.insufficientTokens }
             guard (200...299).contains(urlResponse.statusCode) else { throw ErrorDesc.urlResponseError }
             
-            let decodeSession = try JSONDecoder().decode(AudioSession.self, from: data)
-            return decodeSession.session
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let audioResponse = try decoder.decode(AudioStartResponse.self, from: data)
+            paymentStoreCredits.applyUpdatedBucket(audioResponse.bucket)
+            
+            return audioResponse.session
+            
+        } catch PaymentStoreError.insufficientTokens {
+            throw PaymentStoreError.insufficientTokens
             
         } catch {
             print("error opening audio session", ErrorDesc.sessionError, error)
@@ -119,14 +130,14 @@ public final class AudioTranscriptionManager: ObservableObject {
     }
     
     
-    func createWebSocket(urlRequest: URLRequest) -> URLSessionWebSocketTask {   ///first time start-up
-        let socketId: String = UUID().uuidString
+    func createWebSocket(urlRequest: URLRequest) -> URLSessionWebSocketTask {
+            let socketId: String = UUID().uuidString
         print("new web socket created: \(socketId)")
         return URLSession.shared.webSocketTask(with: urlRequest)
     }
     
     
-    func retryWebSocket(urlRequest: URLRequest) async throws {                  ///retry for failed connections
+    func retryWebSocket(urlRequest: URLRequest) async throws {
         webSocketTask?.cancel(with: .goingAway, reason: .none)
         
         let newWebSocket = createWebSocket(urlRequest: urlRequest)
@@ -251,7 +262,6 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     
     public func extractTranscriptionResponseDelta() async throws {
-        
         do {
             let response = try await decodeTranscriptionResponse()
             
@@ -301,7 +311,6 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     
     public func commitAudioChunk() async throws {
-        
         let event: [String: Any] = ["type": "input_audio_buffer.commit"]
         guard !event.isEmpty else { throw ErrorDesc.nilValue }
         
@@ -354,7 +363,7 @@ public final class AudioTranscriptionManager: ObservableObject {
             for try await stream in bytes.lines {
                 print("RESPONSE STREAM: \(stream)")
                 guard stream.hasPrefix("data:") else { continue }
-                let ssePayload = String(stream.dropFirst(6)).trimmingCharacters(in: .whitespacesAndNewlines)    ///strip the "data:" field from the sse payload line
+                let ssePayload = String(stream.dropFirst(6)).trimmingCharacters(in: .whitespacesAndNewlines)
                 if ssePayload == "[DONE]" { break }
                 
                 guard let streamData = ssePayload.data(using: .utf8) else { continue }
