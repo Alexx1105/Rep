@@ -30,7 +30,7 @@ struct PaymentMenuCard: View {
         "Use credits for Rep AI chat, card generation, and audio transcription",
         "Credits refresh every billing month"
     ]
-
+    
     private var hasPurchasedSelectedTier: Bool {
         switch (selectedTier, paymentStore.currentPlan) {
         case (.free, .free), (.pro, .pro), (.aiMax, .aiMax):
@@ -246,21 +246,22 @@ struct PaymentMenuCard: View {
                         do {
                             guard let productId = coordinator.fetchProductId(tier: selectedTier, interval: billingPlanTab) else { return }
                             try await paymentStore.runPaymentFlow(productId: productId)
+                            isPresented = false
                         } catch {
                             print("failure to run payment flow | Pro tier", ErrorDesc.callsiteError, error)
                         }
                     }
                 } label: {
-                        Text(hasPurchasedSelectedTier ? "Current Plan" : "Purchase")
-                            .font(.system(.headline))
-                            .fontWeight(.semibold)
-                            .foregroundStyle(Color.mmBackground)
-                            .frame(maxWidth: .infinity, maxHeight: 45)
-                        
+                    Text(hasPurchasedSelectedTier ? "Current Plan" : "Purchase")
+                        .font(.system(.headline))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.mmBackground)
+                        .frame(maxWidth: .infinity, maxHeight: 45)
+                    
                 }.buttonStyle(.glassProminent)
-                 .tint(Color.mmDark)
-                 .padding(.horizontal)
-                 .disabled(hasPurchasedSelectedTier)
+                    .tint(Color.mmDark)
+                    .padding(.horizontal)
+                    .disabled(hasPurchasedSelectedTier)
             }
         }
     }
@@ -330,6 +331,7 @@ struct PaymentMenuCard: View {
                         do {
                             guard let productId = coordinator.fetchProductId(tier: selectedTier, interval: billingPlanTab) else { return }
                             try await paymentStore.runPaymentFlow(productId: productId)
+                            isPresented = false
                         } catch {
                             print("failed to initiate payment flow | Max tier", ErrorDesc.callsiteError, error)
                         }
