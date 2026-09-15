@@ -4,11 +4,12 @@
 //
 //  Created by alex haidar on 3/28/26.
 
-/* Upsert functions to supabase push token
-   server for all data soruces run through here */
+/* Supabase db table write operations
+ should all run through here */
 import Foundation
 import Supabase
 import CryptoKit
+import StoreKit
 
 
 let supabaseDBClient: SupabaseClient = SupabaseClient(supabaseURL: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co")!,
@@ -90,5 +91,58 @@ public final class SupabaseClientManager: ObservableObject {
             try await supabaseAudioTranscriptionNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
             print("rep desktop helper transcription notes successfully upserted into supabase ✅")
         }
+    }
+    
+    
+    func getBillingProducts() async throws -> [Product] {
+        let configuredProducts: [BillingProductRow] = try await supabaseDBClient.from("billing_products").select("storekit_product_id").eq("is_active", value: true).execute().value
+        
+        let productIDs = Set(configuredProducts.map(\.storekit_product_id))
+        guard !productIDs.isEmpty else { throw PaymentStoreError.noProductsAvailable }
+    
+        let fetchedProducts = try await Product.products(for: productIDs)
+        let products = fetchedProducts.sorted { lhs, rhs in
+            if lhs.price == rhs.price {
+                return lhs.id < rhs.id
+            }
+            return lhs.price < rhs.price
+        }
+        
+        guard !products.isEmpty else { throw PaymentStoreError.noProductsAvailable }
+        return products
+    }
+    
+    
+    func loadAppAccountToken() async throws -> UUID {
+        let session = try await supabaseDBClient.auth.session
+        guard !session.isExpired else { throw ErrorDesc.authTokenError }
+        
+        let rows: [BillingCustomerRow] = try await supabaseDBClient.from("billing_customers").select("app_account_token").eq("user_id", value: session.user.id.uuidString).limit(1).execute().value
+        guard let customer = rows.first else { throw PaymentStoreError.billingCustomerNotFound }
+        
+        let appAccountToken: UUID = customer.app_account_token
+        return appAccountToken
+    }
+    
+    
+    func fetchBillingPlanTiers(plan: BillingPlan) async throws -> BillingPlanRow {
+        return try await supabaseDBClient.from("billing_plans").select().eq("plan_key", value: plan.rawValue).eq("is_active", value: true).single().execute().value
+    }
+    
+    
+    func fetchBillingFeatureId(feature: BillingFeature) async throws -> UUID {
+        let feature: BillingFeautureId = try await supabaseDBClient.from("billing_features").select("id").eq("feature_key", value: feature.rawValue).single().execute().value
+        return feature.id
+    }
+    
+    
+    func fetchBillingBucketForCrediting(featureId: UUID) async throws -> BillingBucketCredits {
+        let session = try await supabaseDBClient.auth.session
+        
+        return try await supabaseDBClient.from("usage_buckets").select("""
+                                                                id, user_id, feature_id, bucket_type, allowance,
+                                                                consumed:consumed_units, reserved:reserved_units, period_start, period_end
+                                                                """).eq("user_id", value: session.user.id.uuidString).eq("feature_id", value: featureId.uuidString)
+                                                                    .order("period_start", ascending: false).limit(1).single().execute().value
     }
 }

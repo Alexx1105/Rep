@@ -10,15 +10,17 @@ import SwiftUI
 struct TOSPage: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-
+    
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+    
     @State private var hasScrolledToBottom = false
     @State private var contentHeight: CGFloat = 1
     @State private var scrollViewHeight: CGFloat = 0
     @State private var showJumpMenu = false
-
+    
     var onAgree: (() -> Void)?
     var onDecline: (() -> Void)?
-
+    
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
@@ -26,46 +28,46 @@ struct TOSPage: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 16) {
                             header
-
+                            
                             Group {
                                 sectionTitle("LICENSED APPLICATION END USER LICENSE AGREEMENT")
                                 sectionBody(intro)
-
+                                
                                 sectionTitle("a. Scope of License")
                                 sectionBody(scope)
-
+                                
                                 sectionTitle("b. Consent to Use of Data")
                                 sectionBody(consent)
-
+                                
                                 sectionTitle("c. Termination")
                                 sectionBody(termination)
-
+                                
                                 sectionTitle("d. External Services")
                                 sectionBody(externalServices)
-
+                                
                                 sectionTitle("e. NO WARRANTY")
                                 sectionBody(noWarranty)
-
+                                
                                 sectionTitle("f. Limitation of Liability")
                                 sectionBody(limitation)
-
+                                
                                 sectionTitle("g. Export")
                                 sectionBody(exportUse)
-
+                                
                                 sectionTitle("h. U.S. Government End Users")
                                 sectionBody(usGov)
-
+                                
                                 sectionTitle("i. Governing Law")
                                 sectionBody(governingLaw)
                             }
                             .id("content")
-
+                            
                             Color.clear
                                 .frame(height: 1)
                                 .id("bottomMarker")
                         }
                         .padding(.horizontal)
-                        .padding(.bottom, 32) // breathing room above the sticky bar
+                        .padding(.bottom, 96) // keeps content clear of the floating actions
                         .background(
                             GeometryReader { geo in
                                 Color.clear
@@ -88,12 +90,17 @@ struct TOSPage: View {
                     .onChange(of: contentHeight) { _, _ in updateScrolledToBottom(proxy: proxy) }
                     .onChange(of: scrollViewHeight) { _, _ in updateScrolledToBottom(proxy: proxy) }
                 }
-
+                
                 acceptanceBar
             }
             .navigationTitle("Terms of Service")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Terms of Service")
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .opacity(textOpacity)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button("Jump to: Scope of License") { scrollTo("a. Scope of License") }
@@ -111,65 +118,75 @@ struct TOSPage: View {
                     .accessibilityLabel("Jump to section")
                 }
             }
-            .background(backgroundMaterial)
+            .background(Color.mmBackground)
         }
     }
-
+    
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Please review the following terms")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+                .fontWeight(.semibold)
+                .opacity(textOpacity)
+            
             Text("By tapping Agree, you accept these terms.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 14))
+                .lineSpacing(3)
+                .fontWeight(.medium)
+                .opacity(0.50)
         }
         .padding(.top)
     }
-
+    
     private func sectionTitle(_ text: String) -> some View {
         Text(text)
-            .font(.title3.weight(.semibold))
+            .font(.title3)
+            .fontWeight(.semibold)
+            .opacity(textOpacity)
             .padding(.top, 12)
             .accessibilityAddTraits(.isHeader)
             .id(text)
     }
-
+    
     private func sectionBody(_ text: String) -> some View {
         Text(text)
-            .font(.body)
-            .foregroundStyle(.primary)
+            .font(.system(size: 14))
+            .lineSpacing(3)
+            .fontWeight(.medium)
+            .opacity(0.50)
             .multilineTextAlignment(.leading)
     }
-
+    
     private var acceptanceBar: some View {
-        VStack(spacing: 0) {
-            Divider()
-            HStack(spacing: 12) {
-                Button(role: .cancel) {
-                    if let onDecline { onDecline() } else { dismiss() }
-                } label: {
-                    Text("Decline")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button {
-                    if let onAgree { onAgree() } else { dismiss() }
-                } label: {
-                    Text("Agree")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(!hasScrolledToBottom)
-                .opacity(hasScrolledToBottom ? 1 : 0.6)
-                .animation(.easeInOut(duration: 0.2), value: hasScrolledToBottom)
+        HStack(spacing: 12) {
+            Button(role: .cancel) {
+                if let onDecline { onDecline() } else { dismiss() }
+            } label: {
+                Text("Decline")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
             }
-            .padding()
-            .background(.thinMaterial)
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
+            
+            Button {
+                if let onAgree { onAgree() } else { dismiss() }
+            } label: {
+                Text("Agree")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
+            .disabled(!hasScrolledToBottom)
+            .opacity(hasScrolledToBottom ? 1 : 0.6)
+            .animation(.easeInOut(duration: 0.2), value: hasScrolledToBottom)
         }
+        .padding(.horizontal)
+        .padding(.bottom, 8)
     }
-
+    
     private var backgroundMaterial: some View {
         Group {
             if colorScheme == .dark {
@@ -180,11 +197,11 @@ struct TOSPage: View {
         }
         .ignoresSafeArea()
     }
-
+    
     private func scrollTo(_ id: String) {
         // helper to be used if wired with ScrollViewReader from caller; for now it's a no-op placeholder
     }
-
+    
     private func updateScrolledToBottom(proxy: ScrollViewProxy) {
         // Heuristic: if content height is less than or equal to scroll view height, allow immediate agree.
         if contentHeight <= scrollViewHeight + 1 {

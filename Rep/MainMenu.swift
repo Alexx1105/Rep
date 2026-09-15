@@ -27,6 +27,8 @@ struct MainMenu: View {
     
     @AppStorage("desktop.pollingEnabled") private var isPollingEnabled = false
     
+    @Binding var isUserAuthed: Bool
+    
     var pageID: String
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
@@ -291,6 +293,10 @@ struct MainMenu: View {
             }
         }
         
+        .task(id: isUserAuthed) {
+            guard isUserAuthed else { return }
+            await PaymentStore.shared.prepareForAuthenticatedUser()
+        }
         
         .onChange(of: AutoSync.isAutoSync) { _, synced in
             guard let controller = taskController else { return }
@@ -332,7 +338,7 @@ struct MainMenu: View {
 
 
 #Preview {
-    MainMenu(pageID: "")
+    MainMenu(isUserAuthed: .constant(true), pageID: "")
         .environment(\.sizeCategory, .large)
     
 }

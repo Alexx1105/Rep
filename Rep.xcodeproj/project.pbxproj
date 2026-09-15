@@ -15,12 +15,12 @@
 		B2270333302BA69C00F308B9 /* SupabaseDataSourceStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
+		B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */; };
 		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
 		B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2575D0C2EE120D900B82793 /* PaymentStore.swift */; };
 		B2575D0F2EE123A000B82793 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2575D0E2EE123A000B82793 /* StoreKit.framework */; };
-		B2575D112EE269B500B82793 /* Rep pro tier.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B2575D102EE269B500B82793 /* Rep pro tier.storekit */; };
 		B25D6AEB2FD5AFD8004801B7 /* AudioTranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */; };
 		B26842D12CC704DB00471001 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26842CE2CC704DB00471001 /* MainMenu.swift */; };
 		B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26842D22CC9F5FC00471001 /* SettingsView.swift */; };
@@ -35,6 +35,7 @@
 		B2924E2D300C69FE00209D49 /* AudioTranscriptionDesktopPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2924E2C300C69E200209D49 /* AudioTranscriptionDesktopPoller.swift */; };
 		B2924E2F300C702A00209D49 /* AudioTranscriptionStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */; };
 		B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */; };
+		B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */; };
 		B2A2C73D302CE71F000D6977 /* PolledDesktopNotesPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicRepControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */; };
@@ -42,6 +43,8 @@
 		B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C62BCB102F00BBC748 /* RepApp.swift */; };
 		B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */; };
 		B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2B837CA2BCB103000BBC748 /* Assets.xcassets */; };
+		B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */; };
+		B2BBED493032A6E900526E22 /* PaymentStoreCreditsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */; };
 		B2C2A9A72E87A9F000816A0B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B205A9582D73B62D00FFF047 /* WidgetKit.framework */; };
 		B2C2A9AA2E87A9F200816A0B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D220DD2BD981B800E55834 /* SwiftUI.framework */; };
 		B2C2A9AE2E88911A00816A0B /* DynamicRepExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -61,7 +64,7 @@
 		B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3043C921D38E360E9E22AF1 /* VoiceTranscriptionView.swift */; };
 		B359F1882320AC1AE6D0A4F2 /* SliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36DD4E8C61EA857EC222289 /* SliderView.swift */; };
 		B36ECA7BF1CA617BFFA0E766 /* RootTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3CAAAD1F260F8D5F94AB36B /* RootTabs.swift */; };
-		B37F900F71ED3C744896BDF7 /* PaymentMenuCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36B23B52A5A7161361C3160 /* PaymentMenuCard.swift */; };
+		B37F900F71ED3C744896BDF7 /* PaymentMenuSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */; };
 		B3D3BD8D45064655708BF23E /* ChatDialogToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B380EFA55CDCC0BF88AAE605 /* ChatDialogToast.swift */; };
 		B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */; };
 		B3D928544D2C101A23894C79 /* MacHelperDirections.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */; };
@@ -93,6 +96,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = B25A0A932D94FE3300420892;
 			remoteInfo = DynamicRepExtension;
+		};
+		B2BBED433032140E00526E22 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2B837BB2BCB102F00BBC748 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2B837C22BCB102F00BBC748;
+			remoteInfo = Rep;
 		};
 		B2C2A9AC2E888D7000816A0B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -127,13 +137,13 @@
 		B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDataSourceStructs.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
 		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
+		B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradePlanAlertSheet.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B24A69832F57D97D00FBB5FB /* TosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosPage.swift; sourceTree = "<group>"; };
 		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
 		B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPermissions.swift; sourceTree = "<group>"; };
 		B2575D0C2EE120D900B82793 /* PaymentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStore.swift; sourceTree = "<group>"; };
 		B2575D0E2EE123A000B82793 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		B2575D102EE269B500B82793 /* Rep pro tier.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep pro tier.storekit"; sourceTree = "<group>"; };
 		B25A0A472D91D9E300420892 /* DynamicRepTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepTest.swift; sourceTree = "<group>"; };
 		B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DynamicRepExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionManager.swift; sourceTree = "<group>"; };
@@ -148,6 +158,8 @@
 		B2924E2C300C69E200209D49 /* AudioTranscriptionDesktopPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionDesktopPoller.swift; sourceTree = "<group>"; };
 		B2924E2E300C701F00209D49 /* AudioTranscriptionStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionStructs.swift; sourceTree = "<group>"; };
 		B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLiveActivityManager.swift; sourceTree = "<group>"; };
+		B29A1208303A9EC9000A0031 /* Rep Billing Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Rep Billing Products.storekit"; sourceTree = "<group>"; };
+		B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentPricingCoordinator.swift; sourceTree = "<group>"; };
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicRepControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicRepControlsView.swift; sourceTree = "<group>"; };
 		B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolledDesktopNotesPopover.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
@@ -155,6 +167,9 @@
 		B2B837C62BCB102F00BBC748 /* RepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepApp.swift; sourceTree = "<group>"; };
 		B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedNotes.swift; sourceTree = "<group>"; };
 		B2B837CA2BCB103000BBC748 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStoreBillingStructs.swift; sourceTree = "<group>"; };
+		B2BBED3F3032140E00526E22 /* RepTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentStoreCreditsManager.swift; sourceTree = "<group>"; };
 		B2C434E92FEF68F600C528CB /* UIAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAnimations.swift; sourceTree = "<group>"; };
 		B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHelpers.swift; sourceTree = "<group>"; };
 		B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataManager.swift; sourceTree = "<group>"; };
@@ -170,7 +185,7 @@
 		B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacHelperDirections.swift; sourceTree = "<group>"; };
 		B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionSummaryPicker.swift; sourceTree = "<group>"; };
 		B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperToggleCard.swift; sourceTree = "<group>"; };
-		B36B23B52A5A7161361C3160 /* PaymentMenuCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMenuCard.swift; sourceTree = "<group>"; };
+		B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMenuSheet.swift; sourceTree = "<group>"; };
 		B36DD4E8C61EA857EC222289 /* SliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderView.swift; sourceTree = "<group>"; };
 		B380EFA55CDCC0BF88AAE605 /* ChatDialogToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDialogToast.swift; sourceTree = "<group>"; };
 		B3A06C8C01B5FC3E84026961 /* transcriptionSummmaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = transcriptionSummmaryView.swift; sourceTree = "<group>"; };
@@ -195,6 +210,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B25A0A972D94FE3300420892 /* DynamicRep */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (B25A0AA82D94FE3400420892 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = DynamicRep; sourceTree = "<group>"; };
+		B2BBED403032140E00526E22 /* RepTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RepTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,14 +234,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B2BBED3C3032140E00526E22 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		B2B837BA2BCB102F00BBC748 = {
 			isa = PBXGroup;
 			children = (
+				B29A1208303A9EC9000A0031 /* Rep Billing Products.storekit */,
 				B2B837C52BCB102F00BBC748 /* Rep */,
 				B25A0A972D94FE3300420892 /* DynamicRep */,
+				B2BBED403032140E00526E22 /* RepTests */,
 				B2D220DA2BD981B800E55834 /* Frameworks */,
 				B2B837C42BCB102F00BBC748 /* Products */,
 			);
@@ -236,6 +261,7 @@
 			children = (
 				B2B837C32BCB102F00BBC748 /* Rep.app */,
 				B25A0A942D94FE3300420892 /* DynamicRepExtension.appex */,
+				B2BBED3F3032140E00526E22 /* RepTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -245,12 +271,14 @@
 			children = (
 				B2D362FE2E2C855900C3012C /* .gitignore */,
 				B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */,
-				B2575D102EE269B500B82793 /* Rep pro tier.storekit */,
 				B24A69832F57D97D00FBB5FB /* TosPage.swift */,
 				B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */,
 				B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */,
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
+				B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */,
+				B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */,
+				B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */,
 				B2C434E92FEF68F600C528CB /* UIAnimations.swift */,
 				B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */,
 				B3ED98CF4BC35A3484ED0C10 /* UIComponents */,
@@ -302,11 +330,12 @@
 		B3ED98CF4BC35A3484ED0C10 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */,
 				B3CAAAD1F260F8D5F94AB36B /* RootTabs.swift */,
 				B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */,
 				B30709FB764900BE992DFBFA /* MainMenuTab.swift */,
 				B36DD4E8C61EA857EC222289 /* SliderView.swift */,
-				B36B23B52A5A7161361C3160 /* PaymentMenuCard.swift */,
+				B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */,
 				B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */,
 				B3CFF79DB455B634A844A062 /* SkeletonLoader.swift */,
 				B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */,
@@ -371,6 +400,29 @@
 			productReference = B2B837C32BCB102F00BBC748 /* Rep.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B2BBED3E3032140E00526E22 /* RepTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2BBED453032140E00526E22 /* Build configuration list for PBXNativeTarget "RepTests" */;
+			buildPhases = (
+				B2BBED3B3032140E00526E22 /* Sources */,
+				B2BBED3C3032140E00526E22 /* Frameworks */,
+				B2BBED3D3032140E00526E22 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2BBED443032140E00526E22 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B2BBED403032140E00526E22 /* RepTests */,
+			);
+			name = RepTests;
+			packageProductDependencies = (
+			);
+			productName = RepTests;
+			productReference = B2BBED3F3032140E00526E22 /* RepTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -378,7 +430,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					B25A0A932D94FE3300420892 = {
@@ -386,6 +438,10 @@
 					};
 					B2B837C22BCB102F00BBC748 = {
 						CreatedOnToolsVersion = 15.3;
+					};
+					B2BBED3E3032140E00526E22 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = B2B837C22BCB102F00BBC748;
 					};
 				};
 			};
@@ -408,6 +464,7 @@
 			targets = (
 				B2B837C22BCB102F00BBC748 /* Rep */,
 				B25A0A932D94FE3300420892 /* DynamicRepExtension */,
+				B2BBED3E3032140E00526E22 /* RepTests */,
 			);
 		};
 /* End PBXProject section */
@@ -425,9 +482,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				B26D98A92EE26CDB003DEA64 /* StoreKitTestCertificate.cer in Resources */,
-				B2575D112EE269B500B82793 /* Rep pro tier.storekit in Resources */,
 				B2D362FF2E2C856400C3012C /* .gitignore in Resources */,
 				B2B837CB2BCB103000BBC748 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2BBED3D3032140E00526E22 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,6 +508,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2BBED493032A6E900526E22 /* PaymentStoreCreditsManager.swift in Sources */,
 				B281FE392FA6492A00C3EEC5 /* AIDataStructs.swift in Sources */,
 				B2924E2F300C702A00209D49 /* AudioTranscriptionStructs.swift in Sources */,
 				B26842D52CC9F5FD00471001 /* SettingsView.swift in Sources */,
@@ -454,13 +518,14 @@
 				B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */,
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
 				B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */,
+				B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */,
 				B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */,
 				B2F82DAC2E9F330800006533 /* UIComponentsGlobal.swift in Sources */,
 				B36ECA7BF1CA617BFFA0E766 /* RootTabs.swift in Sources */,
 				B3EF374DAB89329BAE2519B4 /* TabSelectionCircle.swift in Sources */,
 				B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */,
 				B359F1882320AC1AE6D0A4F2 /* SliderView.swift in Sources */,
-				B37F900F71ED3C744896BDF7 /* PaymentMenuCard.swift in Sources */,
+				B37F900F71ED3C744896BDF7 /* PaymentMenuSheet.swift in Sources */,
 				B304C27FAA75682CFAB44F27 /* HyperToggleCard.swift in Sources */,
 				B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */,
 				B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */,
@@ -468,6 +533,7 @@
 				B337C6418EFD8CA5DE9847BA /* ChatView.swift in Sources */,
 				B3DF5FDBE44CD85DC6EB0B63 /* MainMenuDataSourceList.swift in Sources */,
 				B316D301EC078AFF6FBC7A64 /* PickerView.swift in Sources */,
+				B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */,
 				B3E4DFB146BC0B9897B2758C /* transcriptionSummmaryView.swift in Sources */,
 				B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */,
 				B3D928544D2C101A23894C79 /* MacHelperDirections.swift in Sources */,
@@ -497,6 +563,14 @@
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
+				B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2BBED3B3032140E00526E22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,6 +591,11 @@
 			isa = PBXTargetDependency;
 			target = B25A0A932D94FE3300420892 /* DynamicRepExtension */;
 			targetProxy = B2997BDA2E564E36004AF870 /* PBXContainerItemProxy */;
+		};
+		B2BBED443032140E00526E22 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2B837C22BCB102F00BBC748 /* Rep */;
+			targetProxy = B2BBED433032140E00526E22 /* PBXContainerItemProxy */;
 		};
 		B2C2A9AD2E888D7000816A0B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -734,7 +813,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -756,7 +835,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -774,7 +853,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -796,7 +875,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -805,6 +884,58 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B2BBED463032140E00526E22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kimchilabs.rep.RepTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rep.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rep";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		B2BBED473032140E00526E22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kimchilabs.rep.RepTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rep.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rep";
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
@@ -834,6 +965,15 @@
 			buildConfigurations = (
 				B2B837E82BCB103000BBC748 /* Debug */,
 				B2B837E92BCB103000BBC748 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B2BBED453032140E00526E22 /* Build configuration list for PBXNativeTarget "RepTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2BBED463032140E00526E22 /* Debug */,
+				B2BBED473032140E00526E22 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

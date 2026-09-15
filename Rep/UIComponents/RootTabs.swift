@@ -11,12 +11,14 @@ struct RootTabs: View {
     @StateObject private var importManager = NotionDataManager.shared
     @StateObject private var chatGenerationManager = AIRequestManager.shared
     
+    @Binding var isUserAuthed: Bool
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 TabView {
                     Tab("Menu", systemImage: "list.bullet") {
-                        MainMenu(pageID: "pageID")
+                        MainMenu(isUserAuthed: $isUserAuthed, pageID: "pageID")
                     }
                     Tab("Settings", systemImage: "gear") {
                         SettingsView()
@@ -69,5 +71,5 @@ struct RootTabs: View {
 }
 
 #Preview {
-    RootTabs()                                ///liquid glass tab bar
+    RootTabs(isUserAuthed: .constant(true))                                ///liquid glass tab bar
 }

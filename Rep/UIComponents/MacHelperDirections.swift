@@ -5,21 +5,24 @@ import AVFoundation
 import KimchiKit
 import ActivityKit
 
+
 struct MacHelperDirections: View {
+    @State var desktopUrlLink: URL?
+    
     var body: some View  {
         VStack {
             HStack(alignment: .top) {
-                Capsule().frame(width: 50, height: 5)
-            }.padding(.top)
+                Capsule().frame(width: 50, height: 5).padding(.top, 10)
+            }
             
             ZStack {
-                RoundedRectangle(cornerRadius: 30).foregroundStyle(Color.gray).opacity(0.2)
+                RoundedRectangle(cornerRadius: 25).foregroundStyle(Color.gray).opacity(0.2)
                     .frame(maxWidth: .infinity, maxHeight: 100)
                     .padding(.horizontal)
                 
                 VStack(spacing: 15) {
                     HStack {
-                        Text("Transcribe On Mac").font(.system(size: 14, weight: .bold, design: .rounded))
+                        Text("Use Rep Desktop on your Mac").font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.mmDark)
                     }
                     
@@ -50,7 +53,7 @@ struct MacHelperDirections: View {
                 }
             }.padding(.top)
             
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 12) {
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("1.  Enable Rep Desktop toggle in settings")
@@ -59,13 +62,14 @@ struct MacHelperDirections: View {
                         .font(.system(size: 15, weight: .regular))
                 }
                 
-                Text("2.  Open App Store on Mac")
+                Text("2.  Open the App Store on your Mac")
                 
-                Text("3.  Search for Rep Desktop Helper and download")
-                
-                Text("4.  Sign in with Apple ID to auto sync Rep between your Mac and iPhone to receive summarized notes")
+                Text("3.  Search for Rep Desktop Helper and download\n(or use the download button below)")
                     .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.center)
+                
+                Text("4.  Sign in with Apple in both apps to receive and sync your summarized notes.")
+                    .fixedSize(horizontal: false, vertical: true)
+                 
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("5.  Allow accessibility permissions")
@@ -75,39 +79,45 @@ struct MacHelperDirections: View {
                 }
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("6.  Enable Notifications for Rep on Mac")
+                    Text("6.  Enable notifications for Rep Desktop.")
                     
                     Image(systemName: "bell.badge")
                         .font(.system(size: 15, weight: .regular))
                 }
                 
-                let appStoreURL: URL = URL(string: "testing")!  //TODO: replace with app store url
-                ShareLink(item: appStoreURL) {
-                    ZStack {
-                        Capsule(style: .continuous)
-                            .fill(Color.intervalBlue)
-                            .frame(width: 145, height: 30)
-                            .glassEffect(.clear)
-                        
-                        HStack(spacing: 5) {
-                            Text("Mac Download")
-                            Image(systemName: "arrow.up.right")
-                        }
-                        .foregroundStyle(Color.kimchiLabs)
+                let appStoreURL: URL = URL(string: "https://www.apple.com/app-store/")!
+                let urlSwap: URL = desktopUrlLink ?? appStoreURL
+                ShareLink(item: urlSwap) {
+                    
+                    HStack(spacing: 8) {
+                        Text("Download Rep Desktop").fontWeight(.semibold)
+                        Image(systemName: "arrow.up.right").fontWeight(.semibold)
                     }
+                    .foregroundStyle(Color.kimchiLabs)
                 }
-                .buttonStyle(.plain)
+                .tint(Color.intervalBlue)
+                .buttonStyle(.glassProminent)
+                .padding(.top, 10)
+             
+                
+                
             }
             .font(.system(size: 14, weight: .regular, design: .rounded))
             .foregroundStyle(Color.mmDark)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top)
-            .padding(.horizontal, 24)
             
-            Spacer()
+            .padding(.horizontal, 28)
+            
+        }
+        .task {
+            let repDesktopUrl = await FetchAppStoreUrl.fetchDesktopUrl()
+            desktopUrlLink = repDesktopUrl.flatMap(URL.init(string:))
         }
     }
 }
+
+
 
 #Preview {
     MacHelperDirections()

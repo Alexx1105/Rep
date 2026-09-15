@@ -4,8 +4,7 @@
 //
 //  Created by alex haidar on 3/13/26.
 //
-/* Helpers centered primarily around fetching, and querying
-   from SwiftData, also includes LiveActivity token genorator */
+/* General utility helpers  */
 
 import Foundation
 import SwiftData
@@ -92,33 +91,19 @@ public final class PageDeletionManager {
     }
 }
 
+public struct AppStoreUrl: Codable {
+    let value: String?
+}
 
-//public final class DesktopAppToken {
-//    public static func sendTokenToDesktop(session: Session) throws {
-//        
-//        let pairingCode: String = UUID().uuidString
-//        let desktopAccessToken: String = session.accessToken
-//        
-//        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!)
-//        request.httpMethod = "POST"
-//        request.setValue("Bearer \(desktopAccessToken)", forHTTPHeaderField: "Authorization")
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        
-//        let body: [String : String] = ["pairing_code" : pairingCode]
-//      
-//        guard !body.isEmpty else { throw ErrorDesc.nilValue }
-//        
-//        Task {
-//            do {
-//                try request.httpBody = JSONSerialization.data(withJSONObject: body)
-//                let (_,response) = try await URLSession.shared.data(for: request)
-//                
-//                guard let httpResponse = response as? HTTPURLResponse else { throw ErrorDesc.responseError }
-//                
-//                print("access token successfully sent to edge for desktop helper ✅", httpResponse.statusCode)
-//            } catch {
-//                print("error sending token", ErrorDesc.authTokenError, error)
-//            }
-//        }
-//    }
-//}
+
+public final class FetchAppStoreUrl {
+    public static func fetchDesktopUrl() async -> String? {
+        do {
+            let query: AppStoreUrl = try await supabaseDBClient.from("app_config").select("value").eq("key", value: "rep_desktop_app_store_url").limit(1).execute().value
+            return query.value
+        } catch {
+            print("no app store url")
+            return nil
+        }
+    }
+}
