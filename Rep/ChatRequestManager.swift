@@ -66,7 +66,7 @@ public final class AIRequestManager: ObservableObject {
     public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
-        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!
+        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
         
         let session = try await supabaseDBClient.auth.session

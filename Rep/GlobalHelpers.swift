@@ -4,8 +4,7 @@
 //
 //  Created by alex haidar on 3/13/26.
 //
-/* Helpers centered primarily around fetching, and querying
-   from SwiftData, also includes LiveActivity token genorator */
+/* General utility helpers  */
 
 import Foundation
 import SwiftData
@@ -92,3 +91,19 @@ public final class PageDeletionManager {
     }
 }
 
+public struct AppStoreUrl: Codable {
+    let value: String?
+}
+
+
+public final class FetchAppStoreUrl {
+    public static func fetchDesktopUrl() async -> String? {
+        do {
+            let query: AppStoreUrl = try await supabaseDBClient.from("app_config").select("value").eq("key", value: "rep_desktop_app_store_url").limit(1).execute().value
+            return query.value
+        } catch {
+            print("no app store url")
+            return nil
+        }
+    }
+}

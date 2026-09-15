@@ -7,6 +7,8 @@ import ActivityKit
 
 
 struct MacHelperDirections: View {
+    @State var desktopUrlLink: URL?
+    
     var body: some View  {
         VStack {
             HStack(alignment: .top) {
@@ -84,7 +86,8 @@ struct MacHelperDirections: View {
                 }
                 
                 let appStoreURL: URL = URL(string: "https://www.apple.com/app-store/")!
-                ShareLink(item: appStoreURL) {
+                let urlSwap: URL = desktopUrlLink ?? appStoreURL
+                ShareLink(item: urlSwap) {
                     
                     HStack(spacing: 8) {
                         Text("Download Rep Desktop").fontWeight(.semibold)
@@ -103,12 +106,18 @@ struct MacHelperDirections: View {
             .foregroundStyle(Color.mmDark)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top)
-
+            
             .padding(.horizontal, 28)
             
         }
+        .task {
+            let repDesktopUrl = await FetchAppStoreUrl.fetchDesktopUrl()
+            desktopUrlLink = repDesktopUrl.flatMap(URL.init(string:))
+        }
     }
 }
+
+
 
 #Preview {
     MacHelperDirections()

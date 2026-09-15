@@ -279,7 +279,7 @@ public struct VoiceTranscriptionView: View {
             }.background(Color.mmBackground)
             
             if audioManager.isTranscriptFinished {
-                transcriptionSummmaryView().ignoresSafeArea()
+                transcriptionSummmaryView(idempotentKey: $idempotentKey).ignoresSafeArea()
                     .transition(.opacity.combined(with: .scale(scale: 0.985)))
                     .zIndex(10)
                 

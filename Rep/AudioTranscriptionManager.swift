@@ -91,7 +91,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     
     public func openAudioSession(idempotentKey: UUID) async throws -> AudioSession.SessionData {
-        let url: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!  //TODO: change back to prod endpoint after edge function is in prod
+        let url: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!  
         var urlRequest: URLRequest = URLRequest(url: url)
         
         let session = try await supabaseDBClient.auth.session
@@ -328,7 +328,7 @@ public final class AudioTranscriptionManager: ObservableObject {
         let fullTranscript: String = finishedTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
         print("FULL TRANSCRIPT: \(fullTranscript)")
         
-        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!  //TODO: change back to prod after
+        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
         
         let session = try await supabaseDBClient.auth.session
@@ -340,6 +340,7 @@ public final class AudioTranscriptionManager: ObservableObject {
         urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(supabaseAccessToken)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("chat", forHTTPHeaderField: "x-rep-action")
+        urlRequest.setValue(boundary, forHTTPHeaderField: "x-idempotency-key")
         urlRequest.httpMethod = "POST"
         
         var multipartReqBody = Data()

@@ -8,6 +8,7 @@ import ActivityKit
 struct transcriptionSummmaryView: View {
     @ObservedObject private var audioManager = AudioTranscriptionManager.shared
     @State public var defaultSelectedType: PickerView.PickerType = .notes
+    @Binding var idempotentKey: UUID
     
     
     var body: some View {
@@ -71,6 +72,7 @@ struct transcriptionSummmaryView: View {
                     PickerView(pickerType: $defaultSelectedType)
                     Spacer(minLength: 5)
                     Button {
+                        idempotentKey = UUID()
                         audioManager.isTranscribing = false
                         audioManager.isSummarizing = false
                         audioManager.audioLevels = 0
@@ -78,6 +80,7 @@ struct transcriptionSummmaryView: View {
                         audioManager.finishedTranscript = ""
                         audioManager.liveTranscription = ""
                         audioManager.isTranscriptFinished = false
+                        audioManager.summarizedNotes = ""
                     } label: {
                         ZStack {
                             Circle().fill(Color.clear).frame(width: 50, height: 50)
@@ -111,5 +114,5 @@ struct transcriptionSummmaryView: View {
 }
 
 #Preview {
-    transcriptionSummmaryView()
+    transcriptionSummmaryView(idempotentKey: .constant(UUID()))
 }
