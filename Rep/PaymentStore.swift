@@ -53,7 +53,7 @@ final class PaymentStore: ObservableObject {
     }
     
     
-    func resetForSignOut() {            //TODO: add a sign out option and call
+    func resetForSignOut() {            
         self.appAccountToken = nil
         self.products = []
         self.entitlement = nil

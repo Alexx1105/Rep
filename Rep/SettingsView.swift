@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import SwiftData
+
 
 struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -201,10 +203,11 @@ struct SettingsView: View {
                                         }
                                     }.padding(.trailing)
                                         .alert("Confirm Logout", isPresented: $isPopoverPresented) {
-                                            Button("Delete", role: .destructive) {
-                                                paymentStore.resetForSignOut()
+                                            Button("Log Out", role: .destructive) {
+                                                Task {
+                                                    await RunSignOutFlow(paymentStore: paymentStore).runSignOut()
+                                                }
                                             }
-                                            
                                             Button("Cancel", role: .cancel) {}
                                         }
                                 }

@@ -38,6 +38,7 @@ enum ErrorDesc: LocalizedError {
     case configError
     case liveActivityError
     case taskError
+    case logoutError
 }
 
 enum ErrorDefinition: Error {

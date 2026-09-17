@@ -107,3 +107,25 @@ public final class FetchAppStoreUrl {
         }
     }
 }
+
+
+@MainActor
+public final class RunSignOutFlow {
+    let paymentStore: PaymentStore
+    
+    init(paymentStore: PaymentStore) {
+        self.paymentStore = paymentStore
+    }
+    
+    public func runSignOut() async {
+        paymentStore.resetForSignOut()
+        UserDefaults.standard.set(false, forKey: "user.signedIn")
+        
+        do {
+            try await supabaseDBClient.auth.signOut()
+        } catch {
+            print("failed to sign out user", ErrorDesc.logoutError, error)
+        }
+        
+    }
+}
