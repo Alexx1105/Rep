@@ -68,7 +68,15 @@ final class BackgroundRefresh {
             let context = ModelContext(container)
             
             Task {
-                try await runSyncWhenReady(context: context, pages: pages)
+                do {
+                    try await runSyncWhenReady(context: context, pages: pages)
+                    task.setTaskCompleted(success: true)
+                } catch is CancellationError {
+                    task.setTaskCompleted(success: false)
+                } catch {
+                    print("background sync failed ❌: \(error.localizedDescription)")
+                    task.setTaskCompleted(success: false)
+                }
             }
             
         } catch {

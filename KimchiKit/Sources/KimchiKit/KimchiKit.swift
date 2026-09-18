@@ -131,13 +131,14 @@ public func startIntervalActivity(label: String, title: String) {
             await IntervalLiveActivityUpdateManager.shared.setActivity(activity: activity)
             print("Live Activity started 🔄")
             
+            try await Task.sleep(for: .seconds(7))
+            for activity in Activity<IntervalLiveActivityAttributes>.activities {
+                await activity.end(nil, dismissalPolicy: .default)
+                print("activity ended")
+            }
+            
         } catch {
             print("Failed to start Live Activity ❌:", error.localizedDescription)
-        }
-        try await Task.sleep(for: .seconds(7))
-        for activity in Activity<IntervalLiveActivityAttributes>.activities {
-            await activity.end(nil, dismissalPolicy: .default)
-            print("activity ended")
         }
     }
 }

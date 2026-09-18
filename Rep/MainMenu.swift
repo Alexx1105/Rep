@@ -227,7 +227,13 @@ struct MainMenu: View {
                             let ids = Array(deleteMultipleTabs)
                             print("stored ids: \(deleteMultipleTabs)")
                             Task {
-                                try await delete(pageID: ids )
+                                do {
+                                    try await delete(pageID: ids)
+                                } catch is CancellationError {
+                                    return
+                                } catch {
+                                    print("remote tab deletion failed ❌: \(error.localizedDescription)")
+                                }
                             }
                             tabSlideOver = false
                             

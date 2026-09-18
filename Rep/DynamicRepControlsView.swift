@@ -109,9 +109,15 @@ struct DynamicRepControlsView: View {
         let intervalTitle = dataSourceTitle
         
         Task {
-            try await Task.sleep(nanoseconds: 500_000_000)
-            startIntervalActivity(label: opt.label, title: intervalTitle)
-            await updateIntervalActivity(label: opt.label, title: intervalTitle)
+            do {
+                try await Task.sleep(nanoseconds: 500_000_000)
+                startIntervalActivity(label: opt.label, title: intervalTitle)
+                await updateIntervalActivity(label: opt.label, title: intervalTitle)
+            } catch is CancellationError {
+                return
+            } catch {
+                print("failed to update interval activity ❌: \(error.localizedDescription)")
+            }
         }
         
         @MainActor

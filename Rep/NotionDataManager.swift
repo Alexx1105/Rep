@@ -21,27 +21,33 @@ public final class NotionDataManager: ObservableObject {
     
     public func handlePageImported(context: ModelContext) {      ///main runner function
         Task {
-            if SyncController.shared.isAutoSync {
-                let syncedPageTitles = try await fetchImportedPageTitles(context: context)
-                for syncedPageIds in syncedPageTitles {
-                    let syncedBlocks = try await getBlocks(pageID: syncedPageIds.pageID, context: context)
-                    extractFieldsFromBlocks(syncedBlocks, forUserPageTitle: syncedPageIds)
-                }
-                
-            } else {
-                let importedPageTitles = try await fetchImportedPageTitles(context: context)
-                for queriedPageIds in importedPageTitles {
-                    let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
-                    let pageIdExists: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
-                    print("does page id exist in db?: \(pageIdExists ? "yes" : "no")")
+            do {
+                if SyncController.shared.isAutoSync {
+                    let syncedPageTitles = try await fetchImportedPageTitles(context: context)
+                    for syncedPageIds in syncedPageTitles {
+                        let syncedBlocks = try await getBlocks(pageID: syncedPageIds.pageID, context: context)
+                        extractFieldsFromBlocks(syncedBlocks, forUserPageTitle: syncedPageIds)
+                    }
                     
-                    guard !pageIdExists else { continue }
-                    
-                    for importedPageTitle in importedPageTitles {
-                        let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
-                        extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
+                } else {
+                    let importedPageTitles = try await fetchImportedPageTitles(context: context)
+                    for queriedPageIds in importedPageTitles {
+                        let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
+                        let pageIdExists: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
+                        print("does page id exist in db?: \(pageIdExists ? "yes" : "no")")
+                        
+                        guard !pageIdExists else { continue }
+                        
+                        for importedPageTitle in importedPageTitles {
+                            let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
+                            extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
+                        }
                     }
                 }
+            } catch is CancellationError {
+                return
+            } catch {
+                print("failed to import Notion pages ❌: \(error.localizedDescription)")
             }
         }
         self.isPageImportedNotification = true
@@ -247,17 +253,21 @@ public final class NotionDataManager: ObservableObject {
                 print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError, error)
             }
             
-            let token: String = await PushTokenManager.generatePushToken()
-            guard !chunkedRows.isEmpty || !token.isEmpty else { throw ErrorDesc.nilValue }
-            
-            await withTaskGroup(of: Void.self) {
-                $0.addTask {
-                    for row in chunkedRows {
-                        let contentHash: String = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
-                        await SupabaseClientManager.shared.supabaseNotionUpsert(token: token, pageID: userPageTitle.pageID, row: row, pageTitle: userPageTitle.text, content_hash: contentHash)
-                        print("==========================\nsplit rows for supaabse upsert ✅: \(row) \nhash: \(contentHash)")
+            do {
+                let token: String = await PushTokenManager.generatePushToken()
+                guard !chunkedRows.isEmpty || !token.isEmpty else { throw ErrorDesc.nilValue }
+                
+                await withTaskGroup(of: Void.self) {
+                    $0.addTask {
+                        for row in chunkedRows {
+                            let contentHash: String = SHA256.hash(data: row.data(using: .utf8)!).map{String(format: "%02x", $0)}.joined()
+                            await SupabaseClientManager.shared.supabaseNotionUpsert(token: token, pageID: userPageTitle.pageID, row: row, pageTitle: userPageTitle.text, content_hash: contentHash)
+                            print("==========================\nsplit rows for supaabse upsert ✅: \(row) \nhash: \(contentHash)")
+                        }
                     }
                 }
+            } catch {
+                print("failed to upload Notion content ❌: \(error.localizedDescription)")
             }
         }
     }

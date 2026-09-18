@@ -189,7 +189,11 @@ public final class AudioTranscriptionManager: ObservableObject {
             }
             
             Task {
-                try await transcriptionEventListener(urlRequest: urlRequest)
+                do {
+                    try await transcriptionEventListener(urlRequest: urlRequest)
+                } catch {
+                    print("task error", error)
+                }
             }
             
             try configAudioSession()

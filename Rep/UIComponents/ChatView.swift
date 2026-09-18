@@ -236,12 +236,18 @@ struct ChatView: View {
                             showEmptyState = false
                             let photos: [PhotosPickerItem] = selectedPhotos
                             Task {
-                                try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                                do {
+                                    try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                                    isShimmerTextVisible = true
+                                    isTextShimmering = true
+                                    fileUrls.removeAll()
+                                    selectedPhotos.removeAll()
+                                    
+                                } catch {
+                                    print("chat error:", error)
+                                }
                             }
-                            isShimmerTextVisible = true
-                            isTextShimmering = true
-                            fileUrls.removeAll()
-                            selectedPhotos.removeAll()
+                           
                             
                         }.onChange(of: Chat.shared.responseMessage.last?.text) { _, newValue in
                             if let presentText = newValue, !presentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -283,10 +289,14 @@ struct ChatView: View {
                             }.onChange(of: selectedPhotos) {_, newValueItem in
                                 
                                 Task { @MainActor in
-                                    for item in newValueItem {
-                                        let transferPhoto: PhotoTransfer? = try await item.loadTransferable(type: PhotoTransfer.self)
-                                        let rawImageData: Data? = transferPhoto?.photo
-                                        let _ = UIImage(data: rawImageData ?? Data())
+                                    do {
+                                        for item in newValueItem {
+                                            let transferPhoto: PhotoTransfer? = try await item.loadTransferable(type: PhotoTransfer.self)
+                                            let rawImageData: Data? = transferPhoto?.photo
+                                            let _ = UIImage(data: rawImageData ?? Data())
+                                        }
+                                    } catch {
+                                        print("task error", error)
                                     }
                                 }
                             }
@@ -315,7 +325,11 @@ struct ChatView: View {
                             
                             let photos: [PhotosPickerItem] = selectedPhotos
                             Task {
-                                try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                                do {
+                                    try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                                } catch {
+                                    print("task error", error)
+                                }
                             }
                             fileUrls.removeAll()
                             selectedPhotos.removeAll()
