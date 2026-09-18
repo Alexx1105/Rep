@@ -69,11 +69,15 @@ final class PaymentStore: ObservableObject {
         state = .loading
         
         do {
-            async let token = supabase.loadAppAccountToken()
-            async let storeProducts = supabase.getBillingProducts()
-            let (loadedToken, loadedProducts) = try await (token, storeProducts)
-            self.appAccountToken = loadedToken
-            self.products = loadedProducts
+            self.appAccountToken = try await supabase.loadAppAccountToken()
+            await AudioTranscriptionManager.shared.recoverInterruptedAudioReservation()
+
+            do {
+                self.products = try await supabase.getBillingProducts()
+            } catch {
+                self.products = []
+                print("failed to load StoreKit products", ErrorDesc.callsiteError, error)
+            }
             
             await processUnfinishedTransactions()
             await processCurrentEntitlements()

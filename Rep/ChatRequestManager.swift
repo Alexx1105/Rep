@@ -109,7 +109,11 @@ public final class AIRequestManager: ObservableObject {
             print("EDGE FUNCTION OPENAI RESPONSE: \(bytes)")
             
             guard let billingResponse = response as? HTTPURLResponse else { throw PaymentStoreError.billingCustomerNotFound }
-            if billingResponse.statusCode == 402 { throw PaymentStoreError.insufficientTokens }
+            if billingResponse.statusCode == 402 {
+                try? await paymentStoreCredits.refreshBillingCredits(plan: PaymentStore.shared.currentPlan)
+                throw PaymentStoreError.insufficientTokens
+            }
+            guard (200...299).contains(billingResponse.statusCode) else { throw ErrorDesc.urlResponseError }
             
             for try await stream in bytes.lines {
                 
@@ -184,4 +188,3 @@ public final class AIRequestManager: ObservableObject {
         }
     }
 }
-

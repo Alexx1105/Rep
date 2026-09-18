@@ -136,13 +136,8 @@ public final class SupabaseClientManager: ObservableObject {
     }
     
     
-    func fetchBillingBucketForCrediting(featureId: UUID) async throws -> BillingBucketCredits {
+    func fetchBillingBucketForCrediting(feature: BillingFeature) async throws -> BillingBucketCredits {
         let session = try await supabaseDBClient.auth.session
-        
-        return try await supabaseDBClient.from("usage_buckets").select("""
-                                                                id, user_id, feature_id, bucket_type, allowance,
-                                                                consumed:consumed_units, reserved:reserved_units, period_start, period_end
-                                                                """).eq("user_id", value: session.user.id.uuidString).eq("feature_id", value: featureId.uuidString)
-                                                                    .order("period_start", ascending: false).limit(1).single().execute().value
+        return try await supabaseDBClient.rpc("create_or_get_current_usage_bucket", params: CurrentUsageBucketParameters(p_user_id: session.user.id, p_feature_key: feature.rawValue)).execute().value
     }
 }

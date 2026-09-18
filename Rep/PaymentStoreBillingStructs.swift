@@ -101,6 +101,11 @@ struct ResolveEntitlementParameters: Encodable, Sendable {
     let p_user_id: UUID
 }
 
+struct CurrentUsageBucketParameters: Encodable, Sendable {
+    let p_user_id: UUID
+    let p_feature_key: String
+}
+
 
 struct PurchaseSyncRequest: Encodable, Sendable {
     let signedTransaction: String
@@ -134,8 +139,53 @@ struct BillingBucketCredits: Identifiable, Codable {
     let consumed: Decimal
     let reserved: Decimal
     
-    let period_start: Date
+    let period_start: Date?
     let period_end: Date?
+
+    
+    private enum CodingKeys: String, CodingKey {    // TODO: Standardize change consumed and reserved to consumed_units/reserved_units keys to match supabase, remove aliases later.
+        case id
+        case user_id
+        case feature_id
+        case bucket_type
+        case allowance
+        case consumed
+        case reserved
+        case consumed_units
+        case reserved_units
+        case period_start
+        case period_end
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(UUID.self, forKey: .id)
+        user_id = try container.decode(UUID.self, forKey: .user_id)
+        feature_id = try container.decode(UUID.self, forKey: .feature_id)
+        bucket_type = try container.decode(CreditBucketType.self, forKey: .bucket_type)
+        allowance = try container.decode(Decimal.self, forKey: .allowance)
+        consumed = try container.decodeIfPresent(Decimal.self, forKey: .consumed)
+            ?? container.decode(Decimal.self, forKey: .consumed_units)
+        reserved = try container.decodeIfPresent(Decimal.self, forKey: .reserved)
+            ?? container.decode(Decimal.self, forKey: .reserved_units)
+        period_start = try container.decodeIfPresent(Date.self, forKey: .period_start)
+        period_end = try container.decodeIfPresent(Date.self, forKey: .period_end)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(user_id, forKey: .user_id)
+        try container.encode(feature_id, forKey: .feature_id)
+        try container.encode(bucket_type, forKey: .bucket_type)
+        try container.encode(allowance, forKey: .allowance)
+        try container.encode(consumed, forKey: .consumed)
+        try container.encode(reserved, forKey: .reserved)
+        try container.encodeIfPresent(period_start, forKey: .period_start)
+        try container.encodeIfPresent(period_end, forKey: .period_end)
+    }
 }
 
 enum BillingFeature: String, Codable {
@@ -167,4 +217,7 @@ struct AudioStartResponse: Decodable {      ///unified wrapper for both audio bi
     let authorized_duration_seconds: Decimal
 }
 
-
+struct AudioBillingSettlementResponse: Decodable {
+    let ok: Bool
+    let bucket: BillingBucketCredits
+}

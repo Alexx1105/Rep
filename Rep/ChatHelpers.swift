@@ -107,11 +107,7 @@ public class Chat: ObservableObject {
         var pendingUIText: String = ""
         let requestBuffer = chatBuffer()
         
-        let creditBucket = CreditBucketsManager.shared
-        let paymentStore = PaymentStore.shared
-        
         do {
-            try await creditBucket.ensureUserHasCredits(plan: paymentStore.currentPlan)
             try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context, idempotentKey: idempotentKey) { chunk in
                 
                 await requestBuffer.append(chunk)
@@ -135,13 +131,7 @@ public class Chat: ObservableObject {
                 print("metadata:", metadataText)
             }
             
-        } catch CreditBucketError.insufficientCredits(_, _ ) {
-            onCreditsNeeded()
-            return
         } catch PaymentStoreError.insufficientTokens {
-            onCreditsNeeded()
-            return
-        } catch CreditBucketError.noCurrentBucket {
             onCreditsNeeded()
             return
         } catch {
@@ -336,5 +326,4 @@ func allowAudioInputAV() async throws {
     let granted = await AVAudioApplication.requestRecordPermission()
     guard granted else { throw ErrorDesc.permissionDenied }
 }
-
 

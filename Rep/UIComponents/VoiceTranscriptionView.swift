@@ -75,8 +75,6 @@ public struct VoiceTranscriptionView: View {
     @State private var showMacDirections: Bool = false
     
     let transcriptionLiveActivity = LocalLiveActivityManager.shared
-    let creditBucket = CreditBucketsManager.shared
-    let paymentStore = PaymentStore.shared
     
     public var body: some View {
         ZStack {
@@ -221,7 +219,6 @@ public struct VoiceTranscriptionView: View {
                                     if audioManager.isTranscribing {
                                         try await allowAudioInputAV()
                                         
-                                        try await creditBucket.ensureUserHasCredits(plan: paymentStore.currentPlan)
                                         let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
                                         try await audioManager.startAudioStream(session: session)
                                     } else {
@@ -232,12 +229,7 @@ public struct VoiceTranscriptionView: View {
                                     }
                                     
                                 } catch PaymentStoreError.insufficientTokens {
-                                    isMoreCreditsNeeded = true
-                                } catch CreditBucketError.invalidCreditAmount {
-                                    isMoreCreditsNeeded = true
-                                } catch CreditBucketError.insufficientCredits(_, _) {
-                                    isMoreCreditsNeeded = true
-                                } catch CreditBucketError.noCurrentBucket {
+                                    audioManager.isTranscribing = false
                                     isMoreCreditsNeeded = true
                                 } catch {
                                     print("failed to start audio session", ErrorDesc.callsiteError, error)
@@ -289,6 +281,11 @@ public struct VoiceTranscriptionView: View {
             }
             UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeAudioTranscriptionSheet() })
         }.animation(.smooth(duration: 0.45), value: audioManager.isTranscriptFinished)
+            .onDisappear {
+                Task {
+                    await audioManager.cancelActiveAudioSession(reason: "audio_view_dismissed")
+                }
+            }
     }
 }
 

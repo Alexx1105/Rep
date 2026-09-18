@@ -34,14 +34,6 @@ final class CreditBucketsManager: ObservableObject {
     }
     
     
-    func ensureUserHasCredits(plan: BillingPlan) async throws {
-        if CreditBucketsManager.shared.current_bucket == nil {
-            try await CreditBucketsManager.shared.refreshBillingCredits(plan: plan)
-        }
-        try CreditBucketsManager.shared.requireCredits(1)
-    }
-    
-    
     func canAfford(credits: Decimal) -> Bool {
         guard credits > 0 else {
             return false
@@ -59,20 +51,16 @@ final class CreditBucketsManager: ObservableObject {
     
     
     func isBucketCurrent(bucket: BillingBucketCredits, date: Date = Date()) -> Bool {
-        guard bucket.period_start <= date else { return false }
-        
-        if let periodEnd = bucket.period_end {
-            return date < periodEnd
-        }
-        
-        return bucket.bucket_type == .lifetime
+        if bucket.bucket_type == .lifetime { return true }
+
+        guard let periodStart = bucket.period_start, let periodEnd = bucket.period_end else { return false }
+        return periodStart <= date && date < periodEnd
     }
     
     
     func refreshBillingCredits(plan: BillingPlan) async throws {
         let billingPlan = try await self.supabase.fetchBillingPlanTiers(plan: plan)
-        let featureId = try await self.supabase.fetchBillingFeatureId(feature: .ai_credits)
-        let billingBucket = try await self.supabase.fetchBillingBucketForCrediting(featureId: featureId)
+        let billingBucket = try await self.supabase.fetchBillingBucketForCrediting(feature: .ai_credits)
         
         guard self.isBucketCurrent(bucket: billingBucket) else {
             self.current_plan = billingPlan
