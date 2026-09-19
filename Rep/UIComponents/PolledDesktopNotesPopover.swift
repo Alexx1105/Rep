@@ -85,7 +85,7 @@ struct PolledDesktopNotesPopover: View {
                                 HStack(alignment: .top, spacing: 12) {
                                     Circle().frame(width: 12, height: 12)
                                         .padding(.top).frame(height: 4)
-                                        .foregroundStyle(Color.babyBlue)
+                                        .foregroundStyle(Color.intervalBlue)
                                         .padding(.leading)
                                     
                                     Text(importedNote.fullNotes.prefix(40))

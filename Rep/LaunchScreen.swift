@@ -26,7 +26,7 @@ struct LaunchScreen: View {
             
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.launch)
+        .background(Color.kimchiLabs)
         
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline:.now() + 0.7) {
