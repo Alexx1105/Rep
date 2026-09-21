@@ -13,12 +13,13 @@ import KimchiKit
 import Supabase
 
 
+@MainActor
 final class FetchAuth {
     static public func fetchAuthToken() throws -> String {
         let context = OAuthTokens.shared.modelContext
         let fetchDescriptor = FetchDescriptor<AuthToken>()
         let authToken = try context?.fetch(fetchDescriptor)
-        
+    
         guard let token = authToken?.first?.accessToken else { throw ErrorDesc.authTokenError }
         return token
     }
@@ -75,21 +76,6 @@ public struct QueryExisting: Codable {
     let page_id: String
 }
 
-public final class PageDeletionManager {
-    public static func checkExistingPageIDs(pageID: String) async -> [String] {                             ///deletion from the db, 
-        do {
-            let queryExistingIds: PostgrestResponse<[QueryExisting]> = try await supabaseDBClient.from("push_tokens").select("page_id").eq("page_id", value: pageID).execute()
-            let result = queryExistingIds.value
-            let ids = result.map{String($0.page_id)}
-            print("IDs from query: \(ids)")
-            return ids
-            
-        } catch {
-            print("page deletion error ❗️:", ErrorDesc.supabaseQueryError, error)
-            return ["no existing ids that match the incoming page"]
-        }
-    }
-}
 
 public struct AppStoreUrl: Codable {
     let value: String?

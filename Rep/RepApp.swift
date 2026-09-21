@@ -126,7 +126,7 @@ struct MuscleMemoryApp: App {
                                 } else {
                                     let context = OAuthTokens.shared.modelContext
                                     try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                    NotionDataManager.shared.handlePageImported(context: context!)
+                                    try await NotionDataManager.shared.fetchFirstTimePages(context: context!)
                                 }
                             } catch {
                                 print("failed async operation(s):", ErrorDesc.concurrencyError, error)
@@ -136,7 +136,7 @@ struct MuscleMemoryApp: App {
                         func bootstrapSync(context: ModelContext) async throws {
                             do {
                                 try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                NotionDataManager.shared.handlePageImported(context: context)
+                                try await NotionDataManager.shared.fetchFirstTimePages(context: context)
                                 print("one time start-up for sync ran 🔄")
                             } catch {
                                 print("one time start-up for sync failed:", ErrorDesc.syncError, error)

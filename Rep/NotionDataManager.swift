@@ -16,42 +16,38 @@ import CryptoKit
 @MainActor
 public final class NotionDataManager: ObservableObject {
     @Published public private(set) var isPageImportedNotification: Bool = false
+   
     public static let shared: NotionDataManager = NotionDataManager()
     private init() {}
     
-    public func handlePageImported(context: ModelContext) {      ///main runner function
-        Task {
+    
+    public func syncCachedPages(context: ModelContext) async throws {
+        guard SyncController.shared.isAutoSync else { return }
+        
+        let desc = FetchDescriptor<UserPageTitle>()
+        let fetchCachedPages = try context.fetch(desc)
+        
+        for syncedPageIds in fetchCachedPages {
             do {
-                if SyncController.shared.isAutoSync {
-                    let syncedPageTitles = try await fetchImportedPageTitles(context: context)
-                    for syncedPageIds in syncedPageTitles {
-                        let syncedBlocks = try await getBlocks(pageID: syncedPageIds.pageID, context: context)
-                        extractFieldsFromBlocks(syncedBlocks, forUserPageTitle: syncedPageIds)
-                    }
-                    
-                } else {
-                    let importedPageTitles = try await fetchImportedPageTitles(context: context)
-                    for queriedPageIds in importedPageTitles {
-                        let fetchPageIDs: [String] = await PageDeletionManager.checkExistingPageIDs(pageID: queriedPageIds.pageID)
-                        let pageIdExists: Bool = fetchPageIDs.contains(queriedPageIds.pageID)
-                        print("does page id exist in db?: \(pageIdExists ? "yes" : "no")")
-                        
-                        guard !pageIdExists else { continue }
-                        
-                        for importedPageTitle in importedPageTitles {
-                            let blocks = try await getBlocks(pageID: importedPageTitle.pageID, context: context)
-                            extractFieldsFromBlocks(blocks, forUserPageTitle: importedPageTitle)
-                        }
-                    }
-                }
-            } catch is CancellationError {
-                return
+                let syncedBlocks = try await getBlocks(pageID: syncedPageIds.pageID, context: context)
+                extractFieldsFromBlocks(syncedBlocks, forUserPageTitle: syncedPageIds)
+                
             } catch {
-                print("failed to import Notion pages ❌: \(error.localizedDescription)")
+                print("error syncing pages:", ErrorDesc.syncError)
             }
+        }
+    }
+    
+    
+    public func fetchFirstTimePages(context: ModelContext) async throws {
+        let importedPageTitles = try await fetchImportedPageTitles(context: context)
+        for queriedPageIds in importedPageTitles {
+            let blocks = try await getBlocks(pageID: queriedPageIds.pageID, context: context)
+            extractFieldsFromBlocks(blocks, forUserPageTitle: queriedPageIds)
         }
         self.isPageImportedNotification = true
     }
+    
     
     private func fetchImportedPageTitles(context: ModelContext) async throws -> [UserPageTitle] {
         let fetch = FetchDescriptor<DeletedPage>()
@@ -67,7 +63,9 @@ public final class NotionDataManager: ObservableObject {
         var urlRequest: URLRequest = URLRequest(url: searchEndpoint)
         urlRequest.addValue("Bearer \(passToken)", forHTTPHeaderField: "Authorization")
         urlRequest.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: ["filter": ["property": "object", "value": "page"]])
         
         do {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
@@ -89,14 +87,14 @@ public final class NotionDataManager: ObservableObject {
                 format.formatOptions = [.withInternetDateTime]
                 if let dateTime = format.date(from: dateString) { return dateTime }
                 
-                throw DecodingError.typeMismatch(Date.self, DecodingError.Context(codingPath: c.codingPath,
-                                                                                  debugDescription: "Date string does not match expected format"))
+                throw DecodingError.typeMismatch(Date.self, DecodingError.Context(codingPath: c.codingPath, debugDescription: "Date string does not match expected format"))
             }
             
             let searchResponse = try jsonDecoder.decode(NotionSearchResponse.self, from: data)
             for i in searchResponse.results {
                 guard !i.id.isEmpty else { continue }
                 guard !deletedPageIDs.contains(i.id) else { continue }
+                guard i.object == "page" else { continue }
                 
                 print("====================================\n Search Imported Page IDs result: \(i)")
                 let titleDictionary: NotionSearchResponse.TitleDict? = i.properties?.title
@@ -134,9 +132,9 @@ public final class NotionDataManager: ObservableObject {
             return pageIDsImported
             
         } catch {
-            print("parsing error ❗️:", ErrorDesc.parsingError, error)
-            return []
+            print("parsing error:", ErrorDesc.parsingError, error)
         }
+        throw ErrorDesc.parsingError
     }
     
     
@@ -149,45 +147,42 @@ public final class NotionDataManager: ObservableObject {
         let auth = try FetchAuth.fetchAuthToken()
         guard !auth.isEmpty else { throw ErrorDesc.authTokenError }
         
-        request.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
+        request.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
         request.addValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
         
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { throw ErrorDesc.urlRequestError }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else { throw ErrorDesc.invalidUrlError }
+        guard (200..<300).contains(httpResponse.statusCode) else { throw ErrorDesc.urlResponseError }
+        
+        let decoder = JSONDecoder()
+        let pageChildrenResponse: PageChildrenResponse = try decoder.decode(PageChildrenResponse.self, from: data)
+        
+        var blocks: [PageChildrenResponse.Block] = pageChildrenResponse.results
+        var hasMore: Bool = pageChildrenResponse.has_more
+        var nextCursor: String? = pageChildrenResponse.next_cursor
+        
+        while hasMore, let cursor = nextCursor {
+            let paginate: String = pagesEndpoint + "?page_size=100&start_cursor=\(cursor)"
+            guard let paginateStringToUrl: URL = URL(string: paginate) else { throw ErrorDesc.paginationError }
             
-            let decoder = JSONDecoder()
-            let pageChildrenResponse: PageChildrenResponse = try decoder.decode(PageChildrenResponse.self, from: data)
+            var paginationRequest: URLRequest = URLRequest(url: paginateStringToUrl)
+            paginationRequest.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
+            paginationRequest.addValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
+            paginationRequest.httpMethod = "GET"
             
-            var blocks: [PageChildrenResponse.Block] = pageChildrenResponse.results
-            var hasMore: Bool = pageChildrenResponse.has_more
-            var nextCursor: String? = pageChildrenResponse.next_cursor
+            let (paginatedData, _) = try await URLSession.shared.data(for: paginationRequest)
+            let paginatedChildrenResponse = try JSONDecoder().decode(PageChildrenResponse.self, from: paginatedData)
             
-            while hasMore, let cursor = nextCursor {
-                let paginate: String = pagesEndpoint + "?page_size=100&start_cursor=\(cursor)"
-                guard let paginateStringToUrl: URL = URL(string: paginate) else { throw ErrorDesc.paginationError }
-                
-                var paginationRequest: URLRequest = URLRequest(url: paginateStringToUrl)
-                paginationRequest.addValue("2022-06-28", forHTTPHeaderField: "Notion-Version")
-                paginationRequest.addValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
-                paginationRequest.httpMethod = "GET"
-                
-                let (paginatedData, _) = try await URLSession.shared.data(for: paginationRequest)
-                let paginatedChildrenResponse = try JSONDecoder().decode(PageChildrenResponse.self, from: paginatedData)
-                
-                blocks.append(contentsOf: paginatedChildrenResponse.results)
-                hasMore = paginatedChildrenResponse.has_more
-                nextCursor = paginatedChildrenResponse.next_cursor
-                print("paginated successfully ✅\n====================================")
-            }
-            
-            return blocks
-        } catch {
-            print("error returning page blocks ❗️", ErrorDesc.parsingError, error)
-            return []
+            blocks.append(contentsOf: paginatedChildrenResponse.results)
+            hasMore = paginatedChildrenResponse.has_more
+            nextCursor = paginatedChildrenResponse.next_cursor
+            print("paginated successfully ✅\n====================================")
         }
+        return blocks
+        
     }
+    
     
     private func extractFieldsFromBlocks(_ blocks: [PageChildrenResponse.Block], forUserPageTitle userPageTitle: UserPageTitle) {
         var blocks = blocks
@@ -224,7 +219,6 @@ public final class NotionDataManager: ObservableObject {
             if let paragraph = blockList.paragraph?.rich_text {
                 let joinedContent: String = paragraph.map{ $0.text?.content ?? "" }.joined()
                 extractedFields.append(contentsOf: [joinedContent])
-                print("ALL LISTS ✅: \(joinedContent)")
             }
             
             blocks[i].extractedFields = extractedFields
@@ -232,8 +226,7 @@ public final class NotionDataManager: ObservableObject {
         
         let formattedString: String = blocks.flatMap{ $0.extractedFields }.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
         let chunkedRows: [String] = formattedString.components(separatedBy: "\n• ").flatMap {$0.components(separatedBy: "\n")}
-        print("formatted & trimmed string ✅: \(chunkedRows)")
-        
+       
         Task {
             do {
                 let context = OAuthTokens.shared.modelContext
@@ -249,8 +242,9 @@ public final class NotionDataManager: ObservableObject {
                     context?.insert(title)
                     try context?.save()
                 }
+                
             } catch {
-                print("Error persisting to CoreData ❗️", ErrorDesc.persistenceError, error)
+                print("Error persisting to CoreData", ErrorDesc.persistenceError, error)
             }
             
             do {
@@ -266,8 +260,9 @@ public final class NotionDataManager: ObservableObject {
                         }
                     }
                 }
+                
             } catch {
-                print("failed to upload Notion content ❌: \(error.localizedDescription)")
+                print("failed to upload Notion content:", ErrorDesc.pushTokenError, error)
             }
         }
     }

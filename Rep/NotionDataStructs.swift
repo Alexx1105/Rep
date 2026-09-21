@@ -3,11 +3,7 @@
 //  Rep
 //
 //  Created by alex haidar on 3/21/26.
-//Hold all notion data structs and future supported notion content types here
-//(future claude, openAI support structs should be in a different file)
-//TODO: change redeclared structs back to upper case when done
 import Foundation
-
 
 
 public struct NotionSearchResponse: Codable {        ///struct for getting first pass headers
