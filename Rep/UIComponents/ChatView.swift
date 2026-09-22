@@ -22,6 +22,7 @@ struct ChatView: View {
     @State var fileUrls: [URL] = []
     @State public var isNewChat: Bool = false
     @State var isGenerating: Bool = false
+    @State private var chatError: String?
     @State private var keyboardHeight: CGFloat = 0
     @State private var isShimmerTextVisible: Bool = false
     @State private var isTextShimmering: Bool = false
@@ -233,22 +234,7 @@ struct ChatView: View {
                         .padding(.horizontal)
                         .fontWeight(.medium)
                         .onSubmit {
-                            showEmptyState = false
-                            let photos: [PhotosPickerItem] = selectedPhotos
-                            Task {
-                                do {
-                                    try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
-                                    isShimmerTextVisible = true
-                                    isTextShimmering = true
-                                    fileUrls.removeAll()
-                                    selectedPhotos.removeAll()
-                                    
-                                } catch {
-                                    print("chat error:", error)
-                                }
-                            }
-                           
-                            
+                            sendMessage()
                         }.onChange(of: Chat.shared.responseMessage.last?.text) { _, newValue in
                             if let presentText = newValue, !presentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                 isShimmerTextVisible = false
@@ -320,19 +306,7 @@ struct ChatView: View {
                         
                         Spacer()
                         Button {
-                            isShimmerTextVisible = true
-                            isTextShimmering = true
-                            
-                            let photos: [PhotosPickerItem] = selectedPhotos
-                            Task {
-                                do {
-                                    try await Chat.sendChatMessage(userFile: fileUrls.first, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
-                                } catch {
-                                    print("task error", error)
-                                }
-                            }
-                            fileUrls.removeAll()
-                            selectedPhotos.removeAll()
+                            sendMessage()
                         } label: {
                             ZStack {    
                                 Circle().fill(Color.mmDark)
@@ -341,6 +315,7 @@ struct ChatView: View {
                                 Image(systemName: "arrow.up").foregroundStyle(Color.checkmark)
                             }
                         }.padding(.trailing)
+                            .disabled(isGenerating)
                         
                     }.offset(y: -keyboardHeight)
                 }.padding(.leading)
@@ -369,6 +344,41 @@ struct ChatView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             keyboardHeight = 0
+        }
+        .alert("Could not generate notes", isPresented: Binding(
+            get: { chatError != nil },
+            set: { if !$0 { chatError = nil } }
+        )) {
+            Button("OK") { chatError = nil }
+        } message: {
+            Text(chatError ?? "Please try again.")
+        }
+    }
+
+    private func sendMessage() {
+        guard !isGenerating, !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        showEmptyState = false
+        chatError = nil
+        isGenerating = true
+        isShimmerTextVisible = true
+        isTextShimmering = true
+        let photos = selectedPhotos
+        let file = fileUrls.first
+
+        Task {
+            defer {
+                isGenerating = false
+                isShimmerTextVisible = false
+                isTextShimmering = false
+            }
+            do {
+                try await Chat.sendChatMessage(userFile: file, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                fileUrls.removeAll()
+                selectedPhotos.removeAll()
+            } catch {
+                chatError = error.localizedDescription
+                print("chat error:", error)
+            }
         }
     }
 }

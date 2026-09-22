@@ -132,11 +132,13 @@ public class Chat: ObservableObject {
             }
             
         } catch PaymentStoreError.insufficientTokens {
+            shared.responseMessage.removeAll(where: { $0.id == localId })
             onCreditsNeeded()
             return
         } catch {
+            shared.responseMessage.removeAll(where: { $0.id == localId })
             print("billing or function call failure", ErrorDesc.callsiteError, error)
-            return
+            throw error
         }
         
         
@@ -326,4 +328,3 @@ func allowAudioInputAV() async throws {
     let granted = await AVAudioApplication.requestRecordPermission()
     guard granted else { throw ErrorDesc.permissionDenied }
 }
-

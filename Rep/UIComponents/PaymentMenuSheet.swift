@@ -8,6 +8,7 @@ struct PaymentMenuCard: View {
     @Environment(\.dismiss) var closePaymentSheet
     
     @State private var selectedTier: PaymentPricingCoordinator.PaywallTier = .pro
+    @State private var paymentError: String?
     
     let coordinator = PaymentPricingCoordinator.shared
     
@@ -70,6 +71,14 @@ struct PaymentMenuCard: View {
                 }
                 .padding(.top)
                 .presentationDetents([.fraction(0.7)])
+                .alert("Purchase unavailable", isPresented: Binding(
+                    get: { paymentError != nil },
+                    set: { if !$0 { paymentError = nil } }
+                )) {
+                    Button("OK") { paymentError = nil }
+                } message: {
+                    Text(paymentError ?? "Please try again.")
+                }
             }
     }
     
@@ -246,8 +255,9 @@ struct PaymentMenuCard: View {
                         do {
                             guard let productId = coordinator.fetchProductId(tier: selectedTier, interval: billingPlanTab) else { return }
                             try await paymentStore.runPaymentFlow(productId: productId)
-                            isPresented = false
+                            if paymentStore.state == .ready { isPresented = false }
                         } catch {
+                            paymentError = error.localizedDescription
                             print("failure to run payment flow | Pro tier", ErrorDesc.callsiteError, error)
                         }
                     }
@@ -331,8 +341,9 @@ struct PaymentMenuCard: View {
                         do {
                             guard let productId = coordinator.fetchProductId(tier: selectedTier, interval: billingPlanTab) else { return }
                             try await paymentStore.runPaymentFlow(productId: productId)
-                            isPresented = false
+                            if paymentStore.state == .ready { isPresented = false }
                         } catch {
+                            paymentError = error.localizedDescription
                             print("failed to initiate payment flow | Max tier", ErrorDesc.callsiteError, error)
                         }
                     }
