@@ -39,6 +39,8 @@ enum ErrorDesc: LocalizedError {
     case liveActivityError
     case taskError
     case logoutError
+    case pushTokenError
+    case invalidUrlError
 }
 
 enum ErrorDefinition: Error {

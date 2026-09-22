@@ -291,9 +291,8 @@ struct ImportedNotes: View {
             
             do {
                 pageBlocks = try ImportedNotesFetch.fetchPageContent(context: context, pageID: pageID)
-                print("content fetched... \(pageBlocks.count)")
             } catch {
-                print("function call failure ❗️:", ErrorDesc.callsiteError, error)
+                print("function call failure:", ErrorDesc.callsiteError, error)
             }
         }
     }

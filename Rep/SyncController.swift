@@ -4,7 +4,7 @@
 //
 //  Created by alex haidar on 2/8/26.
 
-/////related to sync engine and background processes that run the sync
+/* sync engine and background processes that run the sync */
 
 import Foundation
 import BackgroundTasks
@@ -33,11 +33,10 @@ final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
     
     func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
-        await NotionDataManager.shared.handlePageImported(context: pages)
+        try await NotionDataManager.shared.syncCachedPages(context: pages)
         print("sync task ran successfully 🔄")
         
         try await Task.sleep(for: .seconds(60))
-        print("...sleeping")
     }
     
     private var autoSyncTask: Task<Void, Never>?
@@ -74,13 +73,13 @@ final class BackgroundRefresh {
                 } catch is CancellationError {
                     task.setTaskCompleted(success: false)
                 } catch {
-                    print("background sync failed ❌: \(error.localizedDescription)")
+                    print("background sync failed:", ErrorDesc.taskError, error)
                     task.setTaskCompleted(success: false)
                 }
             }
             
         } catch {
-            print("background fetch from model container failure ❗️", ErrorDesc.swiftDataQueryError, error)
+            print("background fetch from model container failure:", ErrorDesc.swiftDataQueryError, error)
         }
     }
     
@@ -102,7 +101,7 @@ final class BackgroundRefresh {
         do {
             try BGTaskScheduler.shared.submit(taskSyncRequest)
         } catch {
-            print("task request error ❗️", ErrorDesc.syncError, error)
+            print("task request error:", ErrorDesc.syncError, error)
         }
     }
 }

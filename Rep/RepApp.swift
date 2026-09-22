@@ -98,22 +98,38 @@ struct MuscleMemoryApp: App {
     @StateObject var desktopNotesPoller = RepDesktopPoller.shared
     
     @State private var isPresented: Bool = false
+    @State private var isCheckingSession = true
     var body: some Scene {
         
         WindowGroup {
             ZStack {
-                RootTabs(isUserAuthed: $isUserAuthed)
-                    .disabled(!isUserAuthed)
-                if !isUserAuthed {
-                    AuthView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(.systemBackground).ignoresSafeArea())
-                        .transition(.opacity)
-                        .zIndex(1)
-                        .contentShape(Rectangle())
-                        .allowsHitTesting(true)
+                if isCheckingSession {
+                    ProgressView()
+                } else {
+                    RootTabs(isUserAuthed: $isUserAuthed)
+                        .disabled(!isUserAuthed)
+                    if !isUserAuthed {
+                        AuthView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(.systemBackground).ignoresSafeArea())
+                            .transition(.opacity)
+                            .zIndex(1)
+                            .contentShape(Rectangle())
+                            .allowsHitTesting(true)
+                    }
+                    PolledDesktopNotesPopover(isPresented: $desktopNotesPoller.didPollerReturnDesktopNotes)
                 }
-                PolledDesktopNotesPopover(isPresented: $desktopNotesPoller.didPollerReturnDesktopNotes)
+            }
+            .task {
+                if isUserAuthed {
+                    do {
+                        _ = try await supabaseDBClient.auth.session
+                    } catch {
+                        print("Stored sign-in has no Supabase session:", error)
+                        isUserAuthed = false
+                    }
+                }
+                isCheckingSession = false
             }
             .onOpenURL { url in
                 if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true) {
@@ -126,7 +142,7 @@ struct MuscleMemoryApp: App {
                                 } else {
                                     let context = OAuthTokens.shared.modelContext
                                     try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                    NotionDataManager.shared.handlePageImported(context: context!)
+                                    try await NotionDataManager.shared.fetchFirstTimePages(context: context!)
                                 }
                             } catch {
                                 print("failed async operation(s):", ErrorDesc.concurrencyError, error)
@@ -136,7 +152,7 @@ struct MuscleMemoryApp: App {
                         func bootstrapSync(context: ModelContext) async throws {
                             do {
                                 try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                NotionDataManager.shared.handlePageImported(context: context)
+                                try await NotionDataManager.shared.fetchFirstTimePages(context: context)
                                 print("one time start-up for sync ran 🔄")
                             } catch {
                                 print("one time start-up for sync failed:", ErrorDesc.syncError, error)
@@ -159,4 +175,3 @@ struct MuscleMemoryApp: App {
 #Preview {
     ContainerView()
 }
-

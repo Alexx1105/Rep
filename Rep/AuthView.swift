@@ -15,6 +15,8 @@ struct AuthView: View {
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
     @State private var animateTitle: Bool = false
+    @State private var isSigningIn = false
+    @State private var signInError: String?
     
     var body: some View {
         VStack {
@@ -61,17 +63,7 @@ struct AuthView: View {
                     SignInWithAppleButton(.signIn, onRequest: { request in
                         request.requestedScopes = [.fullName, .email]
                     }, onCompletion: { result in
-                        switch result {
-                        case .success(let authorization):
-                            auth.handleSuccessfulLogin(authorization)
-                            Task { @MainActor in
-                                print("AuthView: sign-in succeeded — flipping user.signedIn and notifying")
-                                isUserAuthed = true
-                                NotificationCenter.default.post(name: Notification.Name("AuthDidSucceed"), object: nil)
-                            }
-                        case .failure(let error):
-                            auth.handleLoginError(with: error)
-                        }
+                        completeSignIn(result)
                     })
                     .signInWithAppleButtonStyle(.black)
                     
@@ -79,17 +71,7 @@ struct AuthView: View {
                     SignInWithAppleButton(.signIn, onRequest: { request in
                         request.requestedScopes = [.fullName, .email]
                     }, onCompletion: { result in
-                        switch result {
-                        case .success(let authorization):
-                            auth.handleSuccessfulLogin(authorization)
-                            Task { @MainActor in
-                                print("AuthView: sign-in succeeded — flipping user.signedIn and notifying")
-                                isUserAuthed = true
-                                NotificationCenter.default.post(name: Notification.Name("AuthDidSucceed"), object: nil)
-                            }
-                        case .failure(let error):
-                            auth.handleLoginError(with: error)
-                        }
+                        completeSignIn(result)
                     })
                     .signInWithAppleButtonStyle(.white)
                 @unknown default:
@@ -99,9 +81,41 @@ struct AuthView: View {
             .frame(maxWidth: .infinity, maxHeight:  45)
             .cornerRadius(25)
             .padding(.horizontal)
+            .disabled(isSigningIn)
             
             
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            .alert("Sign in failed", isPresented: Binding(
+                get: { signInError != nil },
+                set: { if !$0 { signInError = nil } }
+            )) {
+                Button("OK") { signInError = nil }
+            } message: {
+                Text(signInError ?? "Please try again.")
+            }
+    }
+
+    private func completeSignIn(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let authorization):
+            isSigningIn = true
+            signInError = nil
+            Task { @MainActor in
+                defer { isSigningIn = false }
+                do {
+                    try await auth.signIn(authorization)
+                    isUserAuthed = true
+                    NotificationCenter.default.post(name: Notification.Name("AuthDidSucceed"), object: nil)
+                } catch {
+                    isUserAuthed = false
+                    signInError = error.localizedDescription
+                    print("Supabase sign in failed:", error)
+                }
+            }
+        case .failure(let error):
+            isUserAuthed = false
+            signInError = error.localizedDescription
+        }
     }
 }
 
@@ -110,4 +124,3 @@ struct AuthView: View {
 #Preview {
     AuthView()
 }
-

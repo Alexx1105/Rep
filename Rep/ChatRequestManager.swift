@@ -113,7 +113,18 @@ public final class AIRequestManager: ObservableObject {
                 try? await paymentStoreCredits.refreshBillingCredits(plan: PaymentStore.shared.currentPlan)
                 throw PaymentStoreError.insufficientTokens
             }
-            guard (200...299).contains(billingResponse.statusCode) else { throw ErrorDesc.urlResponseError }
+            guard (200...299).contains(billingResponse.statusCode) else {
+                var responseBody = Data()
+                for try await byte in bytes {
+                    if responseBody.count >= 4096 { break }
+                    responseBody.append(contentsOf: [byte])
+                }
+                let envelope = try? JSONDecoder().decode(ErrorEnvelope.self, from: responseBody)
+                throw PaymentStoreError.backend(
+                    code: envelope?.error.errorCode ?? "http_\(billingResponse.statusCode)",
+                    message: envelope?.error.message ?? "AI request failed (HTTP \(billingResponse.statusCode))."
+                )
+            }
             
             for try await stream in bytes.lines {
                 

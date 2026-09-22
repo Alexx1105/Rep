@@ -56,35 +56,43 @@ extension viewController: ASAuthorizationControllerPresentationContextProviding 
 
 public class authBackend: ObservableObject {
     public func handleSuccessfulLogin(_ authorization: ASAuthorization) {
-        if let userCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            print("User ID:", userCredential.user)
-            
-            if userCredential.authorizedScopes.contains(.fullName) {
-                print("Given name:", userCredential.fullName?.givenName ?? "No given name")
-            }
-            
-            if userCredential.authorizedScopes.contains(.email) {
-                print("Email:", userCredential.email ?? "No email")
-            }
-            
-            if let tokenData: Data = userCredential.identityToken,
-               let tokenString: String = String(data: tokenData, encoding: .utf8) {
-                
-                Task {
-                    do {
-                        let _ = try await supabaseDBClient.auth.signInWithIdToken(credentials: OpenIDConnectCredentials(provider: .apple, idToken: tokenString))  //TODO: add nonce
-                        
-                        print("sign in success")
-                    } catch {
-                        print("failed to exchange tokens with supabase", ErrorDesc.authTokenError, error)
-                    }
-                }
+        Task {
+            do {
+                try await signIn(authorization)
+            } catch {
+                print("failed to exchange tokens with supabase", ErrorDesc.authTokenError, error)
             }
         }
+    }
+
+    public func signIn(_ authorization: ASAuthorization) async throws {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let tokenData = credential.identityToken,
+              let token = String(data: tokenData, encoding: .utf8) else {
+            throw AuthSignInError.missingIdentityToken
+        }
+
+        let session = try await supabaseDBClient.auth.signInWithIdToken(
+            credentials: OpenIDConnectCredentials(provider: .apple, idToken: token)
+        )
+        guard !session.accessToken.isEmpty else { throw AuthSignInError.missingSession }
+        print("Supabase sign in success")
     }
     
     public func handleLoginError(with error: Error) {
         print("Could not authenticate: \(error.localizedDescription)")
+    }
+}
+
+enum AuthSignInError: LocalizedError {
+    case missingIdentityToken
+    case missingSession
+
+    var errorDescription: String? {
+        switch self {
+        case .missingIdentityToken: "Apple did not return a sign-in token. Please try again."
+        case .missingSession: "Rep could not establish a session. Please try signing in again."
+        }
     }
 }
 

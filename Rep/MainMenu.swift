@@ -346,5 +346,4 @@ struct MainMenu: View {
 #Preview {
     MainMenu(isUserAuthed: .constant(true), pageID: "")
         .environment(\.sizeCategory, .large)
-    
 }
