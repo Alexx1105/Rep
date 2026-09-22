@@ -8,7 +8,7 @@ import ActivityKit
 struct HyperToggleCard: View {
     
     @Binding var isPresented: Bool
-    @AppStorage("hypermodetoggle") private var hyperToggleEnabled: Bool = false
+    @Binding var hyperToggleEnabled: Bool
     @Environment(\.colorScheme) var colorScheme
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
@@ -24,7 +24,7 @@ struct HyperToggleCard: View {
             
             VStack(alignment: .leading) {
                 
-                HStack(spacing: 3) {
+                HStack {
                     Spacer()
                     
                     Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
@@ -35,7 +35,7 @@ struct HyperToggleCard: View {
                             print("hyper mode toggled in settings view: \(newValue)")
                         }
                     
-                }.padding(.horizontal)
+                }.padding(.trailing)
                 
                 
                 VStack(alignment: .leading) {
@@ -70,5 +70,5 @@ struct HyperToggleCard: View {
 }
 
 #Preview {
-    HyperToggleCard(isPresented:  .constant(true))
+    HyperToggleCard(isPresented:  .constant(true), hyperToggleEnabled: .constant(false))
 }

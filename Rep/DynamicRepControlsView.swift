@@ -198,6 +198,7 @@ struct DynamicRepControlsView: View {
         self.pageID = pageID
         self._storeSelectedOption = AppStorage(wrappedValue: 0, "intervalOption_\(pageID)")
         self._storeSelectedHyperModeOption = AppStorage(wrappedValue: 0, "intervalHyperOption_\(pageID)")
+        self._hyperToggleEnabled = AppStorage(wrappedValue: false, "hypermodetoggle_\(pageID)")
         self.dataSource = dataSource
     }
     
@@ -356,7 +357,7 @@ struct DynamicRepControlsView: View {
                     }
                 }.padding(.horizontal, -8)
                 
-                HyperToggleCard(isPresented: .constant(true))
+                HyperToggleCard(isPresented: .constant(true), hyperToggleEnabled: $hyperToggleEnabled)
                     .padding(.top)
                 
             }.frame(alignment: .center)
