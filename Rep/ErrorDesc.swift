@@ -41,6 +41,7 @@ enum ErrorDesc: LocalizedError {
     case logoutError
     case pushTokenError
     case invalidUrlError
+    case intervalSchedulingError
 }
 
 enum ErrorDefinition: Error {

@@ -5,8 +5,8 @@ import AVFoundation
 import KimchiKit
 import ActivityKit
 
+
 struct HyperToggleCard: View {
-    
     @Binding var isPresented: Bool
     @Binding var hyperToggleEnabled: Bool
     @Environment(\.colorScheme) var colorScheme
@@ -15,18 +15,16 @@ struct HyperToggleCard: View {
     var body: some View {
         
         ZStack {
-            Rectangle().fill(.ultraThickMaterial)
-                .stroke(Color.mmBackground, lineWidth: 0.3)
-                .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
-                .cornerRadius(15).padding(7)
-                .frame(maxHeight: 130)
+//            Rectangle().fill(.ultraThickMaterial)
+//                .stroke(Color.mmBackground, lineWidth: 0.3)
+//                .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
+//                .cornerRadius(15).padding(7)
+//                .frame(maxHeight: 130)
             
             
             VStack(alignment: .leading) {
                 
-                HStack {
-                    Spacer()
-                    
+                VStack(alignment: .leading) {
                     Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
@@ -36,7 +34,6 @@ struct HyperToggleCard: View {
                         }
                     
                 }.padding(.trailing)
-                
                 
                 VStack(alignment: .leading) {
                     Text("Toggle Hyper Mode to have a shorter\ninterval selection option set")

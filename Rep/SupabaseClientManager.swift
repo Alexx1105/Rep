@@ -140,4 +140,15 @@ public final class SupabaseClientManager: ObservableObject {
         let session = try await supabaseDBClient.auth.session
         return try await supabaseDBClient.rpc("create_or_get_current_usage_bucket", params: CurrentUsageBucketParameters(p_user_id: session.user.id, p_feature_key: feature.rawValue)).execute().value
     }
+    
+    
+    func fetchDynamicNotesQueryIDs(pageID: String) async throws -> [QueryIDs] {
+        let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
+        return selectQuery.value
+    }
+    
+    
+    func updateDynamicNotesOffsetDate(computedOffset: Date?, idsPerBatch: [String], pageID: String) async throws {
+        _ = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [pageID]).execute()
+    }
 }
