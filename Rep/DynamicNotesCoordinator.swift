@@ -66,14 +66,6 @@ public final class DynamicNotesCoordinator: ObservableObject {
     ]
     
     
-    func staggerDateComponents(components: DateComponents, add: Int = 1, multiplier: Int) -> DateComponents {
-        var new = DateComponents()
-        new.hour = (components.hour ?? 0) * multiplier
-        new.minute = (components.minute ?? 0) * multiplier
-        return new
-    }
-    
-    
     @MainActor
     func runSliderOperation(localPage: Binding<[String : Date]>, hyperToggleEnabled: Bool, storeSelectedOption: Int, storeSelectedHyperModeOption: Int) {
         let mode = hyperToggleEnabled ? hyperModeOptions : frequencyOptions
@@ -97,35 +89,20 @@ public final class DynamicNotesCoordinator: ObservableObject {
     }
     
     
-    func scheduleTask(selectedOption: SliderView.SliderOption, pageID: String, basePerPage: Date) async {
+    func scheduleTask(selectedOption: SliderView.SliderOption, pageID: String, basePerPage: Date?) async {
+        guard !Task.isCancelled else { return }
+        
+        let sliderIsOff: Bool = selectedOption.label == "Off"
+        let intervalSeconds: Int? = sliderIsOff ? nil : selectedOption.interval.totalSeconds
+        
+        let nextRunAt: Date? = sliderIsOff ? nil : Calendar.current.date(byAdding: selectedOption.interval, to: basePerPage ?? Date())
+        let scheduleNotes: ScheduleNotesInterval = ScheduleNotesInterval(nextRunAt: nextRunAt, intervalSeconds: intervalSeconds, scheduleStatus: sliderIsOff ? "paused" : "active")
+        
         do {
-            let result: [QueryIDs] = try await supabase.fetchDynamicNotesQueryIDs(pageID: pageID)
-            let queryID = result.map{ String($0.id) }
-            
-            await MainActor.run {
-                Query.accessQuery.queryID = queryID
-            }
-            
-            let rows: Int = 5
-            for i in stride(from: 0, to: queryID.count, by: rows) {
-                if Task.isCancelled { return }
-                
-                let stagger: Int = (i / rows) + 1
-                let scaledOffsets = staggerDateComponents(components: selectedOption.interval, multiplier: stagger)
-                let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: scaledOffsets, to: basePerPage)
-                let batch = min(i + rows, queryID.count)
-                let idsPerBatch = Array(queryID[i..<batch])
-                
-                do {
-                    try await supabase.updateDynamicNotesOffsetDate(computedOffset: computedOffset, idsPerBatch: idsPerBatch, pageID: pageID)
-                    
-                } catch {
-                    print("failed to send offset timestamps to supabase:", ErrorDesc.intervalSchedulingError)
-                }
-            }
+            try await supabase.updateDynamicNotesSchedulingInterval(schedule: scheduleNotes, pageID: pageID)
             
         } catch {
-            print("failed to query id's from supabase:", ErrorDesc.supabaseQueryError)
+            print("failed to send schedule date interval:", ErrorDesc.intervalSchedulingError)
         }
     }
     

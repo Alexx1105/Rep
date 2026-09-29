@@ -38,6 +38,7 @@
 		B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29A1209303B4C48000A0031 /* PaymentPricingCoordinator.swift */; };
 		B2A2C73D302CE71F000D6977 /* PolledDesktopNotesPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */; };
 		B2AEBC0D3067048C0067549B /* DynamicNotesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC0C306704820067549B /* DynamicNotesCoordinator.swift */; };
+		B2AEBC113069D1A80067549B /* DynamicNotesStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC103069D1A00067549B /* DynamicNotesStructs.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicNotesControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicNotesControlsView.swift */; };
 		B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */; };
@@ -164,6 +165,7 @@
 		B2A0EFC42DC7D8F60076DBC0 /* DynamicNotesControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicNotesControlsView.swift; sourceTree = "<group>"; };
 		B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolledDesktopNotesPopover.swift; sourceTree = "<group>"; };
 		B2AEBC0C306704820067549B /* DynamicNotesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicNotesCoordinator.swift; sourceTree = "<group>"; };
+		B2AEBC103069D1A00067549B /* DynamicNotesStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicNotesStructs.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
 		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2B837C62BCB102F00BBC748 /* RepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepApp.swift; sourceTree = "<group>"; };
@@ -310,6 +312,7 @@
 				B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */,
 				B2A0EFC42DC7D8F60076DBC0 /* DynamicNotesControlsView.swift */,
 				B2AEBC0C306704820067549B /* DynamicNotesCoordinator.swift */,
+				B2AEBC103069D1A00067549B /* DynamicNotesStructs.swift */,
 				B25A0A472D91D9E300420892 /* DynamicRepTest.swift */,
 				B21427D82F38FB9200D86624 /* SyncController.swift */,
 				B2E40A932F7E130100D32ECE /* ErrorDesc.swift */,
@@ -519,6 +522,7 @@
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
 				B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */,
+				B2AEBC113069D1A80067549B /* DynamicNotesStructs.swift in Sources */,
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
 				B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */,
 				B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */,

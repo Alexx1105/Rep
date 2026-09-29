@@ -2,7 +2,6 @@
 //  DynamicRepControlsView.swift
 
 import SwiftData
-import Supabase
 import SwiftUI
 import KimchiKit
 import ActivityKit
@@ -31,11 +30,6 @@ struct SliderSelection: Equatable {
     let label: String
     let interval: DateComponents
     
-}
-
-enum NotesOrder: String, CaseIterable {
-    case asc = "Ascending"
-    case desc = "desc"
 }
 
 struct ClusterPickerView: View {
@@ -82,7 +76,7 @@ struct DynamicRepControlsView: View {
     @AppStorage var storeSelectedOption: Int
     @AppStorage var storeSelectedHyperModeOption: Int
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled = false
-    @AppStorage("notesOrder") private var notesOrder: NotesOrder = .asc
+    @AppStorage("notesOrder") private var notesOrder: NotesConfig.NotesOrder = .asc
     @AppStorage("notesCluster") private var picker: ClusterPickerView.ClusterPicker = .oneCard
     
     init(pageID: String, dataSource: CombinedDataSource) {

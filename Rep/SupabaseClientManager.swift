@@ -26,7 +26,7 @@ public final class SupabaseClientManager: ObservableObject {
             guard !token.isEmpty && !row.isEmpty && !pageID.isEmpty else { throw SupabaseError.nilDataError }
             
             let schema: PushToSupabaseNotion = PushToSupabaseNotion(token: token, page_data: row, page_id: pageID, page_title: pageTitle, content_hash: content_hash)
-            let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
             
             print("[notion page] page data successfully inserted ✅:", send)
         } catch {
@@ -43,7 +43,7 @@ public final class SupabaseClientManager: ObservableObject {
             guard !openaiID.isEmpty && !title.isEmpty && !content.isEmpty && !token.isEmpty else { throw SupabaseError.nilDataError }
             
             let schema: PushToSupabaseOpenAi = PushToSupabaseOpenAi(token: token, openaiID: openaiID, title: title, content: content, contentHash: hashed)
-            let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
+            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
             
             print("==========\npage data successfully inserted ✅:", send)
         } catch {
@@ -59,7 +59,7 @@ public final class SupabaseClientManager: ObservableObject {
         guard !userId.isEmpty && !title.isEmpty && !fullNotes.isEmpty else { throw ErrorDesc.nilValue }
         
         let schema: PushToSupabaseRepDesktopNotes = PushToSupabaseRepDesktopNotes(token: token, userId: userId, title: title, fullNotes: fullNotes, contentHash: hashed)
-        let send = try await supabaseDBClient.from("push_tokens").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
+        let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
         print("==========\npage data successfully inserted ✅:", send)
     }
     
@@ -142,13 +142,7 @@ public final class SupabaseClientManager: ObservableObject {
     }
     
     
-    func fetchDynamicNotesQueryIDs(pageID: String) async throws -> [QueryIDs] {
-        let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
-        return selectQuery.value
-    }
-    
-    
-    func updateDynamicNotesOffsetDate(computedOffset: Date?, idsPerBatch: [String], pageID: String) async throws {
-        _ = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [pageID]).execute()
+    func updateDynamicNotesSchedulingInterval(schedule: ScheduleNotesInterval, pageID: String) async throws {
+        _ = try await supabaseDBClient.from("push_tokens_dev").update(schedule).in("page_id", values: [pageID]).execute()
     }
 }
