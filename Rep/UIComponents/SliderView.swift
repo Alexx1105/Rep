@@ -32,11 +32,11 @@ struct SliderView: View {
             Capsule()
                 .frame(height: 55)
                 .opacity(0.06)
-                .glassEffect()
+                .glassEffect(.regular)
             
             HStack {
                 Circle()
-                    .glassEffect()
+                    .glassEffect(.regular)
                     .foregroundStyle(Color.blue)
                     .frame(width: circleSize, height: circleSize)
                     .offset(x: visualPosition)

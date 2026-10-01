@@ -2,8 +2,6 @@
 //  DynamicRepControlsView.swift
 
 import SwiftData
-import Supabase
-import OSLog
 import SwiftUI
 import KimchiKit
 import ActivityKit
@@ -34,6 +32,34 @@ struct SliderSelection: Equatable {
     
 }
 
+struct ClusterPickerView: View {
+    enum ClusterPicker: String, CaseIterable {
+        case oneCard = "1 card"
+        case twoCards = "2 cards"
+        case threeCards = "3 cards"
+        
+        var batchSize: Int {
+            switch self {
+            case .oneCard:
+                return 1
+            case .twoCards:
+                return 2
+            case .threeCards:
+                return 3
+            }
+        }
+    }
+    
+    @Binding public var clusterPicker: ClusterPicker
+    
+    var body: some View {
+        Picker("", selection: $clusterPicker) {
+            ForEach(ClusterPicker.allCases, id: \.self) { card in
+                Text(card.rawValue).tag(card)
+            }
+        }.pickerStyle(.segmented)
+    }
+}
 
 var lastSelected: SliderSelection?
 
@@ -43,147 +69,14 @@ final class Query: ObservableObject {
 }
 
 
-
-func staggerDateComponents(components: DateComponents, add: Int = 1, multiplier: Int) -> DateComponents {
-    var new = DateComponents()
-    
-    new.hour = (components.hour ?? 0) * multiplier
-    new.minute = (components.minute ?? 0) * multiplier
-    return new
-}
-
-
-
 struct DynamicRepControlsView: View {
-    
-    let frequencyOptions: [SliderView.SliderOption] = [
-        .init(label: "Off", symbolName: "multiply.circle", interval: DateComponents(minute: 1)),
-        .init(label: "1hr", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 60)),
-        .init(label: "2h 30m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 2, minute: 30)),
-        .init(label: "3h 40m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(hour: 3, minute: 40))
-    ]
-    
-    let hyperModeOptions: [SliderView.SliderOption] = [
-        .init(label: "Off", symbolName: "multiply.circle", interval: DateComponents(minute: 1)),
-        .init(label: "10m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 10)),
-        .init(label: "30m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 30)),
-        .init(label: "45m", symbolName: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", interval: DateComponents(minute: 45))
-    ]
-    
-    @AppStorage("hypermodetoggle") private var hyperToggleEnabled = false
-    
-    let dataSource: CombinedDataSource
-    
-    var dataSourceId: String {
-        switch dataSource {
-        case .notionContent(let notionPage):
-            return notionPage.pageID
-        case .openaiChatContent(let openaiChat):
-            return openaiChat.openaiId
-        case .repDesktopTranscription(let desktopTranscription):
-            return desktopTranscription.userId
-        case .repMobileTranscription(let mobileTranscription):
-            return mobileTranscription.userId
-        }
-    }
-    
-    var dataSourceTitle: String {
-        switch dataSource {
-        case .notionContent(let notion):
-            return notion.text
-        case .openaiChatContent(let openai):
-            return String(openai.content.prefix(20))
-        case .repDesktopTranscription(let desktopAudio):
-            return String(desktopAudio.fullNotes.prefix(30))
-        case .repMobileTranscription(let mobileAudio):
-            return String(mobileAudio.fullNotes.prefix(30))
-        }
-    }
-    
-    @MainActor
-    func runSliderOperation() {
-        let mode = hyperToggleEnabled ? hyperModeOptions : frequencyOptions
-        let selectedIndex = hyperToggleEnabled ? storeSelectedHyperModeOption : storeSelectedOption
-        guard selectedIndex < mode.count else { return }
-        let opt = mode[selectedIndex]
-        let intervalTitle = dataSourceTitle
-        
-        Task {
-            do {
-                try await Task.sleep(nanoseconds: 500_000_000)
-                startIntervalActivity(label: opt.label, title: intervalTitle)
-                await updateIntervalActivity(label: opt.label, title: intervalTitle)
-            } catch is CancellationError {
-                return
-            } catch {
-                print("failed to update interval activity ❌: \(error.localizedDescription)")
-            }
-        }
-        
-        @MainActor
-        func sliderChangeTask() {
-            currentTask?.cancel()
-            
-            localPage[dataSourceId] = Date()
-            let basePerPage: Date = localPage[dataSourceId]!
-            let selectedOption: SliderView.SliderOption = mode[selectedIndex]
-            let pageID: String = dataSourceId
-            let pageContentID: String = pageContent.first?.userPageId ?? ""
-            
-            currentTask = Task {
-                await scheduleTask(selectedOption: selectedOption, pageID: pageID, pageContentID: pageContentID, basePerPage: basePerPage)
-            }
-        }
-        
-
-        func scheduleTask(selectedOption: SliderView.SliderOption, pageID: String, pageContentID: String, basePerPage: Date) async {
-            do {
-                let selectQuery: PostgrestResponse<[QueryIDs]> = try await supabaseDBClient.from("push_tokens").select("id").eq("page_id", value: pageID).execute()
-                let result: [QueryIDs] = selectQuery.value
-                let queryID = result.map{String($0.id)}
-                print("ID HERE: \(queryID)")
-                
-                await MainActor.run {
-                    Query.accessQuery.queryID = queryID
-                }
-                
-                let rows: Int = 5
-                let base: Date = basePerPage
-                
-                Task.detached(priority: .background) {
-                    for i in stride(from: 0, to: queryID.count, by: rows) {
-                        
-                        if Task.isCancelled { return }
-                        print("prev task cancelled")
-                        
-                        let stagger = (i / rows) + 1
-                        let scaledOffsets = staggerDateComponents(components: selectedOption.interval, multiplier: stagger)
-                        
-                        let computedOffset: Date? = selectedOption.label == "Off" ? nil : Calendar.current.date(byAdding: scaledOffsets, to: base)
-                        
-                        let batch = min(i + rows, queryID.count)
-                        let idsPerBatch = Array(queryID[i..<batch])
-                        
-                        do {
-                            let send = try await supabaseDBClient.from("push_tokens").update(["offset_date" : computedOffset]).in("id", values: idsPerBatch).in("page_id", values: [pageID]).execute()
-                            print("OFFSET DATE SENT TO SUPABASE: \(send)")
-                            print("page ids here: \(pageID)")
-                        } catch {
-                            print("failed to send offset timestamps to supabase ❗️: \(error.localizedDescription)")
-                        }
-                    }
-                }
-            } catch {
-                print("failed to query id's from supabase ❌: \(error.localizedDescription)")
-            }
-        }
-        sliderChangeTask()
-    }
-    
     @ObservedObject public var childQuery = Query.accessQuery
+    
     @Environment(\.dismiss) var dismissControlsTab
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) var modelContextPage
+    
+    @StateObject var dynamicNotesCoordinator: DynamicNotesCoordinator
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
@@ -193,23 +86,36 @@ struct DynamicRepControlsView: View {
     
     @AppStorage var storeSelectedOption: Int
     @AppStorage var storeSelectedHyperModeOption: Int
+    @AppStorage("hypermodetoggle") private var hyperToggleEnabled = false
+    @AppStorage("notesOrder") private var notesOrder: NotesConfig.NotesOrder = .asc
+    @AppStorage("notesCluster") private var picker: ClusterPickerView.ClusterPicker = .oneCard
     
     init(pageID: String, dataSource: CombinedDataSource) {
         self.pageID = pageID
+        self.dataSource = dataSource
         self._storeSelectedOption = AppStorage(wrappedValue: 0, "intervalOption_\(pageID)")
         self._storeSelectedHyperModeOption = AppStorage(wrappedValue: 0, "intervalHyperOption_\(pageID)")
         self._hyperToggleEnabled = AppStorage(wrappedValue: false, "hypermodetoggle_\(pageID)")
-        self.dataSource = dataSource
+        self._dynamicNotesCoordinator = StateObject(wrappedValue: DynamicNotesCoordinator(dataSource: dataSource))
+        self._notesOrder = AppStorage(wrappedValue: .asc, "notesOrder_\(pageID)")
+        self._picker = AppStorage(wrappedValue: .oneCard, "notesCluster_\(pageID)")
     }
     
     @AppStorage("disableOption") var storeDisableOption: Int = 0
     
     @State var localPage: [String: Date] = [:]          ///acts as local per-page base compute
-    @State private var currentTask: Task<Void, Never>?
     
     var pageID: String
     var filterTitle: String {
         return pageTitle.first(where: { $0.pageID == pageID})?.text ?? ""
+    }
+    
+    let dataSource: CombinedDataSource
+    
+    private func runSliderOperation() {
+        dynamicNotesCoordinator.runSliderOperation(localPage: $localPage, hyperToggleEnabled: hyperToggleEnabled,
+                                                   storeSelectedOption: storeSelectedOption,
+                                                   storeSelectedHyperModeOption: storeSelectedHyperModeOption)
     }
     
     var body: some View {
@@ -226,7 +132,7 @@ struct DynamicRepControlsView: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: -5) {
-                    Text("DynamicRep flashcard controls")
+                    Text("Dynamic notes controls")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
                     
@@ -303,7 +209,7 @@ struct DynamicRepControlsView: View {
                 ZStack(alignment: .top) {
                     
                     if hyperToggleEnabled {
-                        SliderView(sliderOptions: hyperModeOptions, initialSelectedOption: storeSelectedHyperModeOption) { hyperOption in
+                        SliderView(sliderOptions: dynamicNotesCoordinator.hyperModeOptions, initialSelectedOption: storeSelectedHyperModeOption) { hyperOption in
                             switch hyperOption {
                             case 0:
                                 print("off")
@@ -320,7 +226,7 @@ struct DynamicRepControlsView: View {
                         }
                         
                     } else {
-                        SliderView(sliderOptions: frequencyOptions, initialSelectedOption: storeSelectedOption) { newOptionIndex in
+                        SliderView(sliderOptions: dynamicNotesCoordinator.frequencyOptions, initialSelectedOption: storeSelectedOption) { newOptionIndex in
                             switch newOptionIndex {
                             case 0:
                                 print("frequency is off")
@@ -347,7 +253,7 @@ struct DynamicRepControlsView: View {
                     .onChange(of: storeSelectedHyperModeOption) { runSliderOperation() }   ///hyper mode selected
                 
                 HStack {
-                    ForEach(hyperToggleEnabled ? hyperModeOptions : frequencyOptions, id: \.label) { opt in
+                    ForEach(hyperToggleEnabled ? dynamicNotesCoordinator.hyperModeOptions : dynamicNotesCoordinator.frequencyOptions, id: \.label) { opt in
                         Text(opt.label)
                             .fontWeight(.medium)
                             .font(.system(size: 14))
@@ -357,8 +263,75 @@ struct DynamicRepControlsView: View {
                     }
                 }.padding(.horizontal, -8)
                 
-                HyperToggleCard(isPresented: .constant(true), hyperToggleEnabled: $hyperToggleEnabled)
-                    .padding(.top)
+                VStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 30, style: .continuous).foregroundStyle(Color.gray).opacity(0.2)
+                            .frame(maxWidth: .infinity, maxHeight: 350).padding(.bottom)
+                            .padding(.horizontal)
+                        
+                        VStack(spacing: 10) {
+                            HStack {
+                                HyperToggleCard(isPresented: .constant(true), hyperToggleEnabled: $hyperToggleEnabled).padding(.horizontal)
+                            }.padding(.top, 14)
+                            Divider().padding(.horizontal).padding(.leading)
+                            
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Notes Cluster")
+                                    .fontWeight(.semibold)
+                                    .opacity(textOpacity)
+                                    .padding(.leading)
+                                
+                                Text("Control wether to recieve 1-3 lockscreen\nnotes at a time to display more conent at once")
+                                    .font(.system(size: 14)).lineSpacing(3)
+                                    .fontWeight(.medium)
+                                    .opacity(0.50)
+                                    .padding(.leading)
+                                
+                                ClusterPickerView(clusterPicker: $picker)
+                                    .onChange(of: picker) {
+                                        Task {
+                                            await dynamicNotesCoordinator.updateNotesCluster(batchSize: picker.batchSize)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                            }.padding(.horizontal)
+                            
+                            
+                            
+                            Spacer()
+                            
+                            HStack {
+                                Menu {
+                                    Button {
+                                        notesOrder = .desc
+                                        
+                                    } label: { Label("Descending", systemImage: "arrow.turn.right.down").foregroundStyle(Color.mmDark) }
+                                    Button {
+                                        notesOrder = .asc
+                                    } label: { Label("Ascending", systemImage: "arrow.turn.left.up").foregroundStyle(Color.mmDark) }
+                                } label: {
+                                    ZStack {
+                                        Capsule().frame(width: 115, height: 35).fixedSize()
+                                            .foregroundStyle(Color.clear).glassEffect(.regular)
+                                        
+                                        HStack(spacing: 15) {
+                                            Text("Order").fontWeight(.semibold)
+                                            Image(systemName: "arrow.up.arrow.down.circle.fill")
+                                        }.foregroundStyle(Color.mmDark)
+                                    }
+                                }.onChange(of: notesOrder) { _,_ in
+                                    Task {
+                                        await dynamicNotesCoordinator.updateNotesOrdering(ordering: notesOrder)
+                                    }
+                                }
+                                Spacer()
+                            }.padding(.leading, 30)
+                            
+                            
+                            Spacer()
+                        }.padding(.top)
+                    }
+                }.padding(.top)
                 
             }.frame(alignment: .center)
                 .padding(.top)
@@ -376,4 +349,3 @@ struct DynamicRepControlsView: View {
 #Preview {
     DynamicRepControlsView(pageID: "", dataSource: .notionContent(UserPageTitle(pageID: "", text: "")))
 }
-
