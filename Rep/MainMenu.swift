@@ -71,7 +71,7 @@ struct MainMenu: View {
     @ObservedObject private var AutoSync = SyncController.shared
     
     private func delete(pageID: [String]) async throws {
-        let _ = try await supabaseDBClient.from("push_tokens").delete().in("page_id", values: pageID).execute()
+        let _ = try await supabaseDBClient.from("push_tokens_dev").delete().in("page_id", values: pageID).execute()
         print("page ids here: \(pageID)")
     }
     

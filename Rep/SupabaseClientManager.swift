@@ -145,4 +145,15 @@ public final class SupabaseClientManager: ObservableObject {
     func updateDynamicNotesSchedulingInterval(schedule: ScheduleNotesInterval, pageID: String) async throws {
         _ = try await supabaseDBClient.from("push_tokens_dev").update(schedule).in("page_id", values: [pageID]).execute()
     }
+    
+    
+    func updateNotesClusterCards(batchSize: Int, pageID: String) async throws {
+        guard (1...3).contains(batchSize) else { throw ErrorDesc.unknown }
+        _ = try await supabaseDBClient.from("push_tokens_dev").update(["batch_size": batchSize]).eq("page_id", value: pageID).execute()
+    }
+    
+    
+    func updateNotesOrdering(ordering: NotesConfig.NotesOrder, pageID: String) async throws {
+        _ = try await supabaseDBClient.from("push_tokens_dev").update(["ordering_mode": ordering.rawValue]).eq("page_id", value: pageID).execute()
+    }
 }

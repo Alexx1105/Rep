@@ -16,8 +16,8 @@ struct NotesConfig: Decodable {
     let order: NotesOrder
     
     enum NotesOrder: String, CaseIterable, Decodable {
-        case asc = "Ascending"
-        case desc = "Descending"
+        case asc = "ascending"
+        case desc = "descending"
     }
 }
 

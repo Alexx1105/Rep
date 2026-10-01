@@ -37,6 +37,17 @@ struct ClusterPickerView: View {
         case oneCard = "1 card"
         case twoCards = "2 cards"
         case threeCards = "3 cards"
+        
+        var batchSize: Int {
+            switch self {
+            case .oneCard:
+                return 1
+            case .twoCards:
+                return 2
+            case .threeCards:
+                return 3
+            }
+        }
     }
     
     @Binding public var clusterPicker: ClusterPicker
@@ -86,6 +97,8 @@ struct DynamicRepControlsView: View {
         self._storeSelectedHyperModeOption = AppStorage(wrappedValue: 0, "intervalHyperOption_\(pageID)")
         self._hyperToggleEnabled = AppStorage(wrappedValue: false, "hypermodetoggle_\(pageID)")
         self._dynamicNotesCoordinator = StateObject(wrappedValue: DynamicNotesCoordinator(dataSource: dataSource))
+        self._notesOrder = AppStorage(wrappedValue: .asc, "notesOrder_\(pageID)")
+        self._picker = AppStorage(wrappedValue: .oneCard, "notesCluster_\(pageID)")
     }
     
     @AppStorage("disableOption") var storeDisableOption: Int = 0
@@ -275,6 +288,11 @@ struct DynamicRepControlsView: View {
                                     .padding(.leading)
                                 
                                 ClusterPickerView(clusterPicker: $picker)
+                                    .onChange(of: picker) {
+                                        Task {
+                                            await dynamicNotesCoordinator.updateNotesCluster(batchSize: picker.batchSize)
+                                        }
+                                    }
                                     .padding(.horizontal)
                             }.padding(.horizontal)
                             
@@ -286,6 +304,7 @@ struct DynamicRepControlsView: View {
                                 Menu {
                                     Button {
                                         notesOrder = .desc
+                                        
                                     } label: { Label("Descending", systemImage: "arrow.turn.right.down").foregroundStyle(Color.mmDark) }
                                     Button {
                                         notesOrder = .asc
@@ -299,6 +318,10 @@ struct DynamicRepControlsView: View {
                                             Text("Order").fontWeight(.semibold)
                                             Image(systemName: "arrow.up.arrow.down.circle.fill")
                                         }.foregroundStyle(Color.mmDark)
+                                    }
+                                }.onChange(of: notesOrder) { _,_ in
+                                    Task {
+                                        await dynamicNotesCoordinator.updateNotesOrdering(ordering: notesOrder)
                                     }
                                 }
                                 Spacer()

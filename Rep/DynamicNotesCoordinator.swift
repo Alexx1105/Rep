@@ -119,4 +119,22 @@ public final class DynamicNotesCoordinator: ObservableObject {
             await scheduleTask(selectedOption: sliderOption, pageID: pageID, basePerPage: basePerPage)
         }
     }
+    
+    
+    func updateNotesCluster(batchSize: Int) async {
+        do {
+            try await supabase.updateNotesClusterCards(batchSize: batchSize, pageID: dataSourceId)
+        } catch {
+            print("failed to update notes cluster size", ErrorDesc.callsiteError, error)
+        }
+    }
+    
+    
+    func updateNotesOrdering(ordering: NotesConfig.NotesOrder) async {
+        do {
+            try await supabase.updateNotesOrdering(ordering: ordering, pageID: dataSourceId)
+        } catch {
+            print("failed to update notes ordering", ErrorDesc.callsiteError, error)
+        }
+    }
 }
