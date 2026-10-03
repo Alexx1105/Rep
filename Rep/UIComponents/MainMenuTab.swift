@@ -5,6 +5,7 @@ import AVFoundation
 import KimchiKit
 import ActivityKit
 
+
 struct MainMenuTab: View {
     @Environment(\.colorScheme) var colorScheme
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
@@ -14,19 +15,11 @@ struct MainMenuTab: View {
     let openaiChatTitle: OpenAIChat?
     let repDesktopAudioTitle: RepDesktopTranscription?
     let repMobileAudioTitle: RepMobileTranscription?
-    
     let dataSource: CombinedDataSource
     
+    
     var body: some View {
-        
-        ZStack(alignment: .center) {
-            Rectangle()
-                .fill(.white.opacity(elementOpacityDark))
-                .stroke(Color.mmBackground, lineWidth: 0.5)
-                .foregroundStyle(Color.mmDark)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.mmDark, lineWidth: 0.3))
-                .cornerRadius(10)
-            
+        VStack(alignment: .center) {
             HStack(spacing: 20) {
                 
                 Menu {
@@ -44,7 +37,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.mmDark)
                         .opacity(0.8)
                         .frame(width: 35, height: 35)
-                        .padding(5)
+                        .background(Circle().fill(Color.clear).glassEffect(.regular))
                 }
                 
                 HStack(spacing: 10) {
@@ -108,12 +101,17 @@ struct MainMenuTab: View {
                 }
                 
                 Spacer()
-                Image("arrowChevron")
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(Color.mmDark)
                     .opacity(0.8)
                     .padding(.trailing)
                 
             }
             .padding(.leading)
+            
+            Divider()
+                .foregroundStyle(Color.mmDark)
+                .padding(.horizontal)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 57)

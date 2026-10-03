@@ -58,7 +58,7 @@
 		B2EAF0552FDE2D2F00532E80 /* AudioTranscriptionDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */; };
 		B2EC7FCE2E80C86100613126 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCD2E80C86100613126 /* Supabase */; };
 		B2F82DAC2E9F330800006533 /* UIComponentsGlobal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */; };
-		B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */; };
+		B2FF4B972CCD5C3A00A26EC7 /* ImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */; };
 		B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30709FB764900BE992DFBFA /* MainMenuTab.swift */; };
 		B304C27FAA75682CFAB44F27 /* HyperToggleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */; };
 		B316D301EC078AFF6FBC7A64 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D62D98C2980D9D3790AC25 /* PickerView.swift */; };
@@ -183,7 +183,7 @@
 		B2E40A932F7E130100D32ECE /* ErrorDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDesc.swift; sourceTree = "<group>"; };
 		B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionDataHelpers.swift; sourceTree = "<group>"; };
 		B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIComponentsGlobal.swift; sourceTree = "<group>"; };
-		B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionImportPageView.swift; sourceTree = "<group>"; };
+		B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPageView.swift; sourceTree = "<group>"; };
 		B3043C921D38E360E9E22AF1 /* VoiceTranscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTranscriptionView.swift; sourceTree = "<group>"; };
 		B30709FB764900BE992DFBFA /* MainMenuTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuTab.swift; sourceTree = "<group>"; };
 		B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacHelperDirections.swift; sourceTree = "<group>"; };
@@ -305,7 +305,7 @@
 				B2B837C82BCB102F00BBC748 /* ImportedNotes.swift */,
 				B26842CE2CC704DB00471001 /* MainMenu.swift */,
 				B2B837C62BCB102F00BBC748 /* RepApp.swift */,
-				B2FF4B952CCD5C3A00A26EC7 /* NotionImportPageView.swift */,
+				B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */,
 				B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */,
 				B26A46662CD04C210064AF46 /* SignOutView.swift */,
 				B26A46622CCFC4250064AF46 /* LaunchScreen.swift */,
@@ -562,7 +562,7 @@
 				B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */,
 				B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */,
 				B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */,
-				B2FF4B972CCD5C3A00A26EC7 /* NotionImportPageView.swift in Sources */,
+				B2FF4B972CCD5C3A00A26EC7 /* ImportPageView.swift in Sources */,
 				B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */,
 				B2A2C73D302CE71F000D6977 /* PolledDesktopNotesPopover.swift in Sources */,
 				B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */,

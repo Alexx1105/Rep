@@ -18,13 +18,12 @@ struct SafariView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
 }
 
+
 struct NotionImportPageView: View {
-    
     @State private var maskHeight: CGFloat = 0
     @State private var borderOpacity: Double = 1.0
     @State private var showOathWebView: Bool = false
     @State private var showChatView: Bool = false
-    @State private var showAudioTranscriptionView: Bool = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
@@ -32,43 +31,8 @@ struct NotionImportPageView: View {
     
     
     var body: some View {
-        
         VStack(alignment: .center, spacing: 1) {
-            
             Spacer().frame(maxHeight: 180)
-            
-            HStack {
-                Spacer()
-                
-                Button {
-                    showAudioTranscriptionView = true
-                } label: {
-                    
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 45))
-                            .frame(width: 130, height: 48)
-                            .padding(.trailing)
-                        
-                        HStack(spacing: 8) {
-                            
-                            Text("Transcribe")
-                                .foregroundStyle(Color.mmDark)
-                                .opacity(textOpacity)
-                                .font(.system(size: 16))
-                                .fontWeight(.medium)
-                            
-                            Image(systemName: "microphone.fill")
-                                .font(.system(size: 20))
-                                .foregroundStyle(Color.mmDark)
-                                .opacity(textOpacity)
-                            
-                        }.padding(.trailing)
-                    }
-                }
-                
-            }.frame(maxWidth: .infinity)
-            
-            Spacer().frame(maxHeight: 5)
             
             ZStack(alignment: .center) {
                 Rectangle()
@@ -76,7 +40,6 @@ struct NotionImportPageView: View {
                     .frame(maxWidth: .infinity, maxHeight: 160)
                     .glassEffect(.regular, in: .rect(cornerRadius: 30))
                     .padding()
-                
                 
                 HStack(alignment: .top) {
                     VStack(spacing: 5 ) {
@@ -93,13 +56,9 @@ struct NotionImportPageView: View {
                             .padding(.horizontal)
                         Spacer()
                     }.frame(maxHeight: 175)
-                    
-                    
                 }
-                
                 .padding(.top)
                 VStack() {
-                    
                     Spacer()
                     ZStack {
                         Button {
@@ -126,10 +85,6 @@ struct NotionImportPageView: View {
                                 .font(.system(size: 16))
                                 .padding(.bottom)
                         }
-                    }.sheet(isPresented: $showAudioTranscriptionView) {
-                        if showAudioTranscriptionView {
-                            VoiceTranscriptionView(idempotentKey: UUID())
-                        }
                     }
                 }.frame(maxHeight: 165)
                     .padding()
@@ -142,9 +97,8 @@ struct NotionImportPageView: View {
                     ZStack {
                         RoundedRectangle(cornerRadius: 30)
                             .fill(Color.clear)
-                            .glassEffect(.regular, in: .rect(cornerRadius: 30))
                             .frame(maxWidth: .infinity, maxHeight: 50)
-                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.regular))
+                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect())
                         
                         HStack(spacing: 10) {
                             Image(systemName: "list.bullet.circle.fill")
@@ -152,7 +106,6 @@ struct NotionImportPageView: View {
                                 .frame(width: 25, height: 25)
                                 .foregroundStyle(Color.mmDark)
                                 .opacity(textOpacity)
-                            
                             
                             Text("Generate With AI")
                                 .foregroundStyle(Color.mmDark)
