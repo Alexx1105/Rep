@@ -29,6 +29,21 @@ public struct DynamicRepAttributes: ActivityAttributes {
     public init(activityID: String) {
         self.activityID = activityID
     }
+
+    /// rep_apns-dev emits pageID-cycle-cursor-card, with three numeric suffixes.
+    public var notesSettingsURL: URL? {
+        let parts = activityID.split(separator: "-", omittingEmptySubsequences: false)
+        guard parts.count > 3,
+              parts.suffix(3).allSatisfy({ Int($0).map { $0 >= 0 } == true }) else { return nil }
+        let pageID = parts.dropLast(3).joined(separator: "-")
+        guard !pageID.isEmpty else { return nil }
+        var components = URLComponents()
+        components.scheme = "MuscleMemory.KimchiLabs.com"
+        components.host = "dynamic-notes"
+        components.path = "/settings"
+        components.queryItems = [URLQueryItem(name: "pageID", value: pageID)]
+        return components.url
+    }
 }
 
 
@@ -195,5 +210,4 @@ public func updateTranscriptionLiveActivity(isRecording: Bool, isPaused: Bool, a
 public func debugTranscriptionLiveActivity() {          ///for manaully debugging/changing UI
     startIntervalActivity(label: "10m", title: "Debug Mode 🧪")
 }
-
 

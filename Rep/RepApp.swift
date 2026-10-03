@@ -99,6 +99,7 @@ struct MuscleMemoryApp: App {
     
     @State private var isPresented: Bool = false
     @State private var isCheckingSession = true
+    @State private var notesSettingsRoute: NotesSettingsRoute?
     var body: some Scene {
         
         WindowGroup {
@@ -132,6 +133,10 @@ struct MuscleMemoryApp: App {
                 isCheckingSession = false
             }
             .onOpenURL { url in
+                if let route = NotesSettingsRoute(url: url) {
+                    notesSettingsRoute = route
+                    return
+                }
                 if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true) {
                     if let codeParse = parseCodeQuery.queryItems?.first(where: { $0.name == "code" })?.value {
                         print("code Query recieved and parsed\(parseCodeQuery)")
@@ -163,10 +168,62 @@ struct MuscleMemoryApp: App {
                     }
                 }
             }
+            .sheet(item: Binding(
+                get: { isUserAuthed && !isCheckingSession ? notesSettingsRoute : nil },
+                set: { notesSettingsRoute = $0 }
+            )) { route in
+                NavigationStack {
+                    NotesSettingsDestination(pageID: route.id)
+                }
+            }
             .preferredColorScheme(toggleEnabled ? .dark : .light)
         }
         .modelContainer(centralContainer)
         .environmentObject(paymentStore)
+    }
+}
+
+private struct NotesSettingsRoute: Identifiable {
+    let id: String
+
+    init?(url: URL) {
+        guard url.scheme?.lowercased() == "musclememory.kimchilabs.com",
+              url.host == "dynamic-notes", url.path == "/settings",
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
+        let pageIDs = components.queryItems?.filter { $0.name == "pageID" } ?? []
+        guard pageIDs.count == 1, let pageID = pageIDs.first?.value,
+              !pageID.isEmpty else { return nil }
+        id = pageID
+    }
+}
+
+private struct NotesSettingsDestination: View {
+    let pageID: String
+    @Query private var notionPages: [UserPageTitle]
+    @Query private var chats: [OpenAIChat]
+    @Query private var desktopNotes: [RepDesktopTranscription]
+    @Query private var mobileNotes: [RepMobileTranscription]
+    @Environment(\.dismiss) private var dismiss
+
+    private var matchingSources: [CombinedDataSource] {
+        notionPages.filter { $0.pageID == pageID }.map { .notionContent($0) }
+        + chats.filter { $0.openaiId == pageID }.map { .openaiChatContent($0) }
+        + desktopNotes.filter { $0.userId == pageID }.map { .repDesktopTranscription($0) }
+        + mobileNotes.filter { $0.userId == pageID }.map { .repMobileTranscription($0) }
+    }
+
+    var body: some View {
+        if matchingSources.count == 1, let source = matchingSources.first {
+            DynamicRepControlsView(pageID: pageID, dataSource: source)
+        } else {
+            ContentUnavailableView("Notes unavailable", systemImage: "note.text",
+                                   description: Text("This note page could not be found on this device."))
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                    }
+                }
+        }
     }
 }
 

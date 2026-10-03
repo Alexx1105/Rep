@@ -631,7 +631,7 @@
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes = KimchiKit.DynamicRepAttributes;
 				"INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes[sdk=iphone*]" = KimchiKit.DynamicRepAttributes;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -666,7 +666,7 @@
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes = KimchiKit.DynamicRepAttributes;
 				"INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes[sdk=iphone*]" = KimchiKit.DynamicRepAttributes;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
