@@ -52,6 +52,7 @@ struct SettingsView: View {
                             .fontWeight(.semibold)
                             .font(.system(size: 10))
                             .buttonStyle(.glass)
+                            .glassEffect(.regular)
                             .padding(.trailing, 7)
                             
                             PaymentMenuCard(isPresented: $isPresented, billingPlanTab: $billingPlanTab)
@@ -63,13 +64,6 @@ struct SettingsView: View {
                         VStack(alignment: .leading) {
                             Spacer(minLength: 20)
                             HStack(alignment: .top) {
-                                Text("Terms Of Use")
-                                    .fontWeight(.semibold)
-                                    .opacity(textOpacity)
-                                    .padding(.top, 3)
-                                    .padding(.leading)
-                                
-                                Spacer()
                                 
                                 NavigationLink(destination: TOSPage()) {
                                     HStack(spacing: 5) {
@@ -77,12 +71,12 @@ struct SettingsView: View {
                                         
                                         Image(systemName: "arrow.up.right.circle")
                                     }
-                                    .font(.system(size: 10))
+                                    .font(.system(size: 14))
                                     .fontWeight(.medium)
-                                    .foregroundStyle(.gray)
+                                    .foregroundStyle(Color.mmDark)
                                 }
-                                .buttonStyle(.glass)
-                                .padding(.trailing)
+                                .buttonStyle(.borderless)
+                                .padding(.leading)
                                 
                             }.padding(.vertical, 10)
                             
@@ -129,6 +123,11 @@ struct SettingsView: View {
                                         .onChange(of: AutoSync.isAutoSync) { _, newValue in
                                             print("auto sync toggled in settings view: \(newValue)")
                                         }
+                                        .onChange(of: paymentStore.hasPaidAccess) { _,_ in
+                                            if !paymentStore.hasPaidAccess {
+                                                AutoSync.isAutoSync = false
+                                            }
+                                        }
                                     
                                 }.frame(alignment: .leading)
                                 
@@ -173,8 +172,8 @@ struct SettingsView: View {
                             
                             Divider()
                             
-                            VStack(alignment: .leading, spacing: 10) {
-                                Spacer(minLength: 20)
+                            VStack(alignment: .leading, spacing: 1) {
+                               
                                 Text("Danger Zone")
                                     .fontWeight(.semibold)
                                     .opacity(textOpacity)
@@ -211,8 +210,12 @@ struct SettingsView: View {
                                             Button("Cancel", role: .cancel) {}
                                         }
                                 }
-                                
+                                .padding(.vertical)
                             }.padding(.leading)
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.mmDark.opacity(0.2), style: StrokeStyle(lineWidth: 1, lineCap: .round,  dash: [6, 5]))
+                                }.padding(.horizontal)
+                                .padding(.top)
                             
                         }.padding(.top)
                     }.padding(.top)

@@ -38,7 +38,7 @@ struct NotionImportPageView: View {
                 Rectangle()
                     .fill(Color.clear)
                     .frame(maxWidth: .infinity, maxHeight: 160)
-                    .glassEffect(.regular, in: .rect(cornerRadius: 30))
+                    .glassEffect(.clear, in: .rect(cornerRadius: 30))
                     .padding()
                 
                 HStack(alignment: .top) {
@@ -98,7 +98,7 @@ struct NotionImportPageView: View {
                         RoundedRectangle(cornerRadius: 30)
                             .fill(Color.clear)
                             .frame(maxWidth: .infinity, maxHeight: 50)
-                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect())
+                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.clear))
                         
                         HStack(spacing: 10) {
                             Image(systemName: "list.bullet.circle.fill")

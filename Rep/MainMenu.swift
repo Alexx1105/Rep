@@ -248,7 +248,7 @@ struct MainMenu: View {
                 } label: {
                     Circle()
                     .frame(height: 45)}
-                .glassEffect()
+                .glassEffect(.regular)
                 .buttonStyle(PlainButtonStyle())
                 
                 .overlay {

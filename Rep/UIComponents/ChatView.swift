@@ -5,6 +5,8 @@ import AVFoundation
 import KimchiKit
 import ActivityKit
 
+
+
 struct ChatView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var closeChatSheet
@@ -14,6 +16,7 @@ struct ChatView: View {
     private var messagePlaceholder: String = "Upload notes or Ask..."
     
     @StateObject private var chatState = Chat.shared
+    
     @State var showFilePicker: Bool = false
     @State var showCameraPicker: Bool = false
     @State var selectedPhotos: [PhotosPickerItem] = []
@@ -29,6 +32,7 @@ struct ChatView: View {
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
     @State var isMoreCreditsNeeded: Bool = false
+    
     @FocusState private var isChatFocused: Bool
     
     
@@ -320,7 +324,7 @@ struct ChatView: View {
                     }.offset(y: -keyboardHeight)
                 }.padding(.leading)
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 30))
+                    .background(RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.clear, in: .rect(cornerRadius: 30)).opacity(0.8)
                         .offset(y: -keyboardHeight)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal))
