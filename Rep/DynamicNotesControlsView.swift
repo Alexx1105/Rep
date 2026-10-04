@@ -300,6 +300,7 @@ struct DynamicRepControlsView: View {
                                     .opacity(0.50)
                                     .padding(.leading)
                                 
+                                
                                 ClusterPickerView(clusterPicker: $picker)
                                     .onChange(of: picker) {
                                         Task {
@@ -308,9 +309,7 @@ struct DynamicRepControlsView: View {
                                     }
                                     .padding(.horizontal)
                             }.padding(.horizontal)
-                            
-                            
-                            
+                          
                             Spacer()
                             
                             HStack {
@@ -339,12 +338,12 @@ struct DynamicRepControlsView: View {
                                 }
                                 Spacer()
                             }.padding(.leading, 30)
+                               
                         
                             Spacer()
                         }.padding(.top)
                     }
                 }.padding(.top)
-                    .padding(.bottom)
                 
             }.padding(.top)
         }
