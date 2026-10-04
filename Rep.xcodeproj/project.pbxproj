@@ -60,7 +60,7 @@
 		B2F82DAC2E9F330800006533 /* UIComponentsGlobal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */; };
 		B2FF4B972CCD5C3A00A26EC7 /* ImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */; };
 		B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30709FB764900BE992DFBFA /* MainMenuTab.swift */; };
-		B304C27FAA75682CFAB44F27 /* HyperToggleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */; };
+		B304C27FAA75682CFAB44F27 /* NotesControlToggles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33E1F869D6A8AC03AF816B7 /* NotesControlToggles.swift */; };
 		B316D301EC078AFF6FBC7A64 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D62D98C2980D9D3790AC25 /* PickerView.swift */; };
 		B337C6418EFD8CA5DE9847BA /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D5C0A833A1B1A62B097383 /* ChatView.swift */; };
 		B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3043C921D38E360E9E22AF1 /* VoiceTranscriptionView.swift */; };
@@ -188,7 +188,7 @@
 		B30709FB764900BE992DFBFA /* MainMenuTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuTab.swift; sourceTree = "<group>"; };
 		B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacHelperDirections.swift; sourceTree = "<group>"; };
 		B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionSummaryPicker.swift; sourceTree = "<group>"; };
-		B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperToggleCard.swift; sourceTree = "<group>"; };
+		B33E1F869D6A8AC03AF816B7 /* NotesControlToggles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesControlToggles.swift; sourceTree = "<group>"; };
 		B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMenuSheet.swift; sourceTree = "<group>"; };
 		B36DD4E8C61EA857EC222289 /* SliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderView.swift; sourceTree = "<group>"; };
 		B380EFA55CDCC0BF88AAE605 /* ChatDialogToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDialogToast.swift; sourceTree = "<group>"; };
@@ -342,7 +342,7 @@
 				B30709FB764900BE992DFBFA /* MainMenuTab.swift */,
 				B36DD4E8C61EA857EC222289 /* SliderView.swift */,
 				B36B23B52A5A7161361C3160 /* PaymentMenuSheet.swift */,
-				B33E1F869D6A8AC03AF816B7 /* HyperToggleCard.swift */,
+				B33E1F869D6A8AC03AF816B7 /* NotesControlToggles.swift */,
 				B3CFF79DB455B634A844A062 /* SkeletonLoader.swift */,
 				B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */,
 				B380EFA55CDCC0BF88AAE605 /* ChatDialogToast.swift */,
@@ -533,7 +533,7 @@
 				B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */,
 				B359F1882320AC1AE6D0A4F2 /* SliderView.swift in Sources */,
 				B37F900F71ED3C744896BDF7 /* PaymentMenuSheet.swift in Sources */,
-				B304C27FAA75682CFAB44F27 /* HyperToggleCard.swift in Sources */,
+				B304C27FAA75682CFAB44F27 /* NotesControlToggles.swift in Sources */,
 				B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */,
 				B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */,
 				B3D3BD8D45064655708BF23E /* ChatDialogToast.swift in Sources */,
@@ -637,7 +637,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.DynamicRepExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -672,7 +672,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.DynamicRepExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -683,6 +683,177 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		B2AEBC3830717DB00067549B /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				"INFOPLIST_FILE[sdk=*]" = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Beta;
+		};
+		B2AEBC3930717DB00067549B /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Rep/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Rep;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rep uses your microphone to transcribe meetings and lectures.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes = KimchiKit.DynamicRepAttributes;
+				"INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes[sdk=iphoneos*]" = KimchiKit.DynamicRepAttributes;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1;
+				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.beta;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Beta;
+		};
+		B2AEBC3A30717DB00067549B /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DynamicRep/DynamicRepExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DynamicRep/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DynamicRep;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes = KimchiKit.DynamicRepAttributes;
+				"INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes[sdk=iphone*]" = KimchiKit.DynamicRepAttributes;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.1;
+				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.beta.DynamicRepExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Beta;
+		};
+		B2AEBC3B30717DB00067549B /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = L96XRPBK46;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kimchilabs.rep.RepTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rep.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rep";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Beta;
 		};
 		B2B837E52BCB103000BBC748 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -839,12 +1010,12 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes = KimchiKit.DynamicRepAttributes;
 				"INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes[sdk=iphoneos*]" = KimchiKit.DynamicRepAttributes;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -880,12 +1051,12 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes = KimchiKit.DynamicRepAttributes;
 				"INFOPLIST_KEY_WKSupportsLiveActivityLaunchAttributeTypes[sdk=iphoneos*]" = KimchiKit.DynamicRepAttributes;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -958,6 +1129,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B25A0AAA2D94FE3400420892 /* Debug */,
+				B2AEBC3A30717DB00067549B /* Beta */,
 				B25A0AAB2D94FE3400420892 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -967,6 +1139,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B2B837E52BCB103000BBC748 /* Debug */,
+				B2AEBC3830717DB00067549B /* Beta */,
 				B2B837E62BCB103000BBC748 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -976,6 +1149,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B2B837E82BCB103000BBC748 /* Debug */,
+				B2AEBC3930717DB00067549B /* Beta */,
 				B2B837E92BCB103000BBC748 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -985,6 +1159,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B2BBED463032140E00526E22 /* Debug */,
+				B2AEBC3B30717DB00067549B /* Beta */,
 				B2BBED473032140E00526E22 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;

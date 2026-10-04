@@ -1,9 +1,4 @@
 import SwiftUI
-import SwiftData
-import PhotosUI
-import AVFoundation
-import KimchiKit
-import ActivityKit
 
 
 struct HyperToggleCard: View {
@@ -15,15 +10,7 @@ struct HyperToggleCard: View {
     var body: some View {
         
         ZStack {
-//            Rectangle().fill(.ultraThickMaterial)
-//                .stroke(Color.mmBackground, lineWidth: 0.3)
-//                .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.mmDark, lineWidth: 0.3))
-//                .cornerRadius(15).padding(7)
-//                .frame(maxHeight: 130)
-            
-            
             VStack(alignment: .leading) {
-                
                 VStack(alignment: .leading) {
                     Toggle("Hyper Mode", isOn: $hyperToggleEnabled)
                         .fontWeight(.semibold)
@@ -66,6 +53,45 @@ struct HyperToggleCard: View {
     }
 }
 
+
+struct RepeatToggleCard: View {
+    @Binding var isPresented: Bool
+    @Binding var repeatEnabled: Bool
+    @Environment(\.colorScheme) var colorScheme
+    private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
+    
+    var body: some View {
+        
+        ZStack {
+            VStack(alignment: .leading) {
+                VStack(alignment: .leading) {
+                    Toggle("Enable Repeat", isOn: $repeatEnabled)
+                        .fontWeight(.semibold)
+                        .opacity(textOpacity)
+                        .tint(.blue)
+                        .onChange(of: repeatEnabled) { oldValue, newValue in
+                            print("hyper mode toggled in settings view: \(newValue)")
+                        }
+                    
+                }.padding(.trailing)
+                
+                VStack(alignment: .leading) {
+                    Text("Enable Repeat to cycle through these\nnotes again after every note has been shown.")
+                        .font(.system(size: 14)).lineSpacing(3)
+                        .fontWeight(.medium)
+                        .opacity(0.50)
+                }
+            }.padding(.leading)
+        }
+    }
+}
+
+
+
 #Preview {
     HyperToggleCard(isPresented:  .constant(true), hyperToggleEnabled: .constant(false))
+}
+
+#Preview {
+    RepeatToggleCard(isPresented: .constant(true), repeatEnabled: .constant(true))
 }

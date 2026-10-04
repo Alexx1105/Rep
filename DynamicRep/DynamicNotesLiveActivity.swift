@@ -65,6 +65,7 @@ struct DynamicRepLiveActivity: Widget {
                         }
                     }.padding(.bottom, 5)
                 }.padding(.leading)
+                    .zIndex(1)
                 
                 HStack {
                     ZStack {
@@ -77,7 +78,7 @@ struct DynamicRepLiveActivity: Widget {
                             .fontWeight(.regular)
                             .font(.system(size: 14)).fontDesign(.rounded)
                             .lineSpacing(2)
-                            .lineLimit(7)
+                            .lineLimit(5)
                             .minimumScaleFactor(0.9)
                             .padding(.vertical, 2)
                         
@@ -97,7 +98,7 @@ struct DynamicRepLiveActivity: Widget {
                             Color.mmBackground
                         }
                         .padding(.top, -14)
-                    }
+                    }.zIndex(0)
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .activityBackgroundTint(Color.black)
@@ -160,11 +161,12 @@ struct DynamicRepLiveActivity: Widget {
                             .minimumScaleFactor(0.9)
                             .foregroundStyle(Color.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(6)
+                            .lineLimit(5)
                             .padding(.horizontal, 5)
                             .padding(.leading, 20)
                             .padding(.trailing)
                             .padding(.vertical, 3)
+                            .padding(.bottom)
                     }
                 }
             } compactLeading: {

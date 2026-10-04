@@ -87,6 +87,7 @@ struct DynamicRepControlsView: View {
     @AppStorage var storeSelectedOption: Int
     @AppStorage var storeSelectedHyperModeOption: Int
     @AppStorage("hypermodetoggle") private var hyperToggleEnabled = false
+    @AppStorage("repeattoggle") private var repeatEnabled = true
     @AppStorage("notesOrder") private var notesOrder: NotesConfig.NotesOrder = .asc
     @AppStorage("notesCluster") private var picker: ClusterPickerView.ClusterPicker = .oneCard
     
@@ -99,9 +100,8 @@ struct DynamicRepControlsView: View {
         self._dynamicNotesCoordinator = StateObject(wrappedValue: DynamicNotesCoordinator(dataSource: dataSource))
         self._notesOrder = AppStorage(wrappedValue: .asc, "notesOrder_\(pageID)")
         self._picker = AppStorage(wrappedValue: .oneCard, "notesCluster_\(pageID)")
+        self._repeatEnabled = AppStorage(wrappedValue: true, "repeattoggle_\(pageID)")
     }
-    
-    @AppStorage("disableOption") var storeDisableOption: Int = 0
     
     @State var localPage: [String: Date] = [:]          ///acts as local per-page base compute
     
@@ -265,14 +265,27 @@ struct DynamicRepControlsView: View {
                 
                 VStack {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 30, style: .continuous).foregroundStyle(Color.gray).opacity(0.2)
-                            .frame(maxWidth: .infinity, maxHeight: 350).padding(.bottom)
+                        RoundedRectangle(cornerRadius: 30, style: .continuous).foregroundStyle(Color.gray).opacity(0.1)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity).padding(.bottom)
                             .padding(.horizontal)
                         
                         VStack(spacing: 10) {
                             HStack {
                                 HyperToggleCard(isPresented: .constant(true), hyperToggleEnabled: $hyperToggleEnabled).padding(.horizontal)
-                            }.padding(.top, 14)
+                            }
+                            Divider().padding(.horizontal).padding(.leading)
+                            
+                            RepeatToggleCard(isPresented: .constant(true), repeatEnabled: $repeatEnabled).padding(.horizontal)
+                                .onChange(of: repeatEnabled) { _,newVal in
+                                    Task {
+                                        await dynamicNotesCoordinator.updateRepeatNotesStatus(repeatEnabled: newVal)
+                                    }
+                                }.onAppear {
+                                    Task {
+                                        await dynamicNotesCoordinator.updateRepeatNotesStatus(repeatEnabled: repeatEnabled)
+                                    }
+                                }
+                            
                             Divider().padding(.horizontal).padding(.leading)
                             
                             VStack(alignment: .leading, spacing: 10) {
@@ -281,7 +294,7 @@ struct DynamicRepControlsView: View {
                                     .opacity(textOpacity)
                                     .padding(.leading)
                                 
-                                Text("Control wether to recieve 1-3 lockscreen\nnotes at a time to display more conent at once")
+                                Text("Control whether to recieve 1-3 lockscreen\nnotes at a time to display more content at once")
                                     .font(.system(size: 14)).lineSpacing(3)
                                     .fontWeight(.medium)
                                     .opacity(0.50)
@@ -326,17 +339,14 @@ struct DynamicRepControlsView: View {
                                 }
                                 Spacer()
                             }.padding(.leading, 30)
-                            
-                            
+                        
                             Spacer()
                         }.padding(.top)
                     }
                 }.padding(.top)
+                    .padding(.bottom)
                 
-            }.frame(alignment: .center)
-                .padding(.top)
-            
-            Spacer()
+            }.padding(.top)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.mmBackground)

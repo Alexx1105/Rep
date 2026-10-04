@@ -137,4 +137,13 @@ public final class DynamicNotesCoordinator: ObservableObject {
             print("failed to update notes ordering", ErrorDesc.callsiteError, error)
         }
     }
+    
+    
+    func updateRepeatNotesStatus(repeatEnabled: Bool) async  {
+        do {
+            try await supabase.updateRepeatNotesStatus(repeatEnabled: repeatEnabled, pageID: dataSourceId)
+        } catch {
+            print("failed to update repeat status", ErrorDesc.callsiteError, error)
+        }
+    }
 }

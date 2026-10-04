@@ -156,4 +156,9 @@ public final class SupabaseClientManager: ObservableObject {
     func updateNotesOrdering(ordering: NotesConfig.NotesOrder, pageID: String) async throws {
         _ = try await supabaseDBClient.from("push_tokens_dev").update(["ordering_mode": ordering.rawValue]).eq("page_id", value: pageID).execute()
     }
+    
+    
+    func updateRepeatNotesStatus(repeatEnabled: Bool, pageID: String) async throws {
+        _ = try await supabaseDBClient.from("push_tokens_dev").update(["repeat_enabled": repeatEnabled]).eq("page_id", value: pageID).execute()
+    }
 }
