@@ -71,6 +71,11 @@ struct RootTabs: View {
                     }
                 }
             }
+            .navigationDestination(for: NavPathItem.self) { route in
+                if route == .pluginStore {
+                    PluginStoreView()
+                }
+            }
         }
         .task(id: importManager.isPageImportedNotification) {
             Task { @MainActor in

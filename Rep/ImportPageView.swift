@@ -31,64 +31,66 @@ struct NotionImportPageView: View {
     
     
     var body: some View {
-        VStack(alignment: .center, spacing: 1) {
-            Spacer().frame(maxHeight: 180)
+        VStack(alignment: .center) {
+            Spacer()
             
-            ZStack(alignment: .center) {
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(maxWidth: .infinity, maxHeight: 160)
-                    .glassEffect(.clear, in: .rect(cornerRadius: 30))
-                    .padding()
+//                Rectangle()
+//                    .fill(Color.clear)
+//                    .frame(maxWidth: .infinity, maxHeight: 160)
+//                    .glassEffect(.clear, in: .rect(cornerRadius: 30))
+//                    .padding()
+//                
+//                HStack(alignment: .top) {
+//                    VStack(spacing: 5 ) {
+//                        Text("Import notes from your notion")
+//                            .font(.system(size: 16))
+//                            .fontWeight(.medium)
+//                            .opacity(textOpacity)
+//                            .padding(.top)
+//                        
+//                        Text("Grant Notion access to your\naccount to import your notes")
+//                            .font(.system(size: 14))
+//                            .fontWeight(.medium)
+//                            .opacity(0.50)
+//                            .padding(.horizontal)
+//                        Spacer()
+//                    }.frame(maxHeight: 175)
+//                }
+//                .padding(.top)
+//                VStack() {
+//                    Spacer()
+//                    ZStack {
+//                        Button {
+//                            showOathWebView = true
+//                        } label: {
+//                            RoundedRectangle(cornerRadius: 30)
+//                                .fill(Color.mmDark)
+//                                .frame(maxWidth: .infinity, maxHeight: 48)
+//                                .padding(.horizontal)
+//                                .padding(.bottom)
+//                        }.padding(.horizontal)
+//                        
+//                        HStack(alignment: .center, spacing: 10) {
+//                            Image("notionLogoReversed")
+//                                .resizable()
+//                                .scaledToFit()
+//                                .frame(width: 20, height: 20)
+//                                .padding(.bottom)
+//                                .opacity(textOpacity)
+//                            
+//                            Text("Import page")
+//                                .foregroundStyle(Color.checkmark)
+//                                .fontWeight(.medium)
+//                                .font(.system(size: 16))
+//                                .padding(.bottom)
+//                        }
+//                    }
+//                }.frame(maxHeight: 165)
+//                    .padding()
                 
-                HStack(alignment: .top) {
-                    VStack(spacing: 5 ) {
-                        Text("Import notes from your notion")
-                            .font(.system(size: 16))
-                            .fontWeight(.medium)
-                            .opacity(textOpacity)
-                            .padding(.top)
-                        
-                        Text("Grant Notion access to your\naccount to import your notes")
-                            .font(.system(size: 14))
-                            .fontWeight(.medium)
-                            .opacity(0.50)
-                            .padding(.horizontal)
-                        Spacer()
-                    }.frame(maxHeight: 175)
-                }
-                .padding(.top)
-                VStack() {
-                    Spacer()
-                    ZStack {
-                        Button {
-                            showOathWebView = true
-                        } label: {
-                            RoundedRectangle(cornerRadius: 30)
-                                .fill(Color.mmDark)
-                                .frame(maxWidth: .infinity, maxHeight: 48)
-                                .padding(.horizontal)
-                                .padding(.bottom)
-                        }.padding(.horizontal)
-                        
-                        HStack(alignment: .center, spacing: 10) {
-                            Image("notionLogoReversed")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .padding(.bottom)
-                                .opacity(textOpacity)
-                            
-                            Text("Import page")
-                                .foregroundStyle(Color.checkmark)
-                                .fontWeight(.medium)
-                                .font(.system(size: 16))
-                                .padding(.bottom)
-                        }
-                    }
-                }.frame(maxHeight: 165)
-                    .padding()
-            }
+                PluginListCard().padding(.vertical)
+                
+            
             
             VStack(alignment: .center) {
                 Button {
@@ -98,7 +100,7 @@ struct NotionImportPageView: View {
                         RoundedRectangle(cornerRadius: 30)
                             .fill(Color.clear)
                             .frame(maxWidth: .infinity, maxHeight: 50)
-                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.clear))
+                            .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.regular))
                         
                         HStack(spacing: 10) {
                             Image(systemName: "list.bullet.circle.fill")

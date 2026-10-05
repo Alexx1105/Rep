@@ -55,6 +55,8 @@ struct ContainerView: View {
                                                                       openaiId: "preview-id")))
                             case .tos:
                                 TOSPage()
+                            case .pluginStore:
+                                PluginStoreView()
                             }
                         }
                 }

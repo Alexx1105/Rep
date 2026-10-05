@@ -39,6 +39,9 @@
 		B2A2C73D302CE71F000D6977 /* PolledDesktopNotesPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */; };
 		B2AEBC0D3067048C0067549B /* DynamicNotesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC0C306704820067549B /* DynamicNotesCoordinator.swift */; };
 		B2AEBC113069D1A80067549B /* DynamicNotesStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC103069D1A00067549B /* DynamicNotesStructs.swift */; };
+		B2AEBC3D3072AA340067549B /* ImportProviderPluginList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */; };
+		B2AEBC3F3072BBD10067549B /* ProviderPluginTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */; };
+		B2AEBC4230730B230067549B /* PluginStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2AEBC403073087F0067549B /* PluginStoreView.swift */; };
 		B2B3F6F22F6E393100FD1367 /* NotionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CDE6B82F6902A900B33DA9 /* NotionDataManager.swift */; };
 		B2B3F6F32F6E444700FD1367 /* DynamicNotesControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A0EFC42DC7D8F60076DBC0 /* DynamicNotesControlsView.swift */; };
 		B2B3F6F52F6F01EE00FD1367 /* NotionDataStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */; };
@@ -166,6 +169,9 @@
 		B2A2C73C302CE71C000D6977 /* PolledDesktopNotesPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolledDesktopNotesPopover.swift; sourceTree = "<group>"; };
 		B2AEBC0C306704820067549B /* DynamicNotesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicNotesCoordinator.swift; sourceTree = "<group>"; };
 		B2AEBC103069D1A00067549B /* DynamicNotesStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicNotesStructs.swift; sourceTree = "<group>"; };
+		B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportProviderPluginList.swift; sourceTree = "<group>"; };
+		B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPluginTabs.swift; sourceTree = "<group>"; };
+		B2AEBC403073087F0067549B /* PluginStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginStoreView.swift; sourceTree = "<group>"; };
 		B2B3F6F42F6F01EE00FD1367 /* NotionDataStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotionDataStructs.swift; sourceTree = "<group>"; };
 		B2B837C32BCB102F00BBC748 /* Rep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rep.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2B837C62BCB102F00BBC748 /* RepApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepApp.swift; sourceTree = "<group>"; };
@@ -306,6 +312,7 @@
 				B26842CE2CC704DB00471001 /* MainMenu.swift */,
 				B2B837C62BCB102F00BBC748 /* RepApp.swift */,
 				B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */,
+				B2AEBC403073087F0067549B /* PluginStoreView.swift */,
 				B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */,
 				B26A46662CD04C210064AF46 /* SignOutView.swift */,
 				B26A46622CCFC4250064AF46 /* LaunchScreen.swift */,
@@ -336,6 +343,8 @@
 		B3ED98CF4BC35A3484ED0C10 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */,
+				B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */,
 				B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */,
 				B3CAAAD1F260F8D5F94AB36B /* RootTabs.swift */,
 				B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */,
@@ -529,8 +538,10 @@
 				B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */,
 				B2F82DAC2E9F330800006533 /* UIComponentsGlobal.swift in Sources */,
 				B36ECA7BF1CA617BFFA0E766 /* RootTabs.swift in Sources */,
+				B2AEBC3F3072BBD10067549B /* ProviderPluginTabs.swift in Sources */,
 				B3EF374DAB89329BAE2519B4 /* TabSelectionCircle.swift in Sources */,
 				B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */,
+				B2AEBC4230730B230067549B /* PluginStoreView.swift in Sources */,
 				B359F1882320AC1AE6D0A4F2 /* SliderView.swift in Sources */,
 				B37F900F71ED3C744896BDF7 /* PaymentMenuSheet.swift in Sources */,
 				B304C27FAA75682CFAB44F27 /* NotesControlToggles.swift in Sources */,
@@ -561,6 +572,7 @@
 				B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */,
 				B2B837C92BCB102F00BBC748 /* ImportedNotes.swift in Sources */,
 				B2B837C72BCB102F00BBC748 /* RepApp.swift in Sources */,
+				B2AEBC3D3072AA340067549B /* ImportProviderPluginList.swift in Sources */,
 				B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */,
 				B2FF4B972CCD5C3A00A26EC7 /* ImportPageView.swift in Sources */,
 				B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */,
