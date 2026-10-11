@@ -10,6 +10,7 @@ import Foundation
 
 struct PluginListCard: View {
     @ObservedObject private var coordinator = PluginCoordinator.shared
+    let onImport: (PluginRegistry.PluginId) -> Void
     
     var body: some View {
         VStack {
@@ -17,7 +18,7 @@ struct PluginListCard: View {
                 ScrollView {
                     LazyVStack(spacing: 35) {
                         ForEach(PluginRegistry.pluginProviders.filter { coordinator.addedPluginId.contains($0.id) }, id: \.id) { providerTitle in
-                            PluginListTab(provider: providerTitle)
+                            PluginListTab(provider: providerTitle, onImport: { onImport(providerTitle.id) })
                         }
                     }
                     .padding(.horizontal)
@@ -82,7 +83,7 @@ struct PluginListCard: View {
                                     .frame(width: 120, height: 35)
                                     .foregroundStyle(Color.mmDark)
                                     .opacity(0.2)
-                               
+                                
                                 HStack(spacing: 5) {
                                     Text("Add Plugins")
                                         .foregroundStyle(Color.mmDark)
@@ -115,5 +116,5 @@ struct PluginListCard: View {
 
 
 #Preview {
-    PluginListCard()
+    PluginListCard(onImport: { _ in })
 }

@@ -50,10 +50,6 @@ public final class NotionDataManager: ObservableObject {
     
     
     private func fetchImportedPageTitles(context: ModelContext) async throws -> [UserPageTitle] {
-        let fetch = FetchDescriptor<DeletedPage>()
-        let deletedPages = try context.fetch(fetch)
-        let deletedPageIDs: Set = Set(deletedPages.map{ $0.pageID })
-        
         var pageIDsImported: [UserPageTitle] = []
         
         let passToken = try FetchAuth.fetchAuthToken()
@@ -93,7 +89,6 @@ public final class NotionDataManager: ObservableObject {
             let searchResponse = try jsonDecoder.decode(NotionSearchResponse.self, from: data)
             for i in searchResponse.results {
                 guard !i.id.isEmpty else { continue }
-                guard !deletedPageIDs.contains(i.id) else { continue }
                 guard i.object == "page" else { continue }
                 
                 print("====================================\n Search Imported Page IDs result: \(i)")

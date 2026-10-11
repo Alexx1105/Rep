@@ -10,11 +10,12 @@ import Foundation
 
 struct PluginListTab: View {
     let provider: PluginRegistry.PluginIdentity
+    let onImport: () -> Void
     
     var body: some View {
         
         Button {
-            
+            onImport()
         } label: {
             VStack {
                 HStack(spacing: 15) {
@@ -39,6 +40,23 @@ struct PluginListTab: View {
                 }
             }
         }
+        .contextMenu {
+            Button(role: .destructive) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    PluginCoordinator.shared.removePluginFromList(provider.id)
+                }
+            } label: {
+                Label("Remove Plugin", systemImage: "pip.remove")
+            }
+        }
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5)
+                .onEnded { _ in
+                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                    impact.prepare()
+                    impact.impactOccurred()
+                }
+        )
     }
 }
 
@@ -49,7 +67,6 @@ struct PluginStoreTab: View {
     @ObservedObject private var coordinator = PluginCoordinator.shared
     
     var body: some View {
-        
         VStack {
             HStack(spacing: 15) {
                 Image(provider.icon)
@@ -98,7 +115,7 @@ struct PluginStoreTab: View {
 
 
 #Preview {
-    PluginListTab(provider: PluginRegistry.pluginProviders[2])
+    PluginListTab(provider: PluginRegistry.pluginProviders[2], onImport: {})
 }
 
 #Preview {

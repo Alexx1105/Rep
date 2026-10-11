@@ -8,6 +8,9 @@ import ActivityKit
 
 struct RootTabs: View {
     @State private var showImportToast: Bool = false
+    @State private var showPluginToast: Bool = false
+    @State private var pluginToastTrigger: UUID?
+    @ObservedObject private var pluginCoordinator = PluginCoordinator.shared
     @State private var showGeneratedChat: Bool = false
     @State private var showAudioTranscriptionView: Bool = false
     @State private var selectedTab: Int = 0
@@ -75,6 +78,33 @@ struct RootTabs: View {
                 if route == .pluginStore {
                     PluginStoreView()
                 }
+            }
+        }
+        .overlay(alignment: .top) {
+            if showPluginToast {
+                PluginAddedToast()
+                    .transition(.move(edge: .top).combined(with: .blurReplace))
+                    .allowsHitTesting(false)
+                    .fixedSize(horizontal: false, vertical: false)
+                    .ignoresSafeArea(edges: .top).padding(.top, 1)
+            }
+        }
+        .onChange(of: pluginCoordinator.addedPluginId) { oldValue, newValue in
+            guard !newValue.subtracting(oldValue).isEmpty else { return }
+            pluginToastTrigger = UUID()
+        }
+        .task(id: pluginToastTrigger) {
+            guard pluginToastTrigger != nil else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showPluginToast = true
+            }
+            do {
+                try await Task.sleep(for: .seconds(3.5))
+            } catch {
+                return
+            }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showPluginToast = false
             }
         }
         .task(id: importManager.isPageImportedNotification) {

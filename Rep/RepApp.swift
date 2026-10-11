@@ -141,27 +141,13 @@ struct MuscleMemoryApp: App {
                 }
                 if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true) {
                     if let codeParse = parseCodeQuery.queryItems?.first(where: { $0.name == "code" })?.value {
-                        print("code Query recieved and parsed\(parseCodeQuery)")
+                        
                         Task {
                             do {
-                                if SyncController.shared.isAutoSync {
-                                    try await bootstrapSync(context: OAuthTokens.shared.modelContext)
-                                } else {
-                                    guard let context = OAuthTokens.shared.modelContext else { throw ErrorDesc.oauthError }
-                                    try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: context, code: codeParse)
-                                }
+                                guard let context = OAuthTokens.shared.modelContext else { throw ErrorDesc.oauthError }
+                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: context, code: codeParse)
                             } catch {
                                 print("failed async operation(s):", ErrorDesc.concurrencyError, error)
-                            }
-                        }
-                        @MainActor
-                        func bootstrapSync(context: ModelContext) async throws {
-                            do {
-                                try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                try await NotionDataManager.shared.fetchFirstTimePages(context: context)
-                                print("one time start-up for sync ran 🔄")
-                            } catch {
-                                print("one time start-up for sync failed:", ErrorDesc.syncError, error)
                             }
                         }
                     } else {
