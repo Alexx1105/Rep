@@ -34,63 +34,7 @@ struct NotionImportPageView: View {
         VStack(alignment: .center) {
             Spacer()
             
-//                Rectangle()
-//                    .fill(Color.clear)
-//                    .frame(maxWidth: .infinity, maxHeight: 160)
-//                    .glassEffect(.clear, in: .rect(cornerRadius: 30))
-//                    .padding()
-//                
-//                HStack(alignment: .top) {
-//                    VStack(spacing: 5 ) {
-//                        Text("Import notes from your notion")
-//                            .font(.system(size: 16))
-//                            .fontWeight(.medium)
-//                            .opacity(textOpacity)
-//                            .padding(.top)
-//                        
-//                        Text("Grant Notion access to your\naccount to import your notes")
-//                            .font(.system(size: 14))
-//                            .fontWeight(.medium)
-//                            .opacity(0.50)
-//                            .padding(.horizontal)
-//                        Spacer()
-//                    }.frame(maxHeight: 175)
-//                }
-//                .padding(.top)
-//                VStack() {
-//                    Spacer()
-//                    ZStack {
-//                        Button {
-//                            showOathWebView = true
-//                        } label: {
-//                            RoundedRectangle(cornerRadius: 30)
-//                                .fill(Color.mmDark)
-//                                .frame(maxWidth: .infinity, maxHeight: 48)
-//                                .padding(.horizontal)
-//                                .padding(.bottom)
-//                        }.padding(.horizontal)
-//                        
-//                        HStack(alignment: .center, spacing: 10) {
-//                            Image("notionLogoReversed")
-//                                .resizable()
-//                                .scaledToFit()
-//                                .frame(width: 20, height: 20)
-//                                .padding(.bottom)
-//                                .opacity(textOpacity)
-//                            
-//                            Text("Import page")
-//                                .foregroundStyle(Color.checkmark)
-//                                .fontWeight(.medium)
-//                                .font(.system(size: 16))
-//                                .padding(.bottom)
-//                        }
-//                    }
-//                }.frame(maxHeight: 165)
-//                    .padding()
-                
                 PluginListCard().padding(.vertical)
-                
-            
             
             VStack(alignment: .center) {
                 Button {
@@ -131,7 +75,7 @@ struct NotionImportPageView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.mmBackground)
         .navigationBarBackButtonHidden()
-        .sheet(isPresented: $showOathWebView) {
+        .sheet(isPresented: $showOathWebView) {  //TODO: unify oauth view for all providers here
             if let url = URL(string: "https://api.notion.com/v1/oauth/authorize?client_id=138d872b-594c-8050-b985-0037723b58e0&response_type=code&owner=user&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge") {
                 SafariView(url: url)
                     .presentationDetents([.fraction(0.9)])

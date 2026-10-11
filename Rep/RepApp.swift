@@ -147,9 +147,8 @@ struct MuscleMemoryApp: App {
                                 if SyncController.shared.isAutoSync {
                                     try await bootstrapSync(context: OAuthTokens.shared.modelContext)
                                 } else {
-                                    let context = OAuthTokens.shared.modelContext
-                                    try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse)
-                                    try await NotionDataManager.shared.fetchFirstTimePages(context: context!)
+                                    guard let context = OAuthTokens.shared.modelContext else { throw ErrorDesc.oauthError }
+                                    try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: context, code: codeParse)
                                 }
                             } catch {
                                 print("failed async operation(s):", ErrorDesc.concurrencyError, error)
@@ -193,8 +192,7 @@ private struct NotesSettingsRoute: Identifiable {
               url.host == "dynamic-notes", url.path == "/settings",
               let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
         let pageIDs = components.queryItems?.filter { $0.name == "pageID" } ?? []
-        guard pageIDs.count == 1, let pageID = pageIDs.first?.value,
-              !pageID.isEmpty else { return nil }
+        guard pageIDs.count == 1, let pageID = pageIDs.first?.value, !pageID.isEmpty else { return nil }
         id = pageID
     }
 }

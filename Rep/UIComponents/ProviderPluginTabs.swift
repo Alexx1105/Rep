@@ -9,18 +9,21 @@ import Foundation
 
 
 struct PluginListTab: View {
-    let index: Int
+    let provider: PluginRegistry.PluginIdentity
+    
     var body: some View {
         
         Button {
             
         } label: {
             VStack {
-                HStack {
-                    RoundedRectangle(cornerRadius: 5).frame(width: 25, height: 25)
-                        .foregroundStyle(Color.mmDark).opacity(0.5)
+                HStack(spacing: 15) {
+                    Image(provider.icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
                     
-                    Text("Notion")
+                    Text(provider.title)
                         .font(.system(size: 16))
                         .fontWeight(.medium)
                         .foregroundStyle(Color.mmDark)
@@ -41,32 +44,53 @@ struct PluginListTab: View {
 
 
 struct PluginStoreTab: View {
+    let provider: PluginRegistry.PluginIdentity
+    
+    @ObservedObject private var coordinator = PluginCoordinator.shared
+    
     var body: some View {
-        Button {
-            
-        } label: {
-            VStack {
-                HStack {
-                    RoundedRectangle(cornerRadius: 5).frame(width: 25, height: 25)
-                        .foregroundStyle(Color.mmDark).opacity(0.5)
+        
+        VStack {
+            HStack(spacing: 15) {
+                Image(provider.icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                
+                Text(provider.title)
+                    .font(.system(size: 16))
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color.mmDark)
+                    .lineLimit(1)
+                
+                Spacer()
+                
+                if coordinator.addedPluginId.contains(provider.id) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .frame(width: 35, height: 35)
+                        .foregroundStyle(Color.green)
                     
-                    Text("Notion")
-                        .font(.system(size: 16))
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.mmDark)
-                        .lineLimit(1)
-                    
-                    Spacer()
-                    
-                    ZStack {
-                        Circle().frame(width: 45, height: 45)
-                            .foregroundStyle(Color.gray).opacity(0.2)
+                } else {
+                    Button {
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.prepare()
+                        impact.impactOccurred()
                         
-                        Image(systemName: "plus").foregroundStyle(Color.mmDark)
-                    }
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            coordinator.addPluginToList(provider.id)
+                        }
+                    } label: {
+                        
+                        ZStack {
+                            Circle().frame(width: 35, height: 35)
+                                .foregroundStyle(Color.gray).opacity(0.2)
+                            
+                            Image(systemName: "plus").foregroundStyle(Color.mmDark)
+                        }
+                    }.transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
-                Divider()
             }
+            Divider()
         }
     }
 }
@@ -74,9 +98,9 @@ struct PluginStoreTab: View {
 
 
 #Preview {
-    PluginListTab(index: 1)
+    PluginListTab(provider: PluginRegistry.pluginProviders[2])
 }
 
 #Preview {
-    PluginStoreTab()
+    PluginStoreTab(provider: PluginRegistry.pluginProviders[0])
 }

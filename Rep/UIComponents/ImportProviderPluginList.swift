@@ -9,40 +9,43 @@ import Foundation
 
 
 struct PluginListCard: View {
+    @ObservedObject private var coordinator = PluginCoordinator.shared
+    
     var body: some View {
         VStack {
             ZStack {
                 ScrollView {
-                    LazyVStack(spacing: 25) {
-                        ForEach(0..<3, id: \.self) { index in
-                            PluginListTab(index: index)
+                    LazyVStack(spacing: 35) {
+                        ForEach(PluginRegistry.pluginProviders.filter { coordinator.addedPluginId.contains($0.id) }, id: \.id) { providerTitle in
+                            PluginListTab(provider: providerTitle)
                         }
                     }
                     .padding(.horizontal)
                     .padding(.top, 110)
                     .padding(.bottom, 50)
                 }
-
+                
                 VStack(spacing: 0) {
                     LinearGradient(
                         stops: [
                             .init(color: Color.mmBackground.opacity(1.00), location: 0.00),
-                            .init(color: Color.mmBackground.opacity(0.90), location: 0.30),
-                            .init(color: Color.mmBackground.opacity(0.80), location: 0.57),
+                            .init(color: Color.mmBackground.opacity(0.97), location: 0.30),
+                            .init(color: Color.mmBackground.opacity(0.93), location: 0.57),
                             .init(color: Color.clear, location: 1.00)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                     .frame(height: 90)
-
+                    
                     Spacer()
-
+                    
                     LinearGradient(
                         stops: [
-                            .init(color: Color.clear, location: 0.00),
-                            .init(color: Color.mmBackground.opacity(0.25), location: 0.55),
-                            .init(color: Color.mmBackground.opacity(0.70), location: 1.00)
+                            .init(color: Color.mmBackground.opacity(0.00), location: 0.00),
+                            .init(color: Color.mmBackground.opacity(0.15), location: 0.30),
+                            .init(color: Color.mmBackground.opacity(0.40), location: 0.65),
+                            .init(color: Color.mmBackground.opacity(0.75), location: 1.00)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -50,7 +53,7 @@ struct PluginListCard: View {
                     .frame(height: 80)
                 }
                 .allowsHitTesting(false)
-
+                
                 VStack(alignment: .leading) {
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
@@ -58,7 +61,7 @@ struct PluginListCard: View {
                                 .foregroundStyle(Color.mmDark)
                                 .fontWeight(.semibold)
                                 .font(.system(size: 16))
-
+                            
                             Text("Connect and add your favorite notes\napp to import notes into Rep.")
                                 .font(.system(size: 14))
                                 .lineSpacing(1)
@@ -66,24 +69,34 @@ struct PluginListCard: View {
                                 .opacity(0.50)
                         }
                         .padding(.top)
-
+                        
                         Spacer()
-
+                    }
+                    Spacer()
+                    
+                    HStack(alignment: .bottom) {
+                        Spacer()
                         NavigationLink(value: NavPathItem.pluginStore) {
                             ZStack {
-                                Circle()
-                                    .frame(width: 45, height: 45)
-                                    .foregroundStyle(Color.gray)
-                                    .opacity(0.2)
-
-                                Image(systemName: "powerplug.portrait")
+                                Capsule()
+                                    .frame(width: 120, height: 35)
                                     .foregroundStyle(Color.mmDark)
+                                    .opacity(0.2)
+                               
+                                HStack(spacing: 5) {
+                                    Text("Add Plugins")
+                                        .foregroundStyle(Color.mmDark)
+                                        .font(.system(size: 14))
+                                        .fontWeight(.medium)
+                                    
+                                    Image(systemName: "powerplug.portrait")
+                                        .foregroundStyle(Color.mmDark)
+                                        .font(.system(size: 14))
+                                }.padding(.horizontal)
                             }
                         }
-                        .padding(.trailing)
-                    }
-
-                    Spacer()
+                        .padding(.trailing, 7)
+                    }.padding(.bottom, 14)
                 }
                 .padding(.leading)
             }

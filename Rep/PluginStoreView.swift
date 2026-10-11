@@ -66,8 +66,10 @@ struct PluginStoreView: View {
                                 .multilineTextAlignment(.center)
                         }
                         
-                        ForEach(0..<3, id: \.self) { index in
-                            PluginStoreTab()
+                        Spacer(minLength: 50)
+                        
+                        ForEach(PluginRegistry.pluginProviders, id: \.id) { providerTitle in
+                            PluginStoreTab(provider: providerTitle)
                         }.padding(.top)
                         
                     }

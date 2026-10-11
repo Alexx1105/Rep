@@ -43,6 +43,7 @@ enum ErrorDesc: LocalizedError {
     case invalidUrlError
     case intervalSchedulingError
     case unknown
+    case pluginError
 }
 
 enum ErrorDefinition: Error {
