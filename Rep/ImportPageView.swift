@@ -25,6 +25,8 @@ struct NotionImportPageView: View {
     @State private var showOathWebView: Bool = false
     @State private var authorizationURL: URL?
     @State private var showChatView: Bool = false
+    @State var showFilePicker: Bool = false
+    @State var fileUrls: [URL] = []
     
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
@@ -37,6 +39,11 @@ struct NotionImportPageView: View {
             Spacer()
             
             PluginListCard(onImport: { providerId in
+                if providerId == .obsidian {
+                    showFilePicker = true
+                    return
+                }
+                
                 Task { @MainActor in
                     do {
                         authorizationURL = try await PluginCoordinator.shared.pluginConnectionRedirect(providerId: providerId)
@@ -89,6 +96,11 @@ struct NotionImportPageView: View {
                 SafariView(url: url)
                     .presentationDetents([.fraction(0.9)])
                     .ignoresSafeArea()
+            }
+        }
+        .sheet(isPresented: $showFilePicker) {
+            DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
+                fileUrls = url
             }
         }
     }

@@ -34,7 +34,23 @@ final class PluginCoordinator: ObservableObject {
     }
     
     
-    func connectPluginProvider(providerId: PluginRegistry.PluginId, context: ModelContext, code: String) async throws {  //TODO: call auth + data manager flows for rest of providers
+    func pluginConnectionRedirect(providerId: PluginRegistry.PluginId) async throws -> URL? {
+        switch providerId {
+        case .notion:
+            guard let url: URL = URL(string: "https://api.notion.com/v1/oauth/authorize?client_id=138d872b-594c-8050-b985-0037723b58e0&response_type=code&owner=user&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge") else { throw ErrorDesc.oauthError }
+            return url
+            
+        case .googleDocs:
+            guard let url: URL = URL(string: "https://accounts.google.com/o/oauth2/v2/auth?client_id=159023554096-v1gck09he80n7cgo1geslgmvotmqd2i3.apps.googleusercontent.com&response_type=code&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdocuments.readonly&access_type=offline&prompt=consent") else { throw ErrorDesc.oauthError }
+            return url
+            
+        case .obsidian:
+            return nil      ///oauth is not required for obsidian imports
+        }
+    }
+    
+    
+    func connectPluginProvider(providerId: PluginRegistry.PluginId, context: ModelContext, code: String) async throws {
         guard let provider = pluginRegistry.fetchPluginProvider(providerId: providerId) else { return }
         
         switch provider.id {
@@ -44,26 +60,12 @@ final class PluginCoordinator: ObservableObject {
             try await NotionDataManager.shared.fetchFirstTimePages(context: context)
             
         case .googleDocs:
-            throw ErrorDesc.pluginError
+            //TODO: call oauth flow for googleDocs
+            try await GoogleDocsDataManager.shared.fetchFirstTimePages(context: context, accessToken: "")  //pass token
+            
         case .obsidian:
-            throw ErrorDesc.pluginError
-        case .oneNote:
-            throw ErrorDesc.pluginError
-        default:
             throw ErrorDesc.pluginError
         }
         addPluginToList(provider.id)
-    }
-    
-    
-    func pluginConnectionRedirect(providerId: PluginRegistry.PluginId) async throws -> URL {
-        switch providerId {
-        case .notion:
-            guard let url: URL = URL(string: "https://api.notion.com/v1/oauth/authorize?client_id=138d872b-594c-8050-b985-0037723b58e0&response_type=code&owner=user&redirect_uri=https%3A%2F%2Foxgumwqxnghqccazzqvw.supabase.co%2Ffunctions%2Fv1%2Fauth-bridge") else { throw ErrorDesc.pluginError }
-            return url
-            
-        case .googleDocs, .obsidian, .oneNote:
-            throw ErrorDesc.pluginError         //TODO: add the rest of the oauth url redirects here
-        }
     }
 }

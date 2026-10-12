@@ -219,6 +219,8 @@
 		B2AEBC453073259D0067549B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				GoogleDocsDataManager.swift,
+				GoogleDocsStructs.swift,
 				NotionDataManager.swift,
 				NotionDataStructs.swift,
 			);

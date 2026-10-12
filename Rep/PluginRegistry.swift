@@ -14,7 +14,6 @@ final class PluginRegistry {
         case notion
         case googleDocs
         case obsidian
-        case oneNote
     }
     
     struct PluginIdentity: Codable {
@@ -27,7 +26,6 @@ final class PluginRegistry {
         .init(id: .notion, title: "Notion", icon: "notionLogo"),
         .init(id: .obsidian, title: "Obsidian", icon: "obsidian"),
         .init(id: .googleDocs, title: "Google Docs", icon: "googleDocs"),
-        .init(id: .oneNote, title: "Microsoft OneNote", icon: "oneNote")
     ]
     
     func fetchPluginProvider(providerId: PluginId) -> PluginIdentity? {
