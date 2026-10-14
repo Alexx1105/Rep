@@ -145,7 +145,7 @@ struct MuscleMemoryApp: App {
                         Task {
                             do {
                                 guard let context = OAuthTokens.shared.modelContext else { throw ErrorDesc.oauthError }
-                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: context, code: codeParse)
+                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: context, code: codeParse, fileUrls: nil)
                             } catch {
                                 print("failed async operation(s):", ErrorDesc.concurrencyError, error)
                             }

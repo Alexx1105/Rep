@@ -6,6 +6,8 @@
 //
 import SwiftUI
 import SafariServices
+import SwiftData
+import UniformTypeIdentifiers
 
 
 struct SafariView: UIViewControllerRepresentable {
@@ -30,7 +32,8 @@ struct NotionImportPageView: View {
     
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissImporTab
-
+    @Environment(\.modelContext) private var context
+    
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
     
@@ -99,8 +102,17 @@ struct NotionImportPageView: View {
             }
         }
         .sheet(isPresented: $showFilePicker) {
-            DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
+            DocPicker(contentType: [UTType(filenameExtension: "md") ?? .plainText], allowMultipleFileSelect: true) { url in
                 fileUrls = url
+                showFilePicker = false
+                
+                Task { @MainActor in
+                    do {
+                        try await ObsidianDataManager.shared.fetchFirstTimeMarkdownFiles(urls: fileUrls, context: context)
+                    } catch {
+                        print("failed to call obsidian import", ErrorDesc.callsiteError, error)
+                    }
+                }
             }
         }
     }

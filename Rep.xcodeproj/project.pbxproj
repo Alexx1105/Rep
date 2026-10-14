@@ -223,6 +223,7 @@
 				GoogleDocsStructs.swift,
 				NotionDataManager.swift,
 				NotionDataStructs.swift,
+				ObsidianDataManager.swift,
 			);
 			target = B25A0A932D94FE3300420892 /* DynamicRepExtension */;
 		};

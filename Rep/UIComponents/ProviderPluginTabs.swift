@@ -84,8 +84,8 @@ struct PluginStoreTab: View {
                 
                 if coordinator.addedPluginId.contains(provider.id) {
                     Image(systemName: "checkmark.circle.fill")
-                        .frame(width: 35, height: 35)
-                        .foregroundStyle(Color.green)
+                        .frame(width: 45, height: 45)
+                        .foregroundStyle(Color.intervalBlue)
                     
                 } else {
                     Button {

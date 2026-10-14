@@ -50,7 +50,7 @@ final class PluginCoordinator: ObservableObject {
     }
     
     
-    func connectPluginProvider(providerId: PluginRegistry.PluginId, context: ModelContext, code: String) async throws {
+    func connectPluginProvider(providerId: PluginRegistry.PluginId, context: ModelContext, code: String, fileUrls: [URL]?) async throws {
         guard let provider = pluginRegistry.fetchPluginProvider(providerId: providerId) else { return }
         
         switch provider.id {
@@ -64,7 +64,8 @@ final class PluginCoordinator: ObservableObject {
             try await GoogleDocsDataManager.shared.fetchFirstTimePages(context: context, accessToken: "")  //pass token
             
         case .obsidian:
-            throw ErrorDesc.pluginError
+            guard let urls: [URL] = fileUrls, !urls.isEmpty else { throw ErrorDesc.fileProcessingError }
+            try await ObsidianDataManager.shared.fetchFirstTimeMarkdownFiles(urls: urls, context: context)
         }
         addPluginToList(provider.id)
     }

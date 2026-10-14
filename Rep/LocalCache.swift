@@ -145,3 +145,24 @@ import SwiftUI
     }
 }
 
+@Model final class ObsidianPageTitle {
+    @Attribute(.unique) public var pageID: String
+    public var text: String
+    public var emoji: String?
+    
+    init(pageID: String, text: String, emoji: String? = nil) {
+        self.pageID = pageID
+        self.text = text
+        self.emoji = emoji
+    }
+}
+
+@Model final class ObsidianPageContent {
+    @Attribute(.unique) public var pageID: String
+    public var userContentPage: String
+    
+    init(pageID: String, userContentPage: String) {
+        self.pageID = pageID
+        self.userContentPage = userContentPage
+    }
+}

@@ -40,7 +40,7 @@ struct PluginStoreView: View {
             
             ZStack {
                 ScrollView {
-                    LazyVStack(spacing: 5) {
+                    LazyVStack(spacing: 10) {
                         VStack(spacing: 10) {
                             HStack(alignment: .center, spacing: 20) {
                                 Image("notionLogo")
