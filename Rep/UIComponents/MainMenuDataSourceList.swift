@@ -42,6 +42,32 @@ struct MainMenuDataSourceList: View {         ///conditionally renders the list 
                 .allowsHitTesting(!tabSlideOver)
             }
             
+        case .obsidianPageTitle(let pageTitle):
+            if tabSlideOver {
+                Button {
+                    print("ALL PAGE IDs: \(deleteMultipleTabs)")
+                    if deleteMultipleTabs.contains(pageTitle.pageID) {
+                        deleteMultipleTabs.remove(pageTitle.pageID)
+                    } else {
+                        deleteMultipleTabs.insert(pageTitle.pageID)
+                    }
+                    
+                } label: {
+                    TabSelectionCircle(selectedTab: deleteMultipleTabs.contains(pageTitle.pageID))
+                }
+            }
+            
+            if !pageTitle.text.isEmpty {
+                NavigationLink {
+                    ImportedNotes(pageID: pageTitle.pageID, titleSource: title)
+                        .navigationBarBackButtonHidden(true)
+                    
+                } label: {
+                    MainMenuTab(userPageTitle: nil, openaiChatTitle: nil, repDesktopAudioTitle: nil, repMobileAudioTitle: nil, obsidianPageTitle: pageTitle, dataSource: title)
+                }
+                .allowsHitTesting(!tabSlideOver)
+            }
+            
         case .openaiChatContent(let chatTitle):
             if tabSlideOver {
                 Button {

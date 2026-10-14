@@ -10,13 +10,18 @@ struct RootTabs: View {
     @State private var showImportToast: Bool = false
     @State private var showPluginToast: Bool = false
     @State private var pluginToastTrigger: UUID?
+    
     @ObservedObject private var pluginCoordinator = PluginCoordinator.shared
+    
     @State private var showGeneratedChat: Bool = false
     @State private var showAudioTranscriptionView: Bool = false
     @State private var selectedTab: Int = 0
     @State private var previousTab: Int = 0
+    
     @StateObject private var importManager = NotionDataManager.shared
     @StateObject private var chatGenerationManager = AIRequestManager.shared
+    @StateObject private var obsidianImportManager = ObsidianDataManager.shared
+    
     @Binding var isUserAuthed: Bool
     
     
@@ -118,6 +123,13 @@ struct RootTabs: View {
             Task { @MainActor in
                 guard self.chatGenerationManager.isNotesGenerated else { return }
                 await Toast.shared.callToastOnPageLoad($showGeneratedChat)
+            }
+        }
+        
+        .task(id: obsidianImportManager.isPageImportedNotification) {
+            Task { @MainActor in
+                guard self.obsidianImportManager.isPageImportedNotification else { return }
+                await Toast.shared.callToastOnPageLoad($showImportToast)
             }
         }
     }

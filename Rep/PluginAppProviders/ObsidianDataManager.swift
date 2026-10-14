@@ -8,6 +8,7 @@ import Foundation
 import SwiftData
 
 
+@MainActor
 final class ObsidianDataManager: ObservableObject {
     private init() {}
     
@@ -15,7 +16,8 @@ final class ObsidianDataManager: ObservableObject {
     static let shared = ObsidianDataManager()
     
     
-    func fetchFirstTimeMarkdownFiles(urls: [URL], context: ModelContext) async throws {  //TODO: debug obsidian importer
+    func fetchFirstTimeMarkdownFiles(urls: [URL], context: ModelContext) async throws {
+        self.isPageImportedNotification = false
         guard !urls.isEmpty else { throw ErrorDesc.invalidUrlError }
         
         for fileUrl in urls {

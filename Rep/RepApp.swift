@@ -91,7 +91,7 @@ struct MuscleMemoryApp: App {
     let centralContainer: ModelContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self,
                                                                AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self,
                                                                DeletedPage.self, OpenAIChat.self, OpenAIMeta.self, RepDesktopTranscription.self,
-                                                               RepMobileTranscription.self)
+                                                               RepMobileTranscription.self, ObsidianPageTitle.self, ObsidianPageContent.self)
     
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
@@ -172,7 +172,7 @@ struct MuscleMemoryApp: App {
 
 private struct NotesSettingsRoute: Identifiable {
     let id: String
-
+    
     init?(url: URL) {
         guard url.scheme?.lowercased() == "musclememory.kimchilabs.com",
               url.host == "dynamic-notes", url.path == "/settings",
@@ -189,26 +189,28 @@ private struct NotesSettingsDestination: View {
     @Query private var chats: [OpenAIChat]
     @Query private var desktopNotes: [RepDesktopTranscription]
     @Query private var mobileNotes: [RepMobileTranscription]
+    @Query private var obisidanPages: [ObsidianPageTitle]
     @Environment(\.dismiss) private var dismiss
-
+    
     private var matchingSources: [CombinedDataSource] {
         notionPages.filter { $0.pageID == pageID }.map { .notionContent($0) }
         + chats.filter { $0.openaiId == pageID }.map { .openaiChatContent($0) }
         + desktopNotes.filter { $0.userId == pageID }.map { .repDesktopTranscription($0) }
         + mobileNotes.filter { $0.userId == pageID }.map { .repMobileTranscription($0) }
+        + obisidanPages.filter { $0.pageID == pageID }.map { .obsidianPageTitle($0) }
     }
-
+    
     var body: some View {
         if matchingSources.count == 1, let source = matchingSources.first {
             DynamicRepControlsView(pageID: pageID, dataSource: source)
         } else {
             ContentUnavailableView("Notes unavailable", systemImage: "note.text",
                                    description: Text("This note page could not be found on this device."))
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { dismiss() }
-                    }
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
                 }
+            }
         }
     }
 }

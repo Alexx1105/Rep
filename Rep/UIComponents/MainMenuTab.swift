@@ -15,6 +15,7 @@ struct MainMenuTab: View {
     let openaiChatTitle: OpenAIChat?
     let repDesktopAudioTitle: RepDesktopTranscription?
     let repMobileAudioTitle: RepMobileTranscription?
+    var obsidianPageTitle: ObsidianPageTitle? = nil
     let dataSource: CombinedDataSource
     
     
@@ -28,7 +29,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? "", dataSource: dataSource)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? obsidianPageTitle?.pageID ?? "", dataSource: dataSource)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
@@ -68,6 +69,21 @@ struct MainMenuTab: View {
                             .opacity(textOpacity)
                         
                         Text(userPageTitle?.text ?? "")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
+                    
+                    if obsidianPageTitle?.text != nil {
+                        Image("obsidian")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .opacity(textOpacity)
+                        
+                        Text(obsidianPageTitle?.text ?? "")
                             .fontWeight(.medium)
                             .foregroundStyle(Color.mmDark)
                             .lineLimit(1)

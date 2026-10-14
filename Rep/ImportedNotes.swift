@@ -28,6 +28,7 @@ struct ImportedNotes: View {
     
     @State private var selectedTab: TranscriptionSummaryPicker.TrancriptTab = .notes
     @State var pageBlocks: [UserPageContent] = []
+    @State var obsidianPageBlocks: [ObsidianPageContent] = []
     let titleSource: CombinedDataSource
     
     
@@ -70,6 +71,29 @@ struct ImportedNotes: View {
                                     .lineLimit(1)
                                 
                                 Image("notionLogo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 18, height: 18)
+                                    .padding(.trailing)
+                                    .opacity(textOpacity)
+                            }
+                        } else {
+                            Rectangle()
+                                .cornerRadius(5)
+                                .frame(width: 150, height: 20)
+                                .opacity(0.1)
+                        }
+                        
+                    case .obsidianPageTitle(let pageTitle):
+                        if let emojis: String? = pageTitle.emoji, let title: String? = pageTitle.text {
+                            HStack(spacing: 10) {
+                                Text(emojis ?? "")
+                                Text(title ?? "")
+                                    .fontWeight(.semibold)
+                                    .truncationMode(.middle)
+                                    .lineLimit(1)
+                                
+                                Image("obsidian")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 18, height: 18)
@@ -145,6 +169,31 @@ struct ImportedNotes: View {
                         } else {
                             let noteText = pageBlocks
                                 .compactMap { $0.userContentPage?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                                .filter { !$0.isEmpty }
+                                .joined(separator: "\n\n")
+                            ScrollView {
+                                Text(noteText)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading)
+                                    .font(.system(size: 16)).lineSpacing(5)
+                                    .multilineTextAlignment(.leading)
+                                    .textSelection(.enabled)
+                                    .tint(.white)
+                                    .padding(.trailing)
+                                    .padding(.top)
+                                Spacer().frame(height: 30)
+                            }
+                        }
+                    case .obsidianPageTitle(_ ):
+                        if obsidianPageBlocks.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            let noteText = obsidianPageBlocks
+                                .map { $0.userContentPage.trimmingCharacters(in: .whitespacesAndNewlines) }
                                 .filter { !$0.isEmpty }
                                 .joined(separator: "\n\n")
                             ScrollView {
@@ -287,10 +336,16 @@ struct ImportedNotes: View {
             .background(Color.mmBackground)
         }
         .task {
-            guard case .notionContent(_) = titleSource else { return }
-            
             do {
-                pageBlocks = try ImportedNotesFetch.fetchPageContent(context: context, pageID: pageID)
+                switch titleSource {
+                case .notionContent(_):
+                    pageBlocks = try ImportedNotesFetch.fetchPageContent(context: context, pageID: pageID)
+                case .obsidianPageTitle(_):
+                    let desc: FetchDescriptor<ObsidianPageContent> = FetchDescriptor<ObsidianPageContent>(predicate: #Predicate { $0.pageID == pageID })
+                    obsidianPageBlocks = try context.fetch(desc)
+                default:
+                    return
+                }
             } catch {
                 print("function call failure:", ErrorDesc.callsiteError, error)
             }
