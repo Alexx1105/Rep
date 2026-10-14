@@ -29,10 +29,10 @@ struct PluginListCard: View {
                 VStack(spacing: 0) {
                     LinearGradient(
                         stops: [
-                            .init(color: Color.mmBackground.opacity(1.00), location: 0.00),
-                            .init(color: Color.mmBackground.opacity(0.97), location: 0.30),
-                            .init(color: Color.mmBackground.opacity(0.93), location: 0.57),
-                            .init(color: Color.clear, location: 1.00)
+                            .init(color: Color.mmBackground.opacity(0.75), location: 0.00),
+                            .init(color: Color.mmBackground.opacity(0.40), location: 0.35),
+                            .init(color: Color.mmBackground.opacity(0.15), location: 0.70),
+                            .init(color: Color.mmBackground.opacity(0.00), location: 1.00)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
