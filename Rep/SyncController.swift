@@ -65,26 +65,17 @@ final class BackgroundRefresh {
     
     
     private func bgAppRefresh(task: BGAppRefreshTask) {
-        
-        do {
-            let container = try ModelContainer(for: NotionPageMetaData.self)
-            let pages = ModelContext(container)
-            let context = ModelContext(container)
-            
-            Task {
-                do {
-                    try await runSyncWhenReady(context: context, pages: pages)
-                    task.setTaskCompleted(success: true)
-                } catch is CancellationError {
-                    task.setTaskCompleted(success: false)
-                } catch {
-                    print("background sync failed:", ErrorDesc.taskError, error)
-                    task.setTaskCompleted(success: false)
-                }
+        Task { @MainActor in
+            do {
+                let context = RepApp.AppCentralContainer.shared.mainContext
+                try await runSyncWhenReady(context: context, pages: context)
+                task.setTaskCompleted(success: true)
+            } catch is CancellationError {
+                task.setTaskCompleted(success: false)
+            } catch {
+                print("background sync failed:", ErrorDesc.taskError, error)
+                task.setTaskCompleted(success: false)
             }
-            
-        } catch {
-            print("background fetch from model container failure:", ErrorDesc.swiftDataQueryError, error)
         }
     }
     

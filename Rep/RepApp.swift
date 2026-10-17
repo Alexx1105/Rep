@@ -77,7 +77,7 @@ struct ContainerView: View {
 
 
 @main
-struct MuscleMemoryApp: App {
+struct RepApp: App {
     
     init() {
         BackgroundRefresh.bgTaskRegister()
@@ -87,12 +87,16 @@ struct MuscleMemoryApp: App {
         }
     }
     
+    @MainActor
+    enum AppCentralContainer {
+        static let shared: ModelContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self,
+                                                                   AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self,
+                                                                   DeletedPage.self, OpenAIChat.self, OpenAIMeta.self, RepDesktopTranscription.self,
+                                                                   RepMobileTranscription.self, ObsidianPageTitle.self, ObsidianPageContent.self,
+                                                                   GooglePageTitle.self, GooglePageContent.self)
+    }
     
-    let centralContainer: ModelContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self,
-                                                               AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self,
-                                                               DeletedPage.self, OpenAIChat.self, OpenAIMeta.self, RepDesktopTranscription.self,
-                                                               RepMobileTranscription.self, ObsidianPageTitle.self, ObsidianPageContent.self,
-                                                               GooglePageTitle.self, GooglePageContent.self)
+ 
     
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
@@ -144,7 +148,7 @@ struct MuscleMemoryApp: App {
                     if let handoffCode: String = try OauthProviderManager.notionHandoffCode(from: url) {
                         Task { @MainActor in
                             do {
-                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: centralContainer.mainContext, code: handoffCode, fileUrls: nil)
+                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: RepApp.AppCentralContainer.shared.mainContext, code: handoffCode, fileUrls: nil)
                             } catch {
                                 print("failed to complete Notion connection:", ErrorDesc.oauthError, error)
                             }
@@ -159,7 +163,7 @@ struct MuscleMemoryApp: App {
                     if let handoffCode: String = try OauthProviderManager.googleDocsHandoffCode(from: url) {
                         Task { @MainActor in
                             do {
-                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .googleDocs, context: centralContainer.mainContext, code: handoffCode, fileUrls: nil)
+                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .googleDocs, context: RepApp.AppCentralContainer.shared.mainContext, code: handoffCode, fileUrls: nil)
                             } catch {
                                 print("failed to complete Google connection:", ErrorDesc.oauthError, error)
                             }
@@ -181,7 +185,7 @@ struct MuscleMemoryApp: App {
             }
             .preferredColorScheme(toggleEnabled ? .dark : .light)
         }
-        .modelContainer(centralContainer)
+        .modelContainer(RepApp.AppCentralContainer.shared)
         .environmentObject(paymentStore)
     }
 }
