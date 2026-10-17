@@ -15,6 +15,7 @@ enum CombinedDataSource: Identifiable {
     case repDesktopTranscription(RepDesktopTranscription)
     case repMobileTranscription(RepMobileTranscription)
     case obsidianPageTitle(ObsidianPageTitle)
+    case googlePageTitle(GooglePageTitle)
 
     
     var id: String {            //TODO: add support for anthropic, and other data sources
@@ -29,6 +30,8 @@ enum CombinedDataSource: Identifiable {
             return "mobileNotes-\(mobileNotes.userId)"
         case .obsidianPageTitle(let page):
             return "obsidianPageTitle-\(page.pageID)"
+        case .googlePageTitle(let page):
+            return "googlePageTitle-\(page.pageID)"
         }
     }
 }

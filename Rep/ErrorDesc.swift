@@ -44,6 +44,8 @@ enum ErrorDesc: LocalizedError {
     case intervalSchedulingError
     case unknown
     case pluginError
+    case urlError
+    case fileNotAccessible
 }
 
 enum ErrorDefinition: Error {

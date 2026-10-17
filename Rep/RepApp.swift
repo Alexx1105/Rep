@@ -91,7 +91,8 @@ struct MuscleMemoryApp: App {
     let centralContainer: ModelContainer = try! ModelContainer(for: UserEmail.self, UserPageTitle.self, UserPageContent.self,
                                                                AuthToken.self, SyncUserContentPage.self, NotionPageMetaData.self,
                                                                DeletedPage.self, OpenAIChat.self, OpenAIMeta.self, RepDesktopTranscription.self,
-                                                               RepMobileTranscription.self, ObsidianPageTitle.self, ObsidianPageContent.self)
+                                                               RepMobileTranscription.self, ObsidianPageTitle.self, ObsidianPageContent.self,
+                                                               GooglePageTitle.self, GooglePageContent.self)
     
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
@@ -139,20 +140,35 @@ struct MuscleMemoryApp: App {
                     notesSettingsRoute = route
                     return
                 }
-                if let parseCodeQuery = URLComponents(url: url, resolvingAgainstBaseURL: true) {
-                    if let codeParse = parseCodeQuery.queryItems?.first(where: { $0.name == "code" })?.value {
-                        
-                        Task {
+                do {
+                    if let handoffCode: String = try OauthProviderManager.notionHandoffCode(from: url) {
+                        Task { @MainActor in
                             do {
-                                guard let context = OAuthTokens.shared.modelContext else { throw ErrorDesc.oauthError }
-                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: context, code: codeParse, fileUrls: nil)
+                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .notion, context: centralContainer.mainContext, code: handoffCode, fileUrls: nil)
                             } catch {
-                                print("failed async operation(s):", ErrorDesc.concurrencyError, error)
+                                print("failed to complete Notion connection:", ErrorDesc.oauthError, error)
                             }
                         }
-                    } else {
-                        print("code query is nil:", ErrorDesc.oauthError, parseCodeQuery)
+                        return
                     }
+                } catch {
+                    print("invalid Notion callback:", ErrorDesc.oauthError)
+                    return
+                }
+                do {
+                    if let handoffCode: String = try OauthProviderManager.googleDocsHandoffCode(from: url) {
+                        Task { @MainActor in
+                            do {
+                                try await PluginCoordinator.shared.connectPluginProvider(providerId: .googleDocs, context: centralContainer.mainContext, code: handoffCode, fileUrls: nil)
+                            } catch {
+                                print("failed to complete Google connection:", ErrorDesc.oauthError, error)
+                            }
+                        }
+                        return
+                    }
+                } catch {
+                    print("invalid Google callback:", ErrorDesc.oauthError)
+                    return
                 }
             }
             .sheet(item: Binding(
@@ -190,6 +206,7 @@ private struct NotesSettingsDestination: View {
     @Query private var desktopNotes: [RepDesktopTranscription]
     @Query private var mobileNotes: [RepMobileTranscription]
     @Query private var obisidanPages: [ObsidianPageTitle]
+    @Query private var googlePages: [GooglePageTitle]
     @Environment(\.dismiss) private var dismiss
     
     private var matchingSources: [CombinedDataSource] {
@@ -198,6 +215,7 @@ private struct NotesSettingsDestination: View {
         + desktopNotes.filter { $0.userId == pageID }.map { .repDesktopTranscription($0) }
         + mobileNotes.filter { $0.userId == pageID }.map { .repMobileTranscription($0) }
         + obisidanPages.filter { $0.pageID == pageID }.map { .obsidianPageTitle($0) }
+        + googlePages.filter { $0.pageID == pageID }.map { .googlePageTitle($0) }
     }
     
     var body: some View {

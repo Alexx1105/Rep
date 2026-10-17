@@ -32,8 +32,13 @@ final class SyncController: ObservableObject {
 final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
     
-    func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
+    @MainActor
+    func runSyncWhenReady(context: ModelContext, pages: ModelContext, url: URL? = nil) async throws {
         try await NotionDataManager.shared.syncCachedPages(context: pages)
+        try await ObsidianDataManager.shared.syncCachedPages(context: context, url: url)
+        
+        let accessToken: String = try await OauthProviderManager.shared.googleDocsAccessToken(context: context)
+        try await GoogleDocsDataManager.shared.syncCachedPages(context: context, accessToken: accessToken)
         print("sync task ran successfully 🔄")
         
         try await Task.sleep(for: .seconds(60))
@@ -42,12 +47,12 @@ final class BackgroundRefresh {
     private var autoSyncTask: Task<Void, Never>?
     
     @MainActor
-    func startAutoSyncTask(pages: ModelContext, context: ModelContext) {
+    func startAutoSyncTask(pages: ModelContext, context: ModelContext, url: URL? = nil) {
         if SyncController.shared.isAutoSync {
             autoSyncTask = Task {
                 while !Task.isCancelled {
                     do {
-                        try await runSyncWhenReady(context: context, pages: pages)
+                        try await runSyncWhenReady(context: context, pages: pages, url: url)
                         try await Task.sleep(for: .seconds(2 * 60))
                         
                     } catch {
@@ -98,10 +103,12 @@ final class BackgroundRefresh {
         let taskSyncRequest = BGAppRefreshTaskRequest(identifier: "MuscleMemory.KimchiLabs.com")
         taskSyncRequest.earliestBeginDate = Date(timeIntervalSinceNow: 60)
         
-        do {
-            try BGTaskScheduler.shared.submit(taskSyncRequest)
-        } catch {
-            print("task request error:", ErrorDesc.syncError, error)
+        Task {
+            do {
+                try await BGTaskScheduler.shared.submitTaskRequest(taskSyncRequest)
+            } catch {
+                print("task request error:", ErrorDesc.syncError, error)
+            }
         }
     }
 }

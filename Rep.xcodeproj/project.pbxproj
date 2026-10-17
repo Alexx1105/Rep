@@ -14,7 +14,7 @@
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
 		B2270333302BA69C00F308B9 /* SupabaseDataSourceStructs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */; };
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
-		B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */; };
+		B22E10F22D04F7C0003F3D9F /* OauthProviderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */; };
 		B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */; };
 		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
@@ -141,7 +141,7 @@
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDataSourceStructs.swift; sourceTree = "<group>"; };
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
-		B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
+		B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthProviderManager.swift; sourceTree = "<group>"; };
 		B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradePlanAlertSheet.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B24A69832F57D97D00FBB5FB /* TosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosPage.swift; sourceTree = "<group>"; };
@@ -325,7 +325,7 @@
 				B2AEBC403073087F0067549B /* PluginStoreView.swift */,
 				B2AEBC46307A8E8E0067549B /* PluginRegistry.swift */,
 				B2AEBC48307A94520067549B /* PluginCoordinator.swift */,
-				B22E10F12D04F7AF003F3D9F /* OAuthTokens.swift */,
+				B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */,
 				B26A46662CD04C210064AF46 /* SignOutView.swift */,
 				B26A46622CCFC4250064AF46 /* LaunchScreen.swift */,
 				B292781E3028DA0B007F567E /* LocalLiveActivityManager.swift */,
@@ -599,7 +599,7 @@
 				B2C434EA2FEF68FD00C528CB /* UIAnimations.swift in Sources */,
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */,
-				B22E10F22D04F7C0003F3D9F /* OAuthTokens.swift in Sources */,
+				B22E10F22D04F7C0003F3D9F /* OauthProviderManager.swift in Sources */,
 				B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

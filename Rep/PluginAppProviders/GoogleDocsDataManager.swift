@@ -17,12 +17,14 @@ public final class GoogleDocsDataManager: ObservableObject {
     private init() {}
     
     
-    public func fetchFirstTimePages(context: ModelContext, accessToken: String) async throws {
+    public func fetchFirstTimePages(pageIDs: [String], context: ModelContext, accessToken: String) async throws {
         self.isPageImportedNotification = false
-        let importedPageTitles: [GoogleDocsSearchMetaData.Result] = try await fetchImportedPageTitles(accessToken: accessToken)
-        for queriedPageIds: GoogleDocsSearchMetaData.Result in importedPageTitles {
+        guard !pageIDs.isEmpty else { throw ErrorDesc.fileProcessingError }
+        var importedPageIDs: Set<String> = []
+        for pageID: String in pageIDs {
             try Task.checkCancellation()
-            let document: GoogleDocsPageResponse = try await getDocument(pageID: queriedPageIds.id, accessToken: accessToken)
+            guard importedPageIDs.insert(pageID).inserted else { continue }
+            let document: GoogleDocsPageResponse = try await getDocument(pageID: pageID, accessToken: accessToken)
             let formattedString: String = extractFieldsFromBlocks(document)
             try storePage(pageID: document.documentId, pageTitle: document.title, content: formattedString, context: context, isFirstTimeImport: true)
         }
@@ -31,8 +33,8 @@ public final class GoogleDocsDataManager: ObservableObject {
     
     
     public func syncCachedPages(context: ModelContext, accessToken: String) async throws {
-        let desc: FetchDescriptor<UserPageTitle> = FetchDescriptor<UserPageTitle>()
-        let fetchCachedPages: [UserPageTitle] = try context.fetch(desc)
+        let desc: FetchDescriptor<GooglePageTitle> = FetchDescriptor<GooglePageTitle>()
+        let fetchCachedPages: [GooglePageTitle] = try context.fetch(desc)
         let cachedPageIDs: [String] = fetchCachedPages.filter { $0.pageID.hasPrefix("googleDocs:") }.map { String($0.pageID.dropFirst("googleDocs:".count)) }
         for pageID: String in cachedPageIDs {
             try Task.checkCancellation()
@@ -89,11 +91,13 @@ public final class GoogleDocsDataManager: ObservableObject {
     
     private func fetchPageData(url: URL, accessToken: String) async throws -> Data {
         guard !accessToken.isEmpty else { throw ErrorDesc.authTokenError }
+        
         var request: URLRequest = URLRequest(url: url)
         request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "GET"
         let (data, response): (Data, URLResponse) = try await URLSession.shared.data(for: request)
+        
         guard let httpResponse: HTTPURLResponse = response as? HTTPURLResponse else { throw ErrorDesc.invalidUrlError }
         guard (200..<300).contains(httpResponse.statusCode) else { throw ErrorDesc.urlResponseError }
         return data
@@ -158,21 +162,24 @@ public final class GoogleDocsDataManager: ObservableObject {
     
     
     private func storePage(pageID: String, pageTitle: String, content: String, context: ModelContext, isFirstTimeImport: Bool) throws {
-        let storedPageID: String = "googleDocs:\(pageID)"
-        let titleFetch: FetchDescriptor<UserPageTitle> = FetchDescriptor<UserPageTitle>(predicate: #Predicate { $0.pageID == storedPageID })
-        let contentFetch: FetchDescriptor<UserPageContent> = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == storedPageID })
-        let existingTab: UserPageTitle? = try context.fetch(titleFetch).first
+        let pageID: String = "googleDocs:\(pageID)"
+        let titleFetch: FetchDescriptor<GooglePageTitle> = FetchDescriptor<GooglePageTitle>(predicate: #Predicate { $0.pageID == pageID })
+        let contentFetch: FetchDescriptor<GooglePageContent> = FetchDescriptor<GooglePageContent>(predicate: #Predicate { $0.pageID == pageID })
+        let existingTab: GooglePageTitle? = try context.fetch(titleFetch).first
+        
         guard isFirstTimeImport || existingTab != nil else { return }
-        if let title: UserPageTitle = existingTab {
+        
+        if let title: GooglePageTitle = existingTab {
             title.text = pageTitle
         } else {
-            let title: UserPageTitle = UserPageTitle(pageID: storedPageID, text: pageTitle, emoji: nil)
+            let title: GooglePageTitle = GooglePageTitle(pageID: pageID, text: pageTitle, emoji: nil)
             context.insert(title)
         }
-        if let contentExists: UserPageContent = try context.fetch(contentFetch).first {
+        
+        if let contentExists: GooglePageContent = try context.fetch(contentFetch).first {
             contentExists.userContentPage = content
         } else {
-            let pageContent: UserPageContent = UserPageContent(userContentPage: content, userPageId: storedPageID)
+            let pageContent: GooglePageContent = GooglePageContent(pageID: pageID, userContentPage: content)
             context.insert(pageContent)
         }
         try context.save()

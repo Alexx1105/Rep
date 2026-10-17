@@ -16,6 +16,7 @@ struct MainMenuTab: View {
     let repDesktopAudioTitle: RepDesktopTranscription?
     let repMobileAudioTitle: RepMobileTranscription?
     var obsidianPageTitle: ObsidianPageTitle? = nil
+    var googlePageTitle: GooglePageTitle? = nil
     let dataSource: CombinedDataSource
     
     
@@ -29,7 +30,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? obsidianPageTitle?.pageID ?? "", dataSource: dataSource)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? obsidianPageTitle?.pageID ?? googlePageTitle?.pageID ?? "", dataSource: dataSource)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
@@ -84,6 +85,21 @@ struct MainMenuTab: View {
                             .opacity(textOpacity)
                         
                         Text(obsidianPageTitle?.text ?? "")
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.mmDark)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer()
+                    }
+                    
+                    if googlePageTitle?.text != nil {
+                        Image("googleDocs")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .opacity(textOpacity)
+                        
+                        Text(googlePageTitle?.text ?? "")
                             .fontWeight(.medium)
                             .foregroundStyle(Color.mmDark)
                             .lineLimit(1)

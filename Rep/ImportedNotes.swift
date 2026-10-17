@@ -29,6 +29,7 @@ struct ImportedNotes: View {
     @State private var selectedTab: TranscriptionSummaryPicker.TrancriptTab = .notes
     @State var pageBlocks: [UserPageContent] = []
     @State var obsidianPageBlocks: [ObsidianPageContent] = []
+    @State var googlePageBlocks: [GooglePageContent] = []
     let titleSource: CombinedDataSource
     
     
@@ -94,6 +95,29 @@ struct ImportedNotes: View {
                                     .lineLimit(1)
                                 
                                 Image("obsidian")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 18, height: 18)
+                                    .padding(.trailing)
+                                    .opacity(textOpacity)
+                            }
+                        } else {
+                            Rectangle()
+                                .cornerRadius(5)
+                                .frame(width: 150, height: 20)
+                                .opacity(0.1)
+                        }
+                        
+                    case .googlePageTitle(let pageTitle):
+                        if let emojis: String? = pageTitle.emoji, let title: String? = pageTitle.text {
+                            HStack(spacing: 10) {
+                                Text(emojis ?? "")
+                                Text(title ?? "")
+                                    .fontWeight(.semibold)
+                                    .truncationMode(.middle)
+                                    .lineLimit(1)
+                                
+                                Image("googleDocs")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 18, height: 18)
@@ -193,6 +217,31 @@ struct ImportedNotes: View {
                             }
                         } else {
                             let noteText = obsidianPageBlocks
+                                .map { $0.userContentPage.trimmingCharacters(in: .whitespacesAndNewlines) }
+                                .filter { !$0.isEmpty }
+                                .joined(separator: "\n\n")
+                            ScrollView {
+                                Text(noteText)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading)
+                                    .font(.system(size: 16)).lineSpacing(5)
+                                    .multilineTextAlignment(.leading)
+                                    .textSelection(.enabled)
+                                    .tint(.white)
+                                    .padding(.trailing)
+                                    .padding(.top)
+                                Spacer().frame(height: 30)
+                            }
+                        }
+                    case .googlePageTitle(_ ):
+                        if googlePageBlocks.isEmpty {
+                            VStack(spacing: -10) {
+                                ForEach(0..<13) { _ in
+                                    SkeletonLoader()
+                                }
+                            }
+                        } else {
+                            let noteText = googlePageBlocks
                                 .map { $0.userContentPage.trimmingCharacters(in: .whitespacesAndNewlines) }
                                 .filter { !$0.isEmpty }
                                 .joined(separator: "\n\n")
@@ -343,6 +392,9 @@ struct ImportedNotes: View {
                 case .obsidianPageTitle(_):
                     let desc: FetchDescriptor<ObsidianPageContent> = FetchDescriptor<ObsidianPageContent>(predicate: #Predicate { $0.pageID == pageID })
                     obsidianPageBlocks = try context.fetch(desc)
+                case .googlePageTitle(_):
+                    let desc: FetchDescriptor<GooglePageContent> = FetchDescriptor<GooglePageContent>(predicate: #Predicate { $0.pageID == pageID })
+                    googlePageBlocks = try context.fetch(desc)
                 default:
                     return
                 }

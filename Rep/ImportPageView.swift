@@ -22,6 +22,7 @@ struct SafariView: UIViewControllerRepresentable {
 
 
 struct NotionImportPageView: View {
+    @ObservedObject private var oauthProvider = OauthProviderManager.shared
     @State private var maskHeight: CGFloat = 0
     @State private var borderOpacity: Double = 1.0
     @State private var showOathWebView: Bool = false
@@ -94,6 +95,11 @@ struct NotionImportPageView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.mmBackground)
         .navigationBarBackButtonHidden()
+        .onChange(of: oauthProvider.didReceiveGoogleCallback) { _, didReceiveCallback in
+            if didReceiveCallback {
+                showOathWebView = false
+            }
+        }
         .sheet(isPresented: $showOathWebView) {
             if let url = authorizationURL {
                 SafariView(url: url)
@@ -108,7 +114,8 @@ struct NotionImportPageView: View {
                 
                 Task { @MainActor in
                     do {
-                        try await ObsidianDataManager.shared.fetchFirstTimeMarkdownFiles(urls: fileUrls, context: context)
+                        try await ObsidianDataManager.shared.fetchFirstTimeMarkdownFiles(urls: fileUrls, context: context)   //TODO: Test
+                        try await ObsidianDataManager.shared.syncCachedPages(context: context, url: fileUrls.first)
                     } catch {
                         print("failed to call obsidian import", ErrorDesc.callsiteError, error)
                     }

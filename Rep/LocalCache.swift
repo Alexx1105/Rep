@@ -58,9 +58,11 @@ import SwiftUI
 
 @Model public class AuthToken {                                 ///Oauth token
     @Attribute(.unique) public var accessToken: String
+    public var providerId: String = "notion"
     
-    init(accessToken: String) {
+    init(accessToken: String, providerId: String = "notion") {
         self.accessToken = accessToken
+        self.providerId = providerId
     }
 }
 
@@ -158,6 +160,29 @@ import SwiftUI
 }
 
 @Model final class ObsidianPageContent {
+    @Attribute(.unique) public var pageID: String
+    public var userContentPage: String
+    
+    init(pageID: String, userContentPage: String) {
+        self.pageID = pageID
+        self.userContentPage = userContentPage
+    }
+}
+
+
+@Model final class GooglePageTitle {
+    @Attribute(.unique) public var pageID: String
+    public var text: String
+    public var emoji: String?
+    
+    init(pageID: String, text: String, emoji: String? = nil) {
+        self.pageID = pageID
+        self.text = text
+        self.emoji = emoji
+    }
+}
+
+@Model final class GooglePageContent {
     @Attribute(.unique) public var pageID: String
     public var userContentPage: String
     

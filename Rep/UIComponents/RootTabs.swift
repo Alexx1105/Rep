@@ -21,6 +21,7 @@ struct RootTabs: View {
     @StateObject private var importManager = NotionDataManager.shared
     @StateObject private var chatGenerationManager = AIRequestManager.shared
     @StateObject private var obsidianImportManager = ObsidianDataManager.shared
+    @StateObject private var googleImportManager = GoogleDocsDataManager.shared
     
     @Binding var isUserAuthed: Bool
     
@@ -129,6 +130,13 @@ struct RootTabs: View {
         .task(id: obsidianImportManager.isPageImportedNotification) {
             Task { @MainActor in
                 guard self.obsidianImportManager.isPageImportedNotification else { return }
+                await Toast.shared.callToastOnPageLoad($showImportToast)
+            }
+        }
+        
+        .task(id: googleImportManager.isPageImportedNotification) {
+            Task { @MainActor in
+                guard self.googleImportManager.isPageImportedNotification else { return }
                 await Toast.shared.callToastOnPageLoad($showImportToast)
             }
         }
