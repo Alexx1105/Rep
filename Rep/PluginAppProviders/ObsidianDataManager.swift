@@ -6,6 +6,7 @@
 //
 import Foundation
 import SwiftData
+import CryptoKit
 
 
 @MainActor
@@ -38,6 +39,15 @@ final class ObsidianDataManager: ObservableObject {
             
             context.insert(title)
             context.insert(content)
+
+            Task {
+                let chunkedRows: [String] = markdownFileContent.components(separatedBy: "\n• ").flatMap { $0.components(separatedBy: "\n") }
+                let token: String = await PushTokenManager.generatePushToken()
+                for row: String in chunkedRows {
+                    let contentHash: String = SHA256.hash(data: Data(row.utf8)).map { String(format: "%02x", $0) }.joined()
+                    await SupabaseClientManager.shared.supabaseObsidianUpsert(token: token, pageID: pageID, title: pageTitle, content: row, contentHash: contentHash)
+                }
+            }
         }
         try context.save()
         self.isPageImportedNotification = true
@@ -66,6 +76,20 @@ final class ObsidianDataManager: ObservableObject {
             
             if isStale {
                 syncContent.fileUrlBookmark = try fileUrl.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+            }
+
+            let pageID: String = syncContent.pageID
+            let titleFetch: FetchDescriptor<ObsidianPageTitle> = FetchDescriptor<ObsidianPageTitle>(predicate: #Predicate { $0.pageID == pageID })
+            if let title: ObsidianPageTitle = try context.fetch(titleFetch).first {
+                let pageTitle: String = title.text
+                Task {
+                    let chunkedRows: [String] = syncedFileContent.components(separatedBy: "\n• ").flatMap { $0.components(separatedBy: "\n") }
+                    let token: String = await PushTokenManager.generatePushToken()
+                    for row: String in chunkedRows {
+                        let contentHash: String = SHA256.hash(data: Data(row.utf8)).map { String(format: "%02x", $0) }.joined()
+                        await SupabaseClientManager.shared.supabaseObsidianUpsert(token: token, pageID: pageID, title: pageTitle, content: row, contentHash: contentHash)
+                    }
+                }
             }
         }
         try context.save()

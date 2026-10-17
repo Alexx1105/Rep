@@ -7,6 +7,7 @@
 import Foundation
 import SwiftData
 import Combine
+import CryptoKit
 
 
 @MainActor
@@ -183,5 +184,14 @@ public final class GoogleDocsDataManager: ObservableObject {
             context.insert(pageContent)
         }
         try context.save()
+
+        Task {
+            let chunkedRows: [String] = content.components(separatedBy: "\n• ").flatMap { $0.components(separatedBy: "\n") }
+            let token: String = await PushTokenManager.generatePushToken()
+            for row: String in chunkedRows {
+                let contentHash: String = SHA256.hash(data: Data(row.utf8)).map { String(format: "%02x", $0) }.joined()
+                await SupabaseClientManager.shared.supabaseGoogleDocsUpsert(token: token, pageID: pageID, title: pageTitle, content: row, contentHash: contentHash)
+            }
+        }
     }
 }
