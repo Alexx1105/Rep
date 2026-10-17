@@ -162,10 +162,12 @@ import SwiftUI
 @Model final class ObsidianPageContent {
     @Attribute(.unique) public var pageID: String
     public var userContentPage: String
+    public var fileUrlBookmark: Data? = nil
     
-    init(pageID: String, userContentPage: String) {
+    init(pageID: String, userContentPage: String, fileUrlBookmark: Data? = nil) {
         self.pageID = pageID
         self.userContentPage = userContentPage
+        self.fileUrlBookmark = fileUrlBookmark
     }
 }
 

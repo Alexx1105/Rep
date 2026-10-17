@@ -33,9 +33,9 @@ final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
     
     @MainActor
-    func runSyncWhenReady(context: ModelContext, pages: ModelContext, url: URL? = nil) async throws {
+    func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
         try await NotionDataManager.shared.syncCachedPages(context: pages)
-        try await ObsidianDataManager.shared.syncCachedPages(context: context, url: url)
+        try await ObsidianDataManager.shared.syncCachedPages(context: context)
         
         let accessToken: String = try await OauthProviderManager.shared.googleDocsAccessToken(context: context)
         try await GoogleDocsDataManager.shared.syncCachedPages(context: context, accessToken: accessToken)
@@ -47,12 +47,12 @@ final class BackgroundRefresh {
     private var autoSyncTask: Task<Void, Never>?
     
     @MainActor
-    func startAutoSyncTask(pages: ModelContext, context: ModelContext, url: URL? = nil) {
+    func startAutoSyncTask(pages: ModelContext, context: ModelContext) {
         if SyncController.shared.isAutoSync {
             autoSyncTask = Task {
                 while !Task.isCancelled {
                     do {
-                        try await runSyncWhenReady(context: context, pages: pages, url: url)
+                        try await runSyncWhenReady(context: context, pages: pages)
                         try await Task.sleep(for: .seconds(2 * 60))
                         
                     } catch {

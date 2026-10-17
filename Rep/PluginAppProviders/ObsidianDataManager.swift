@@ -21,12 +21,20 @@ final class ObsidianDataManager: ObservableObject {
         guard !urls.isEmpty else { throw ErrorDesc.invalidUrlError }
         
         for fileUrl in urls {
+            try Task.checkCancellation()
+            let isAccessing: Bool = fileUrl.startAccessingSecurityScopedResource()
+            defer {
+                if isAccessing {
+                    fileUrl.stopAccessingSecurityScopedResource()
+                }
+            }
             let markdownFileContent: String = try String(contentsOf: fileUrl, encoding: .utf8)
             let pageTitle: String = fileUrl.deletingPathExtension().lastPathComponent
             let pageID: String = "obsidian:\(UUID().uuidString)"
             
             let title: ObsidianPageTitle = ObsidianPageTitle(pageID: pageID, text: pageTitle, emoji: nil)
             let content: ObsidianPageContent = ObsidianPageContent( pageID: pageID, userContentPage: markdownFileContent)
+            content.fileUrlBookmark = try fileUrl.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
             
             context.insert(title)
             context.insert(content)
@@ -36,35 +44,31 @@ final class ObsidianDataManager: ObservableObject {
     }
     
     
-    func syncCachedPages(context: ModelContext, url: URL? = nil) async throws {
-        var obsidianVaultUrl: URL
-        var bookmarkDataFile: Data
+    func syncCachedPages(context: ModelContext) async throws {
+        let desc: FetchDescriptor<ObsidianPageContent> = FetchDescriptor<ObsidianPageContent>()
+        let cachedPages: [ObsidianPageContent] = try context.fetch(desc)
         
-        if let url: URL = url {
-            bookmarkDataFile = try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
-            UserDefaults.standard.set(bookmarkDataFile, forKey: "obsidianVaultBookmark")
+        for syncContent: ObsidianPageContent in cachedPages {
+            try Task.checkCancellation()
+            guard let bookmarkDataFile: Data = syncContent.fileUrlBookmark else { continue }
             
-        } else {
-            guard let savedBookmark: Data = UserDefaults.standard.data(forKey: "obsidianVaultBookmark") else { throw ErrorDesc.fileNotAccessible }
-            bookmarkDataFile = savedBookmark
+            var isStale: Bool = false
+            let fileUrl: URL = try URL(resolvingBookmarkData: bookmarkDataFile, options: [], relativeTo: nil, bookmarkDataIsStale: &isStale)
+            let isAccessing: Bool = fileUrl.startAccessingSecurityScopedResource()
+            defer {
+                if isAccessing {
+                    fileUrl.stopAccessingSecurityScopedResource()
+                }
+            }
+            
+            let syncedFileContent: String = try String(contentsOf: fileUrl, encoding: .utf8)
+            syncContent.userContentPage = syncedFileContent
+            
+            if isStale {
+                syncContent.fileUrlBookmark = try fileUrl.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+            }
         }
-        
-        var isStale: Bool = false
-        let saveUrl: URL = try URL(resolvingBookmarkData: bookmarkDataFile,options: [],relativeTo: nil, bookmarkDataIsStale: &isStale)
-        obsidianVaultUrl = saveUrl
-        
-        let desc: FetchDescriptor<ObsidianPageTitle> = FetchDescriptor<ObsidianPageTitle>()
-        let fetch = try? context.fetch(desc)
-        
-        guard obsidianVaultUrl.startAccessingSecurityScopedResource() else { throw ErrorDesc.fileNotAccessible }
-        defer { obsidianVaultUrl.stopAccessingSecurityScopedResource() }
-        guard let enumeratedFiles: FileManager.DirectoryEnumerator = FileManager.default.enumerator(at: obsidianVaultUrl, includingPropertiesForKeys: [.isRegularFileKey], options: .skipsHiddenFiles) else { throw ErrorDesc.fileNotAccessible }
-        
-        while let item = enumeratedFiles.nextObject() {
-            guard let fileItem = item as? URL else { throw ErrorDesc.fileNotAccessible }
-            let syncedFileContent: String = try String(contentsOf: fileItem, encoding: .utf8)
-            //TODO: cache back into swift data schema 
-        }
+        try context.save()
     }
 }
 

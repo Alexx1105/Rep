@@ -108,14 +108,13 @@ struct NotionImportPageView: View {
             }
         }
         .sheet(isPresented: $showFilePicker) {
-            DocPicker(contentType: [UTType(filenameExtension: "md") ?? .plainText], allowMultipleFileSelect: true) { url in
+            DocPicker(contentType: [UTType(filenameExtension: "md") ?? .plainText], allowMultipleFileSelect: true, asCopy: false) { url in
                 fileUrls = url
                 showFilePicker = false
                 
                 Task { @MainActor in
                     do {
                         try await ObsidianDataManager.shared.fetchFirstTimeMarkdownFiles(urls: fileUrls, context: context)   //TODO: Test
-                        try await ObsidianDataManager.shared.syncCachedPages(context: context, url: fileUrls.first)
                     } catch {
                         print("failed to call obsidian import", ErrorDesc.callsiteError, error)
                     }
