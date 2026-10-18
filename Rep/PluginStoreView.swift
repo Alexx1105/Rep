@@ -12,6 +12,8 @@ struct PluginStoreView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismissTab
     
+    @State private var searchPlugins: String = ""
+    
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     
     var body: some View {
@@ -68,14 +70,15 @@ struct PluginStoreView: View {
                         
                         Spacer(minLength: 50)
                         
-                        ForEach(PluginRegistry.pluginProviders, id: \.id) { providerTitle in
-                            PluginStoreTab(provider: providerTitle)
-                        }.padding(.top)
+                        ForEach(PluginRegistry.pluginProviders.filter { provider in
+                            searchPlugins.isEmpty || provider.title.localizedCaseInsensitiveContains(searchPlugins)}, id: \.id) { providerTitle in
+                                PluginStoreTab(provider: providerTitle)
+                            }.padding(.top)
                         
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 50)
-                }
+                }.scrollDismissesKeyboard(.interactively)
                 
                 VStack(spacing: 0) {
                     LinearGradient(
@@ -103,13 +106,24 @@ struct PluginStoreView: View {
                         endPoint: .bottom
                     )
                     .frame(height: 80)
+                    
                 }
                 .allowsHitTesting(false)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationBarBackButtonHidden()
+        
+        .toolbar(.hidden, for: .navigationBar)
+        .overlay(alignment: .bottom) {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass").opacity(textOpacity)
+                TextField("Search plugins", text: $searchPlugins)
+            }
+            .padding()
+            .glassEffect(.regular, in: .capsule)
+            .padding()
+        }
         .background(Color.mmBackground)
     }
 }
