@@ -50,13 +50,9 @@ public final class NotionDataManager: ObservableObject {
     
     
     private func fetchImportedPageTitles(context: ModelContext) async throws -> [UserPageTitle] {
-        let fetch = FetchDescriptor<DeletedPage>()
-        let deletedPages = try context.fetch(fetch)
-        let deletedPageIDs: Set = Set(deletedPages.map{ $0.pageID })
-        
         var pageIDsImported: [UserPageTitle] = []
         
-        let passToken = try FetchAuth.fetchAuthToken()
+        let passToken = try FetchAuth.fetchAuthToken(providerId: "notion")
         guard !passToken.isEmpty else { throw ErrorDesc.authTokenError }
         
         let searchEndpoint: URL = URL(string: "https://api.notion.com/v1/search")!
@@ -93,7 +89,6 @@ public final class NotionDataManager: ObservableObject {
             let searchResponse = try jsonDecoder.decode(NotionSearchResponse.self, from: data)
             for i in searchResponse.results {
                 guard !i.id.isEmpty else { continue }
-                guard !deletedPageIDs.contains(i.id) else { continue }
                 guard i.object == "page" else { continue }
                 
                 print("====================================\n Search Imported Page IDs result: \(i)")
@@ -101,7 +96,7 @@ public final class NotionDataManager: ObservableObject {
                 let emoji: String? = i.icon?.emoji
                 let lastEditedAt: Date? = i.last_edited_time
                 
-                let context = OAuthTokens.shared.modelContext
+                let context = OauthProviderManager.shared.modelContext
                 if let titleText: String = titleDictionary?.title.first?.plain_text {
                     print("====================================\n PLAIN TEXT TITLE ✅: \(titleText)")
                     
@@ -144,7 +139,7 @@ public final class NotionDataManager: ObservableObject {
         guard let stringToUrl: URL = URL(string: pagesEndpoint) else { return [] }
         var request: URLRequest = URLRequest(url: stringToUrl)
         
-        let auth = try FetchAuth.fetchAuthToken()
+        let auth = try FetchAuth.fetchAuthToken(providerId: "notion")
         guard !auth.isEmpty else { throw ErrorDesc.authTokenError }
         
         request.addValue("2026-03-11", forHTTPHeaderField: "Notion-Version")
@@ -229,7 +224,7 @@ public final class NotionDataManager: ObservableObject {
        
         Task {
             do {
-                let context = OAuthTokens.shared.modelContext
+                let context = OauthProviderManager.shared.modelContext
                 let pageID: String = userPageTitle.pageID
                 let fetch = FetchDescriptor<UserPageContent>(predicate: #Predicate { $0.userPageId == pageID })
                 

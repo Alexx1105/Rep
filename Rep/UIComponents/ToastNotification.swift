@@ -40,3 +40,39 @@ struct ToastNotification: View {
 #Preview {
     ToastNotification()
 }
+
+struct PluginAddedToast: View {
+    var body: some View {
+        
+        ZStack {
+            Capsule()
+                .frame(maxWidth: 248, maxHeight: 43)
+                .glassEffect(.regular)
+            
+            HStack(alignment: .center, spacing: 15) {
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Plugin Successfully Added")
+                        .font(Font.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(Color.mmDark)
+                        .padding(.leading)
+                    
+                    Text("Ready To Import Your Notes")
+                        .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
+                        .padding(.leading)
+                }
+                
+                ZStack {
+                    Circle()
+                        .frame(maxWidth: 35, maxHeight: 35)
+                        .foregroundStyle(Color.intervalBlue)
+                    
+                    Image(systemName: "checkmark.circle").font(.system(size: 17)).foregroundStyle(Color.kimchiLabs)
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    PluginAddedToast()
+}

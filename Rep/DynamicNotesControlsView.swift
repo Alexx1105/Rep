@@ -149,6 +149,30 @@ struct DynamicRepControlsView: View {
                                 .frame(height: 25)
                                 .glassEffect(.regular))
                         
+                    case .obsidianPageTitle(let obsidianPage):
+                        Text(obsidianPage.text)
+                            .font(.system(size: 14))
+                            .fontWeight(.regular)
+                            .truncationMode(.tail)
+                            .lineLimit(1)
+                            .padding()
+                        
+                            .background(Capsule()
+                                .frame(height: 25)
+                                .glassEffect(.regular))
+                        
+                    case .googlePageTitle(let googlePage):
+                        Text(googlePage.text)
+                            .font(.system(size: 14))
+                            .fontWeight(.regular)
+                            .truncationMode(.tail)
+                            .lineLimit(1)
+                            .padding()
+                        
+                            .background(Capsule()
+                                .frame(height: 25)
+                                .glassEffect(.regular))
+                        
                     case .openaiChatContent(let openAIChat):
                         Text(openAIChat.content)
                             .font(.system(size: 14))

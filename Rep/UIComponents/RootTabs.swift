@@ -8,12 +8,21 @@ import ActivityKit
 
 struct RootTabs: View {
     @State private var showImportToast: Bool = false
+    @State private var showPluginToast: Bool = false
+    @State private var pluginToastTrigger: UUID?
+    
+    @ObservedObject private var pluginCoordinator = PluginCoordinator.shared
+    
     @State private var showGeneratedChat: Bool = false
     @State private var showAudioTranscriptionView: Bool = false
     @State private var selectedTab: Int = 0
     @State private var previousTab: Int = 0
+    
     @StateObject private var importManager = NotionDataManager.shared
     @StateObject private var chatGenerationManager = AIRequestManager.shared
+    @StateObject private var obsidianImportManager = ObsidianDataManager.shared
+    @StateObject private var googleImportManager = GoogleDocsDataManager.shared
+    
     @Binding var isUserAuthed: Bool
     
     
@@ -71,6 +80,38 @@ struct RootTabs: View {
                     }
                 }
             }
+            .navigationDestination(for: NavPathItem.self) { route in
+                if route == .pluginStore {
+                    PluginStoreView()
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            if showPluginToast {
+                PluginAddedToast()
+                    .transition(.move(edge: .top).combined(with: .blurReplace))
+                    .allowsHitTesting(false)
+                    .fixedSize(horizontal: false, vertical: false)
+                    .ignoresSafeArea(edges: .top).padding(.top, 1)
+            }
+        }
+        .onChange(of: pluginCoordinator.addedPluginId) { oldValue, newValue in
+            guard !newValue.subtracting(oldValue).isEmpty else { return }
+            pluginToastTrigger = UUID()
+        }
+        .task(id: pluginToastTrigger) {
+            guard pluginToastTrigger != nil else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showPluginToast = true
+            }
+            do {
+                try await Task.sleep(for: .seconds(3.5))
+            } catch {
+                return
+            }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showPluginToast = false
+            }
         }
         .task(id: importManager.isPageImportedNotification) {
             Task { @MainActor in
@@ -83,6 +124,20 @@ struct RootTabs: View {
             Task { @MainActor in
                 guard self.chatGenerationManager.isNotesGenerated else { return }
                 await Toast.shared.callToastOnPageLoad($showGeneratedChat)
+            }
+        }
+        
+        .task(id: obsidianImportManager.isPageImportedNotification) {
+            Task { @MainActor in
+                guard self.obsidianImportManager.isPageImportedNotification else { return }
+                await Toast.shared.callToastOnPageLoad($showImportToast)
+            }
+        }
+        
+        .task(id: googleImportManager.isPageImportedNotification) {
+            Task { @MainActor in
+                guard self.googleImportManager.isPageImportedNotification else { return }
+                await Toast.shared.callToastOnPageLoad($showImportToast)
             }
         }
     }

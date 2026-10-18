@@ -28,9 +28,32 @@ public final class SupabaseClientManager: ObservableObject {
             let schema: PushToSupabaseNotion = PushToSupabaseNotion(token: token, page_data: row, page_id: pageID, page_title: pageTitle, content_hash: content_hash)
             let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
             
-            print("[notion page] page data successfully inserted ✅:", send)
         } catch {
-            print("supabse insertion errror ❗️", SupabaseError.upsertError, error)
+            print("[notion] supabse insertion errror", SupabaseError.upsertError, error)
+        }
+    }
+    
+    
+    public func supabaseObsidianUpsert(token: String, pageID: String, title: String, content: String, contentHash: String) async {
+        do {
+            guard !token.isEmpty && !pageID.isEmpty else { throw SupabaseError.nilDataError }
+            let schema: PushToSupabaseObsidian = PushToSupabaseObsidian(token: token, pageID: pageID, title: title, content: content, contentHash: contentHash)
+            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            
+        } catch {
+            print("[obsidian] supabase insertion error", SupabaseError.upsertError, error)
+        }
+    }
+    
+    
+    public func supabaseGoogleDocsUpsert(token: String, pageID: String, title: String, content: String, contentHash: String) async {
+        do {
+            guard !token.isEmpty && !pageID.isEmpty else { throw SupabaseError.nilDataError }
+            let schema: PushToSupabaseGoogleDocs = PushToSupabaseGoogleDocs(token: token, pageID: pageID, title: title, content: content, contentHash: contentHash)
+            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            
+        } catch {
+            print("[google docs] supabase insertion error", SupabaseError.upsertError, error)
         }
     }
     

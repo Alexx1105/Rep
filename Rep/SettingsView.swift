@@ -4,7 +4,6 @@
 //
 //  Created by alex haidar on 10/23/24.
 //
-
 import SwiftUI
 import SwiftData
 
@@ -109,7 +108,7 @@ struct SettingsView: View {
                             HStack(alignment: .top ) {
                                 HStack(spacing: 10) {
                                     
-                                    Image("notionLogo")
+                                    Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 15, height: 15)
@@ -134,7 +133,7 @@ struct SettingsView: View {
                             }.frame(maxWidth: .infinity)
                                 .padding(.horizontal)
                             
-                            Text("Toggle Auto Sync to enable on-demand\nsyncing between your Notion and your\nimported notes")
+                            Text("Toggle Auto Sync to keep your imported\nnotes up to date across your added apps.")
                                 .font(.system(size: 14)).lineSpacing(3)
                                 .fontWeight(.medium)
                                 .opacity(0.50)

@@ -3,8 +3,8 @@
 //  Rep
 //
 //  Created by alex haidar on 5/16/26.
-/* for multi data source support for the front end main menu
-   tabs, currently supports notion and openai and audio transcription */
+/* For multi data source support for
+   the front-end main menu tabs */
 import SwiftUI
 import SwiftData
 
@@ -14,6 +14,8 @@ enum CombinedDataSource: Identifiable {
     case openaiChatContent(OpenAIChat)
     case repDesktopTranscription(RepDesktopTranscription)
     case repMobileTranscription(RepMobileTranscription)
+    case obsidianPageTitle(ObsidianPageTitle)
+    case googlePageTitle(GooglePageTitle)
 
     
     var id: String {            //TODO: add support for anthropic, and other data sources
@@ -26,6 +28,10 @@ enum CombinedDataSource: Identifiable {
             return "desktopNotes-\(desktopNotes.userId)"
         case .repMobileTranscription(let mobileNotes):
             return "mobileNotes-\(mobileNotes.userId)"
+        case .obsidianPageTitle(let page):
+            return "obsidianPageTitle-\(page.pageID)"
+        case .googlePageTitle(let page):
+            return "googlePageTitle-\(page.pageID)"
         }
     }
 }

@@ -32,8 +32,13 @@ final class SyncController: ObservableObject {
 final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
     
+    @MainActor
     func runSyncWhenReady(context: ModelContext, pages: ModelContext) async throws {
         try await NotionDataManager.shared.syncCachedPages(context: pages)
+        try await ObsidianDataManager.shared.syncCachedPages(context: context)
+        
+        let accessToken: String = try await OauthProviderManager.shared.googleDocsAccessToken(context: context)
+        try await GoogleDocsDataManager.shared.syncCachedPages(context: context, accessToken: accessToken)
         print("sync task ran successfully 🔄")
         
         try await Task.sleep(for: .seconds(60))
@@ -60,26 +65,17 @@ final class BackgroundRefresh {
     
     
     private func bgAppRefresh(task: BGAppRefreshTask) {
-        
-        do {
-            let container = try ModelContainer(for: NotionPageMetaData.self)
-            let pages = ModelContext(container)
-            let context = ModelContext(container)
-            
-            Task {
-                do {
-                    try await runSyncWhenReady(context: context, pages: pages)
-                    task.setTaskCompleted(success: true)
-                } catch is CancellationError {
-                    task.setTaskCompleted(success: false)
-                } catch {
-                    print("background sync failed:", ErrorDesc.taskError, error)
-                    task.setTaskCompleted(success: false)
-                }
+        Task { @MainActor in
+            do {
+                let context = RepApp.AppCentralContainer.shared.mainContext
+                try await runSyncWhenReady(context: context, pages: context)
+                task.setTaskCompleted(success: true)
+            } catch is CancellationError {
+                task.setTaskCompleted(success: false)
+            } catch {
+                print("background sync failed:", ErrorDesc.taskError, error)
+                task.setTaskCompleted(success: false)
             }
-            
-        } catch {
-            print("background fetch from model container failure:", ErrorDesc.swiftDataQueryError, error)
         }
     }
     
@@ -98,10 +94,12 @@ final class BackgroundRefresh {
         let taskSyncRequest = BGAppRefreshTaskRequest(identifier: "MuscleMemory.KimchiLabs.com")
         taskSyncRequest.earliestBeginDate = Date(timeIntervalSinceNow: 60)
         
-        do {
-            try BGTaskScheduler.shared.submit(taskSyncRequest)
-        } catch {
-            print("task request error:", ErrorDesc.syncError, error)
+        Task {
+            do {
+                try await BGTaskScheduler.shared.submitTaskRequest(taskSyncRequest)
+            } catch {
+                print("task request error:", ErrorDesc.syncError, error)
+            }
         }
     }
 }

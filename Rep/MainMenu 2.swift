@@ -58,7 +58,7 @@ struct MainMenu: View {
                         .onAppear {
                             Task {
                                 searchPages.shared.modelContextTitleStored(context: modelContext)
-                                OAuthTokens.shared.modelContextEmailStored(emailStored: modelContext)
+                                OauthProviderManager.shared.modelContextEmailStored(emailStored: modelContext)
                             }
                         }
                     

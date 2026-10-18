@@ -338,7 +338,6 @@ struct ChatView: View {
         .sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
-                
             }
         }.onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
             

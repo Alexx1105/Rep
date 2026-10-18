@@ -15,9 +15,9 @@ import Supabase
 
 @MainActor
 final class FetchAuth {
-    static public func fetchAuthToken() throws -> String {
-        let context = OAuthTokens.shared.modelContext
-        let fetchDescriptor = FetchDescriptor<AuthToken>()
+    static public func fetchAuthToken(providerId: String) throws -> String {
+        let context = OauthProviderManager.shared.modelContext
+        let fetchDescriptor: FetchDescriptor<AuthToken> = FetchDescriptor<AuthToken>(predicate: #Predicate { $0.providerId == providerId })
         let authToken = try context?.fetch(fetchDescriptor)
     
         guard let token = authToken?.first?.accessToken else { throw ErrorDesc.authTokenError }

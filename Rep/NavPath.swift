@@ -27,6 +27,7 @@ enum NavPathItem: Hashable {
     case logOut
     case importpageUser
     case tos
+    case pluginStore
 }
 
 

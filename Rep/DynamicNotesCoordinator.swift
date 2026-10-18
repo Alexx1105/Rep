@@ -27,6 +27,10 @@ public final class DynamicNotesCoordinator: ObservableObject {
         switch dataSource {
         case .notionContent(let notionPage):
             return notionPage.pageID
+        case .obsidianPageTitle(let obsidianPage):
+            return obsidianPage.pageID
+        case .googlePageTitle(let googlePage):
+            return googlePage.pageID
         case .openaiChatContent(let openaiChat):
             return openaiChat.openaiId
         case .repDesktopTranscription(let desktopTranscription):
@@ -41,6 +45,10 @@ public final class DynamicNotesCoordinator: ObservableObject {
         switch dataSource {
         case .notionContent(let notion):
             return notion.text
+        case .obsidianPageTitle(let obsidian):
+            return obsidian.text
+        case .googlePageTitle(let google):
+            return google.text
         case .openaiChatContent(let openai):
             return String(openai.content.prefix(20))
         case .repDesktopTranscription(let desktopAudio):

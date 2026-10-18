@@ -173,6 +173,7 @@ public class Chat: ObservableObject {
 struct DocPicker: UIViewControllerRepresentable {
     var contentType: [UTType] = [.pdf, .png, .jpeg, .plainText, .commaSeparatedText, .image]
     var allowMultipleFileSelect: Bool = true
+    var asCopy: Bool = true
     var onSelect: ([URL]) -> Void
     
     func makeCoordinator() -> CoordinatorBridge {
@@ -180,7 +181,7 @@ struct DocPicker: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let newController = UIDocumentPickerViewController(forOpeningContentTypes: contentType, asCopy: true)
+        let newController = UIDocumentPickerViewController(forOpeningContentTypes: contentType, asCopy: asCopy)
         newController.allowsMultipleSelection = allowMultipleFileSelect
         newController.delegate = context.coordinator
         return newController

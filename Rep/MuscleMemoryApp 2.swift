@@ -56,11 +56,11 @@ struct MuscleMemoryApp: App {
                             print("code Query recieved and parsed\(parseCodeQuery)")
                             
                             let pages = searchPages.shared.modelContextTitle
-                            let context = OAuthTokens.shared.modelContextEmail
+                            let context = OauthProviderManager.shared.modelContextEmail
                             
                             Task {
                                 do {
-                                    try await OAuthTokens.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
+                                    try await OauthProviderManager.shared.exchangeToken(authorizationCode: codeParse, modelContext: context)
                                     try await searchPages.shared.userEndpoint(modelContextTitle: pages)
                                     try await ImportUserPage.shared.pageEndpoint()
                                     

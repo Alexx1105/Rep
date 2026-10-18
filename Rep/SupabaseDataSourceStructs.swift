@@ -48,3 +48,35 @@ public struct PushToSupabaseRepDesktopNotes: Encodable {
         case contentHash = "content_hash"
     }
 }
+
+public struct PushToSupabaseObsidian: Encodable {
+    let token: String
+    let pageID: String
+    let title: String
+    let content: String
+    let contentHash: String
+
+    enum CodingKeys: String, CodingKey {
+        case token = "token"
+        case pageID = "page_id"
+        case title = "page_title"
+        case content = "page_data"
+        case contentHash = "content_hash"
+    }
+}
+
+public struct PushToSupabaseGoogleDocs: Encodable {
+    let token: String
+    let pageID: String
+    let title: String
+    let content: String
+    let contentHash: String
+
+    enum CodingKeys: String, CodingKey {
+        case token = "token"
+        case pageID = "page_id"
+        case title = "page_title"
+        case content = "page_data"
+        case contentHash = "content_hash"
+    }
+}

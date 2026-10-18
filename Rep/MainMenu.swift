@@ -24,6 +24,8 @@ struct MainMenu: View {
     @Query var openaiChat: [OpenAIChat]
     @Query var repDesktopTranscriptions: [RepDesktopTranscription]
     @Query var repMobileTranscriptions: [RepMobileTranscription]
+    @Query var obsidianPages: [ObsidianPageTitle]
+    @Query var googlePages: [GooglePageTitle]
     
     @AppStorage("desktop.pollingEnabled") private var isPollingEnabled = false
     
@@ -102,7 +104,8 @@ struct MainMenu: View {
     
     var mainMenuSources: [CombinedDataSource] {
         pageTitles.map{ .notionContent($0)} + openaiChat.map {.openaiChatContent($0)} +
-        repDesktopTranscriptions.map { .repDesktopTranscription($0)} + repMobileTranscriptions.map { .repMobileTranscription($0)}
+        repDesktopTranscriptions.map { .repDesktopTranscription($0)} + repMobileTranscriptions.map { .repMobileTranscription($0)} +
+        obsidianPages.map { .obsidianPageTitle($0)} + googlePages.map { .googlePageTitle($0)}
     }
     
     var body: some View {
@@ -125,7 +128,7 @@ struct MainMenu: View {
                     
                         .onAppear {
                             Task {
-                                OAuthTokens.shared.storeModelContext(context)
+                                OauthProviderManager.shared.storeModelContext(context)
                             }
                         }
                     
@@ -206,6 +209,10 @@ struct MainMenu: View {
                             try context.delete(model: OpenAIChat.self, where: #Predicate{deleteTabIDs.contains($0.openaiId)})
                             try context.delete(model: RepDesktopTranscription.self, where: #Predicate {deleteTabIDs.contains($0.userId)})
                             try context.delete(model: RepMobileTranscription.self, where: #Predicate {deleteTabIDs.contains($0.userId)})
+                            try context.delete(model: ObsidianPageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
+                            try context.delete(model: ObsidianPageContent.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
+                            try context.delete(model: GooglePageTitle.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
+                            try context.delete(model: GooglePageContent.self, where: #Predicate {deleteTabIDs.contains($0.pageID)})
                             
                             
                             
