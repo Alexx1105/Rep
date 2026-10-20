@@ -366,18 +366,18 @@ struct ChatView: View {
         isShimmerTextVisible = true
         isTextShimmering = true
         let photos = selectedPhotos
-        let file = fileUrls.first
+        let file = fileUrls
 
         Task {
             defer {
                 isGenerating = false
                 isShimmerTextVisible = false
                 isTextShimmering = false
+                fileUrls.removeAll()
+                selectedPhotos.removeAll()
             }
             do {
                 try await Chat.sendChatMessage(userFile: file, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
-                fileUrls.removeAll()
-                selectedPhotos.removeAll()
             } catch {
                 chatError = error.localizedDescription
                 print("chat error:", error)
@@ -385,6 +385,8 @@ struct ChatView: View {
         }
     }
 }
+
+
 
 #Preview {
     ChatView()

@@ -74,11 +74,10 @@ public class Chat: ObservableObject {
     
     
     @MainActor
-    public static func sendChatMessage(userFile: URL?, context: ModelContext, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
+    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
         let idempotentKey: UUID = UUID()
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
-        print("sending chat: \(trimUserInput)")
         
         Chat.shared.chat = ""
         let localId: String = UUID().uuidString
@@ -90,17 +89,11 @@ public class Chat: ObservableObject {
         
         if let userFile { print("sending selected file: \(userFile)") }
         
-        let userPhotoData: Data?
-        if let userPhoto = selectedPhotos.compactMap({ $0 }).first {
-            if let transferPhoto = try await userPhoto.loadTransferable(type: PhotoTransfer.self) {
-                userPhotoData = transferPhoto.photo
-                
-                print("photo passed down: \(userPhotoData?.count ?? 0)")
-            } else {
-                userPhotoData = nil
+        var userPhotoData: [Data] = []
+        for photoData in selectedPhotos {
+            if let transferPhoto: PhotoTransfer = try await photoData.loadTransferable(type: PhotoTransfer.self) {
+                userPhotoData.append(transferPhoto.photo)
             }
-        } else {
-            userPhotoData = nil
         }
         
         var metadataText: String = ""
@@ -128,7 +121,7 @@ public class Chat: ObservableObject {
             
             onMeta: { meta in
                 metadataText = meta
-                print("metadata:", metadataText)
+                print("metadata:", metadataText) //Use later
             }
             
         } catch PaymentStoreError.insufficientTokens {
@@ -162,9 +155,8 @@ public class Chat: ObservableObject {
             guard !title.isEmpty && !trimmedText.isEmpty else { throw ErrorDesc.nilValue }
             try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: localId, title: title)
             
-            print("chat session saved...")
         } catch {
-            print("failed to persist chat session ❗️", ErrorDesc.persistenceError, error)
+            print("failed to persist chat session:", ErrorDesc.persistenceError, error)
         }
     }
 }

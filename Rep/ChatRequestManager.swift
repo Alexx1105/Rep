@@ -63,7 +63,7 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, userFileUrl: URL?, userPhotoData: Data?, gptModel: String = "mini", context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
+    public func openAIRequest(userMessage: String, userFileUrl: [URL]?, userPhotoData: [Data]?, gptModel: String = "mini", context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
@@ -91,14 +91,18 @@ public final class AIRequestManager: ObservableObject {
         multipartReqBody.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
         multipartReqBody.append("\(gptModel)\r\n".data(using: .utf8)!)
         
-        if let userFileUrl {
-            let fileBytes = try buildFilePathHelper(userFileUrl: userFileUrl, fileIdentifier: fileIdentifier)
-            multipartReqBody.append(fileBytes)
+        if let fileUrls: [URL] = userFileUrl {
+            for files in fileUrls {
+                let fileBytes = try buildFilePathHelper(userFileUrl: files, fileIdentifier: fileIdentifier)
+                multipartReqBody.append(fileBytes)
+            }
         }
         
-        if let userPhotoData {
-            let photoBytes = try buildPhotoBodyHelper(userPhotoData: userPhotoData, fileIdentifier: fileIdentifier)
-            multipartReqBody.append(photoBytes)
+        if let userPhotos: [Data] = userPhotoData {
+            for photo in userPhotos {
+                let photoBytes: Data = try buildPhotoBodyHelper(userPhotoData: photo, fileIdentifier: fileIdentifier)
+                multipartReqBody.append(photoBytes)
+            }
         }
         
         multipartReqBody.append("--\(fileIdentifier)--\r\n".data(using: .utf8)!)
