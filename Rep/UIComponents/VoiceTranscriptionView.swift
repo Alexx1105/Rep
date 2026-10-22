@@ -122,148 +122,135 @@ public struct VoiceTranscriptionView: View {
                 
                 VStack {
                     let shape = RoundedRectangle(cornerRadius: 15)
-                    if audioManager.didStopAudioStream && !audioManager.finishedTranscript.isEmpty {
-                        EmptyView()
-                    } else {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 15))
-                            
-                            ScrollViewReader { proxy in
-                                ScrollView {
-                                    VStack(alignment: .leading) {
-                                        
-                                        
-                                        HStack {
-                                            if audioManager.isSummarizing {
-                                                ShimmerText(text: transcriptNotesGenerating).padding(.top)
-                                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                                Spacer(minLength: 30)
-                                                
-                                            } else if !audioManager.isTranscribing {
-                                                Text(transcriptionPlaceholder).padding(.top, 10)
-                                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                            }
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 15))
+                        
+                        ScrollViewReader { proxy in
+                            ScrollView {
+                                VStack(alignment: .leading) {
+                                    
+                                    
+                                    HStack {
+                                        if audioManager.isSummarizing {
+                                            ShimmerText(text: transcriptNotesGenerating).padding(.top)
+                                                .font(.system(size: 14, weight: .regular, design: .rounded))
                                             Spacer(minLength: 30)
-                                        }
-                                        
-                                        
-                                        if audioManager.isTranscribing {
-                                            TranscriptionView(transcription: audioManager.liveTranscription)
-                                                .animation(.easeOut(duration: 0.10), value: audioManager.liveTranscription)
-                                            Spacer(minLength: 10)
                                             
+                                        } else if !audioManager.isTranscribing {
+                                            Text(transcriptionPlaceholder).padding(.top, 10)
+                                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                         }
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.horizontal)
-                                    .onChange(of: audioManager.liveTranscription) { _,_ in
-                                        proxy.scrollTo("typing-caret", anchor: .bottom)
+                                        Spacer(minLength: 30)
                                     }
                                     
-                                    Color.clear.frame(height: 1).id("typing-caret")
-                                    
-                                }.scrollDisabled(audioManager.liveTranscription.isEmpty)
-                            }
-                            
-                            
-                            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
-                                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
-                                                                      .init(color: Color.mmBackground.opacity(0.50), location: 0.05),
-                                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.10),]), startPoint: .top, endPoint: .bottom)
-                            .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
-                            .allowsHitTesting(false)
-                            
-                            
-                            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.00),
-                                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
-                                                                      .init(color: Color.mmBackground.opacity(0.50), location: 0.10),
-                                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.15),]), startPoint: .bottom, endPoint: .top)
-                            .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
-                            .allowsHitTesting(false)
-                            
-                        }.frame(minHeight: 50, maxHeight: transcriptionBoxHeight)
-                            .onPreferenceChange(HeightPreferenceKey.self) { height in
-                                dynamicBoxHieght = height
-                            }
-                            .animation(.easeOut(duration: 0.5), value: transcriptionBoxHeight)
-                            .padding(.horizontal)
-                        Spacer(minLength: 15)
-                    }
-                    
-                    if audioManager.isTranscribing {
-                        EmptyView()
-                    }
-                    
-                    if audioManager.didStopAudioStream && !audioManager.finishedTranscript.isEmpty {
-                        EmptyView()
-                        
-                    } else {
-                        HStack(spacing: 3) {
-                            ForEach(0..<5) { wave in
-                                Capsule().frame(width: 40, height: AudioTranscriptionHelper.waveHeight(for: wave, audioLevel: audioManager.audioLevels))
-                                    .foregroundStyle(Color.mmDark)
-                                    .animation(.spring(response: 0.18, dampingFraction: 0.72), value: audioManager.audioLevels)
-                            }
-                        }.padding()
-                        
-                        
-                        Button {
-                            audioManager.isTranscribing.toggle()
-                            
-                            Task {
-                                do {
-                                    let impact = UIImpactFeedbackGenerator(style: .medium)
-                                    impact.prepare()
-                                    impact.impactOccurred()
                                     
                                     if audioManager.isTranscribing {
-                                        try await allowAudioInputAV()
+                                        TranscriptionView(transcription: audioManager.liveTranscription)
+                                            .animation(.easeOut(duration: 0.10), value: audioManager.liveTranscription)
+                                        Spacer(minLength: 10)
                                         
-                                        let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
-                                        try await audioManager.startAudioStream(session: session)
-                                    } else {
-                                        try await audioManager.stopAudioStream(context: context) { delta in
-                                            streamingText += delta
-                                        }
-                                        audioManager.liveTranscription.removeAll()
                                     }
-                                    
-                                } catch PaymentStoreError.insufficientTokens {
-                                    audioManager.isTranscribing = false
-                                    isMoreCreditsNeeded = true
-                                } catch {
-                                    print("failed to start audio session", ErrorDesc.callsiteError, error)
                                 }
-                            }
-                            
-                        } label: {
-                            ZStack {
-                                Circle().fill(Color.clear).glassEffect(.regular)
-                                    .frame(maxWidth: 80, maxHeight: 80)
-                                    .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal)
+                                .onChange(of: audioManager.liveTranscription) { _,_ in
+                                    proxy.scrollTo("typing-caret", anchor: .bottom)
+                                }
+                                
+                                Color.clear.frame(height: 1).id("typing-caret")
+                                
+                            }.scrollDisabled(audioManager.liveTranscription.isEmpty)
+                        }
+                        
+                        
+                        LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
+                                                                  .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
+                                                                  .init(color: Color.mmBackground.opacity(0.50), location: 0.05),
+                                                                  .init(color: Color.mmBackground.opacity(0.30), location: 0.10),]), startPoint: .top, endPoint: .bottom)
+                        .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
+                        .allowsHitTesting(false)
+                        
+                        
+                        LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.00),
+                                                                  .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
+                                                                  .init(color: Color.mmBackground.opacity(0.50), location: 0.10),
+                                                                  .init(color: Color.mmBackground.opacity(0.30), location: 0.15),]), startPoint: .bottom, endPoint: .top)
+                        .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
+                        .allowsHitTesting(false)
+                        
+                    }.frame(minHeight: 50, maxHeight: transcriptionBoxHeight)
+                        .onPreferenceChange(HeightPreferenceKey.self) { height in
+                            dynamicBoxHieght = height
+                        }
+                        .animation(.easeOut(duration: 0.5), value: transcriptionBoxHeight)
+                        .padding(.horizontal)
+                    Spacer(minLength: 15)
+                    
+                    HStack(spacing: 3) {
+                        ForEach(0..<5) { wave in
+                            Capsule().frame(width: 40, height: AudioTranscriptionHelper.waveHeight(for: wave, audioLevel: audioManager.audioLevels))
+                                .foregroundStyle(Color.mmDark)
+                                .animation(.spring(response: 0.18, dampingFraction: 0.72), value: audioManager.audioLevels)
+                        }
+                    }.padding()
+                    
+                    
+                    Button {
+                        audioManager.isTranscribing.toggle()
+                        Task {
+                            do {
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.prepare()
+                                impact.impactOccurred()
                                 
                                 if audioManager.isTranscribing {
-                                    RoundedRectangle(cornerRadius: 12).fill(Color.red).frame(maxWidth: 45, maxHeight: 45)
-                                        .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
+                                    try await allowAudioInputAV()
                                     
-                                        .task {
-                                            transcriptionLiveActivity.startLiveActivity(transcriptionStartedAt)
-                                        }
-                                    
-                                        .onChange(of: audioManager.audioLevels) { _,_ in
-                                            transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
-                                        }
-                                    
+                                    let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
+                                    try await audioManager.startAudioStream(session: session)
                                 } else {
-                                    Circle().fill(Color.red).frame(maxWidth: 70, maxHeight: 70)
-                                        .task {
-                                            transcriptionLiveActivity.stopLiveActivity()
-                                        }
+                                    try await audioManager.stopAudioStream(context: context) { delta in
+                                        streamingText += delta
+                                    }
+                                    audioManager.liveTranscription.removeAll()
                                 }
+                                
+                            } catch PaymentStoreError.insufficientTokens {
+                                audioManager.isTranscribing = false
+                                isMoreCreditsNeeded = true
+                            } catch {
+                                print("failed to start audio session", ErrorDesc.callsiteError, error)
                             }
-                        }.padding(.top)
-                            .padding(.bottom)
-                    }
+                        }
+                        
+                    } label: {
+                        ZStack {
+                            Circle().fill(Color.clear).glassEffect(.regular)
+                                .frame(maxWidth: 80, maxHeight: 80)
+                                .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
+                            
+                            if audioManager.isTranscribing {
+                                RoundedRectangle(cornerRadius: 12).fill(Color.red).frame(maxWidth: 45, maxHeight: 45)
+                                    .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
+                                
+                                    .task {
+                                        transcriptionLiveActivity.startLiveActivity(transcriptionStartedAt)
+                                    }
+                                
+                                    .onChange(of: audioManager.audioLevels) { _,_ in
+                                        transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
+                                    }
+                                
+                            } else {
+                                Circle().fill(Color.red).frame(maxWidth: 70, maxHeight: 70)
+                                    .task {
+                                        transcriptionLiveActivity.stopLiveActivity()
+                                    }
+                            }
+                        }
+                    }.padding(.top)
+                        .padding(.bottom)
+                        .disabled(audioManager.isSummarizing)
                     
                 }.padding(.top)
                     .frame(maxHeight: .infinity)
