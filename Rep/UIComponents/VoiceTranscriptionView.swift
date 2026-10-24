@@ -237,8 +237,17 @@ public struct VoiceTranscriptionView: View {
                                         transcriptionLiveActivity.startLiveActivity(transcriptionStartedAt)
                                     }
                                 
-                                    .onChange(of: audioManager.audioLevels) { _,_ in
-                                        transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
+                                    .task(id: audioManager.isTranscribing) {
+                                        guard audioManager.isTranscribing else { return }
+                                        
+                                        do {
+                                            while !Task.isCancelled {
+                                                try await transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)    //TODO: test
+                                                try await Task.sleep(for: .milliseconds(300))
+                                            }
+                                        } catch {
+                                            print("failed to update transcription live activity push", ErrorDesc.taskError, error)
+                                        }
                                     }
                                 
                             } else {

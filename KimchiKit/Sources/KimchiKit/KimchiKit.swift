@@ -121,12 +121,13 @@ public actor TranscriptionLiveActivityManager {
     }
     
     public func update(isRecording: Bool, isPaused: Bool, audioLevel: CGFloat, startedAt: Date) async throws {
-        guard let activity else { return }
+        guard let activity else {
+            print("transcription Live Activity update skipped: no registered activity")
+            return
+        }
         
         let state = TranscriptionLiveActivityAttributes.ContentState(isRecording: isRecording, isPaused: isPaused, audioLevel: audioLevel, startedAt: startedAt)
         await activity.update(ActivityContent(state: state, staleDate: nil, relevanceScore: 1.0), alertConfiguration: nil)
-        
-        print("Live Activity updated ✅")
     }
 }
 
@@ -174,23 +175,16 @@ public func debugStartIntervalLiveActivity() {          ///for manaully debuggin
 
 
 @available(iOS 18.0, *)
-public func startTranscriptionLiveActivity(isRecording: Bool, isPaused: Bool, audioLevel: CGFloat, startedAt: Date) {
+public func startTranscriptionLiveActivity(isRecording: Bool, isPaused: Bool, audioLevel: CGFloat, startedAt: Date) async throws {  //TODO: test
     guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+
+    let attributes = TranscriptionLiveActivityAttributes()
+    let state = TranscriptionLiveActivityAttributes.ContentState(isRecording: isRecording, isPaused: isPaused, audioLevel: audioLevel, startedAt: startedAt)
     
-    Task {
-        do {
-            let attributes = TranscriptionLiveActivityAttributes()
-            let state = TranscriptionLiveActivityAttributes.ContentState(isRecording: isRecording, isPaused: isPaused, audioLevel: audioLevel, startedAt: startedAt)
-            
-            let activity = try Activity.request(attributes: attributes, content: .init(state: state, staleDate: nil, relevanceScore: 1.0), pushType: nil, style: .transient)
-            
-            await TranscriptionLiveActivityManager.shared.setActivity(activity: activity)
-            print("Live Activity started 🔄")
-            
-        } catch {
-            print("Failed to start Live Activity ❌:", error.localizedDescription)
-        }
-    }
+    let activity = try Activity.request(attributes: attributes, content: .init(state: state, staleDate: nil, relevanceScore: 1.0), pushType: nil, style: .transient)
+    
+    await TranscriptionLiveActivityManager.shared.setActivity(activity: activity)
+    print("Live Activity started 🔄")
 }
 
 

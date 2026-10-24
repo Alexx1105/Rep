@@ -75,20 +75,20 @@ public final class SupabaseClientManager: ObservableObject {
     }
     
     
-    public func supabaseAudioTranscriptionNotesUpsert(userId: String, title: String, fullNotes: String, token: String) async throws {    ///shared by mobile & desktop
+    public func supabaseAudioTranscriptionNotesUpsert(pageID: String, title: String, fullNotes: String, token: String) async throws {    ///shared by mobile & desktop
         let hash: Data = Data(fullNotes.utf8)
         let hashed = SHA256.hash(data: hash).map { String(format: "%02x", $0) }.joined()
         
-        guard !userId.isEmpty && !title.isEmpty && !fullNotes.isEmpty else { throw ErrorDesc.nilValue }
+        guard !pageID.isEmpty && !title.isEmpty && !fullNotes.isEmpty else { throw ErrorDesc.nilValue }
         
-        let schema: PushToSupabaseRepDesktopNotes = PushToSupabaseRepDesktopNotes(token: token, userId: userId, title: title, fullNotes: fullNotes, contentHash: hashed)
+        let schema: PushToSupabaseTranscriptionNotes = PushToSupabaseTranscriptionNotes(token: token, pageID: pageID, title: title, fullNotes: fullNotes, contentHash: hashed)
         let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
         print("==========\npage data successfully inserted ✅:", send)
     }
     
     
-    func upsertRepMobileNotes(fullNotes: String, userId: String, title: String) async throws {
-        guard !fullNotes.isEmpty && !userId.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
+    func upsertRepMobileNotes(fullNotes: String, pageID: String, title: String) async throws {
+        guard !fullNotes.isEmpty && !pageID.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
         
         let token: String = await PushTokenManager.generatePushToken()
         
@@ -96,14 +96,14 @@ public final class SupabaseClientManager: ObservableObject {
             let desktopNote = String(transcribedNote).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !desktopNote.isEmpty else { continue }
             
-            try await supabaseAudioTranscriptionNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
+            try await supabaseAudioTranscriptionNotesUpsert(pageID: pageID, title: title, fullNotes: desktopNote, token: token)
             print("rep desktop helper transcription notes successfully upserted into supabase ✅")
         }
     }
     
     
-    func upsertRepDesktopNotes(fullNotes: String, userId: String, title: String) async throws {
-        guard !fullNotes.isEmpty && !userId.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
+    func upsertRepDesktopNotes(fullNotes: String, pageID: String, title: String) async throws {
+        guard !fullNotes.isEmpty && !pageID.isEmpty && !title.isEmpty else { throw ErrorDesc.nilValue }
         
         let token: String = await PushTokenManager.generatePushToken()
         
@@ -111,7 +111,7 @@ public final class SupabaseClientManager: ObservableObject {
             let desktopNote = String(transcribedNote).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !desktopNote.isEmpty else { continue }
             
-            try await supabaseAudioTranscriptionNotesUpsert(userId: userId, title: title, fullNotes: desktopNote, token: token)
+            try await supabaseAudioTranscriptionNotesUpsert(pageID: pageID, title: title, fullNotes: desktopNote, token: token)
             print("rep desktop helper transcription notes successfully upserted into supabase ✅")
         }
     }

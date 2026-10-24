@@ -491,6 +491,14 @@ public final class AudioTranscriptionManager: ObservableObject {
                 if ssePayload == "[DONE]" { break }
                 
                 guard let streamData = ssePayload.data(using: .utf8) else { continue }
+                
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                if let billingDecoder = try? decoder.decode(BillingSseResponse.self, from: streamData) {
+                    paymentStoreCredits.applyUpdatedBucket(billingDecoder.rep_billing.bucket)
+                    continue
+                }
+                
                 let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
                 
                 if let delta: String = streamDecoder.delta {
@@ -517,7 +525,7 @@ public final class AudioTranscriptionManager: ObservableObject {
                     }
                     
                     if !fullNotes.isEmpty && !userId.isEmpty {
-                        try await SupabaseClientManager.shared.upsertRepMobileNotes(fullNotes: fullNotes, userId: userId, title: title)
+                        try await SupabaseClientManager.shared.upsertRepMobileNotes(fullNotes: fullNotes, pageID: userId, title: title)
                     }
                 }
             }

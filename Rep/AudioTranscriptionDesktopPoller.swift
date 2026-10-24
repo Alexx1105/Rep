@@ -86,7 +86,7 @@ final class RepDesktopPoller: ObservableObject {
             didPollerReturnDesktopNotes = true
             
             if !fullNotes.isEmpty && !userId.isEmpty {
-                try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, userId: userId, title: title)
+                try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, pageID: userId, title: title)
             }
         }
     }
