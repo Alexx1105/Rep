@@ -230,7 +230,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		B25A0A972D94FE3300420892 /* DynamicRep */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (B25A0AA82D94FE3400420892 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = DynamicRep; sourceTree = "<group>"; };
+		B25A0A972D94FE3300420892 /* RepLiveActivities */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (B25A0AA82D94FE3400420892 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = RepLiveActivities; sourceTree = "<group>"; };
 		B2AEBC433073255F0067549B /* PluginAppProviders */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (B2AEBC453073259D0067549B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = PluginAppProviders; sourceTree = "<group>"; };
 		B2BBED403032140E00526E22 /* RepTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RepTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -271,7 +271,7 @@
 			children = (
 				B29A1208303A9EC9000A0031 /* Rep Billing Products.storekit */,
 				B2B837C52BCB102F00BBC748 /* Rep */,
-				B25A0A972D94FE3300420892 /* DynamicRep */,
+				B25A0A972D94FE3300420892 /* RepLiveActivities */,
 				B2BBED403032140E00526E22 /* RepTests */,
 				B2D220DA2BD981B800E55834 /* Frameworks */,
 				B2B837C42BCB102F00BBC748 /* Products */,
@@ -396,7 +396,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				B25A0A972D94FE3300420892 /* DynamicRep */,
+				B25A0A972D94FE3300420892 /* RepLiveActivities */,
 				B2AEBC433073255F0067549B /* PluginAppProviders */,
 			);
 			name = DynamicRepExtension;
@@ -647,13 +647,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = DynamicRep/DynamicRepExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = RepLiveActivities/DynamicRepExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DynamicRep/Info.plist;
+				INFOPLIST_FILE = RepLiveActivities/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DynamicRep;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -682,13 +682,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = DynamicRep/DynamicRepExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = RepLiveActivities/DynamicRepExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DynamicRep/Info.plist;
+				INFOPLIST_FILE = RepLiveActivities/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DynamicRep;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -827,13 +827,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = DynamicRep/DynamicRepExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = RepLiveActivities/DynamicRepExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DynamicRep/Info.plist;
+				INFOPLIST_FILE = RepLiveActivities/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DynamicRep;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
