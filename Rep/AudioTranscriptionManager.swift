@@ -56,16 +56,17 @@ public final class AudioTranscriptionManager: ObservableObject {
     @Published var didStopAudioStream: Bool = false
     
     
-    func configAudioSession() throws {
+    func configAudioSession() async throws {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .defaultToSpeaker])
             try audioSession.setPreferredInputNumberOfChannels(1)
-            try audioSession.setActive(true)
+            let activated = try await audioSession.activate(options: [])
+            guard activated else { throw ErrorDesc.configError }
             
-            print("audio session successfully set up")
         } catch {
             print("failed to config audio session", ErrorDesc.configError, error)
+            throw ErrorDesc.configError
         }
     }
     
@@ -78,14 +79,15 @@ public final class AudioTranscriptionManager: ObservableObject {
         
         audioEngine.inputNode.removeTap(onBus: 0)
         
-        micInput.installTap(onBus: 0, bufferSize: 512, format: micInputFormat) { [weak self] buffer, _ in    //TODO: update to installAudioTap(onBus:bufferSize:format:tapProvider:)
+        try micInput.installAudioTap(onBus: 0, bufferSize: 512, format: micInputFormat) { [weak self] buffer, _ in
             guard let self else { return }
             
             do {
                 guard let resampleAudioFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 24_000, channels: 1, interleaved: false) else { throw ErrorDesc.configError }
                 guard let converter = AVAudioConverter(from: micInputFormat, to: resampleAudioFormat) else { throw ErrorDesc.configError }
                 
-                let resampledBuffer = try AudioTranscriptionHelper.resampleBuffer(buffer, converter: converter, outputFormat: resampleAudioFormat)
+                let newInputBuffer = AVAudioPCMBuffer(copying: buffer)
+                let resampledBuffer = try AudioTranscriptionHelper.resampleBuffer(newInputBuffer, converter: converter, outputFormat: resampleAudioFormat)
                 let getPcmData: AudioBufferData = try AudioTranscriptionHelper.convertBufferToPCM16Data(resampledBuffer)
                 
                 let pcmData: Data = getPcmData.data
@@ -198,7 +200,7 @@ public final class AudioTranscriptionManager: ObservableObject {
                 }
             }
             
-            try configAudioSession()
+            try await configAudioSession()
             try startMicCapture()
             
         } catch {
