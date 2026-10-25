@@ -138,12 +138,14 @@ import SwiftUI
     var fullNotes: String
     var fullTranscript: String
     var title: String
+    var duration: TimeInterval? = nil
     
-    init(userId: String, fullNotes: String, title: String, fullTranscript: String) {
+    init(userId: String, fullNotes: String, title: String, fullTranscript: String, duration: TimeInterval? = nil) {
         self.userId = userId
         self.fullNotes = fullNotes
         self.fullTranscript = fullTranscript
         self.title = title
+        self.duration = duration
     }
 }
 

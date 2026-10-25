@@ -43,6 +43,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     private var webSocketTask: URLSessionWebSocketTask?
     private var activeAudioReservationKey: UUID?
     private var audioSessionStartedAt: Date?
+    private var audioSessionDuration: TimeInterval?
     typealias MessageTranscription = URLSessionWebSocketTask.Message
     
     @Published public var liveTranscription: String = ""
@@ -186,6 +187,7 @@ public final class AudioTranscriptionManager: ObservableObject {
             await MainActor.run {
                 isTranscribing = true
                 audioSessionStartedAt = Date()
+                audioSessionDuration = nil
             }
             
             Task {
@@ -232,6 +234,10 @@ public final class AudioTranscriptionManager: ObservableObject {
         }
 
         do {
+            if let startedAt = audioSessionStartedAt {
+                audioSessionDuration = max(Date().timeIntervalSince(startedAt), 0)
+            }
+            
             audioEngine.inputNode.removeTap(onBus: 0)
             audioEngine.stop()
             print("socket fully shut for this session")
@@ -519,7 +525,7 @@ public final class AudioTranscriptionManager: ObservableObject {
                         isSummarizing = false
                         isTranscriptFinished = true
                         
-                        let repMobileTranscription: RepMobileTranscription = RepMobileTranscription(userId: userId, fullNotes: fullNotes, title: title, fullTranscript: fullTranscript)
+                        let repMobileTranscription: RepMobileTranscription = RepMobileTranscription(userId: userId, fullNotes: fullNotes, title: title, fullTranscript: fullTranscript, duration: audioSessionDuration)
                         context.insert(repMobileTranscription)
                         try? context.save()
                     }

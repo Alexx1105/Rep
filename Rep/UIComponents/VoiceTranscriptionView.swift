@@ -13,15 +13,14 @@ public struct VoiceTranscriptionView: View {
     @State private var streamingText: String = ""
     @State private var dynamicBoxHieght: CGFloat = 0
     @State private var isSummarizing: Bool = false
-    @State var transcriptionStartedAt: Date
+    @State var transcriptionStartedAt = Date()
     @State var isMoreCreditsNeeded: Bool = false
     @State private var idempotentKey: UUID
     
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
     private var transcriptNotesGenerating: String = "Generating notes... "
     
-    public init(transcriptionStartedAt: Date = Date(), idempotentKey: UUID) {
-        self.transcriptionStartedAt = transcriptionStartedAt
+    public init(idempotentKey: UUID) {
         self.idempotentKey = idempotentKey
     }
     
@@ -93,6 +92,19 @@ public struct VoiceTranscriptionView: View {
                         }
                     }
                     
+                    Spacer()
+                    
+                    if audioManager.isTranscribing {
+                        Text(transcriptionStartedAt, style: .timer).font(Font.system(size: 14))
+                            .fontDesign(.monospaced)
+                            .fontWeight(.regular)
+                            .foregroundStyle(Color.red)
+                            .padding(.top, 7)
+                            .padding(.horizontal)
+                            .padding(.vertical, 5)
+                            .background(Capsule().fill(Color.red.opacity(0.2)).padding(.top, 7))
+                    }
+
                     Spacer()
                     
                     Button {
@@ -208,6 +220,7 @@ public struct VoiceTranscriptionView: View {
                                     
                                     let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
                                     try await audioManager.startAudioStream(session: session)
+                                    transcriptionStartedAt = Date()
                                 } else {
                                     try await audioManager.stopAudioStream(context: context) { delta in
                                         streamingText += delta
@@ -242,7 +255,7 @@ public struct VoiceTranscriptionView: View {
                                         
                                         do {
                                             while !Task.isCancelled {
-                                                try await transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)    //TODO: test
+                                                try await transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
                                                 try await Task.sleep(for: .milliseconds(300))
                                             }
                                         } catch {
@@ -288,5 +301,5 @@ public struct VoiceTranscriptionView: View {
 
 
 #Preview {
-    VoiceTranscriptionView(transcriptionStartedAt: Date(), idempotentKey: UUID())
+    VoiceTranscriptionView(idempotentKey: UUID())
 }
