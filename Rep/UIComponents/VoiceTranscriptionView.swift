@@ -104,7 +104,7 @@ public struct VoiceTranscriptionView: View {
                             .padding(.vertical, 5)
                             .background(Capsule().fill(Color.red.opacity(0.2)).padding(.top, 7))
                     }
-
+                    
                     Spacer()
                     
                     Button {
@@ -295,6 +295,7 @@ public struct VoiceTranscriptionView: View {
                     await audioManager.cancelActiveAudioSession(reason: "audio_view_dismissed")
                 }
             }
+        
     }
 }
 

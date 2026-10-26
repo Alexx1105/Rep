@@ -795,7 +795,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Rep/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Rep;
+				INFOPLIST_KEY_CFBundleDisplayName = "Rep Beta";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rep uses your microphone to transcribe meetings and lectures.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;

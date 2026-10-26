@@ -56,13 +56,19 @@ public final class AudioTranscriptionManager: ObservableObject {
     @Published var didStopAudioStream: Bool = false
     
     
-    func configAudioSession() async throws {
+    func configAudioSession() async throws {    
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .defaultToSpeaker])
             try audioSession.setPreferredInputNumberOfChannels(1)
-            let activated = try await audioSession.activate(options: [])
-            guard activated else { throw ErrorDesc.configError }
+          
+            Task.detached {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(true)
+                } catch {
+                    print("failed to config audio session:", ErrorDesc.configError, error)
+                }
+            }
             
         } catch {
             print("failed to config audio session", ErrorDesc.configError, error)
@@ -196,17 +202,16 @@ public final class AudioTranscriptionManager: ObservableObject {
                 do {
                     try await transcriptionEventListener(urlRequest: urlRequest)
                 } catch {
-                    print("task error", error)
+                    print("task error:", ErrorDesc.taskError, error)
                 }
             }
-            
-            try await configAudioSession()
+            //try await configAudioSession()
             try startMicCapture()
             
         } catch {
             await releaseActiveAudioReservation(reason: "audio_start_failed")
             isTranscribing = false
-            print("failed to start stream to openai transcription endpoint ❗️", ErrorDesc.webSocketError, error)
+            print("failed to start stream to openai transcription endpoint:", ErrorDesc.webSocketError, error)
             throw error
         }
     }
