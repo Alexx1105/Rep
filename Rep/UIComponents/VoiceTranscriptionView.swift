@@ -13,6 +13,7 @@ public struct VoiceTranscriptionView: View {
     @State private var streamingText: String = ""
     @State private var dynamicBoxHieght: CGFloat = 0
     @State private var isSummarizing: Bool = false
+    @State private var isStartingAudioStream: Bool = false
     @State var transcriptionStartedAt = Date()
     @State var isMoreCreditsNeeded: Bool = false
     @State private var idempotentKey: UUID
@@ -29,7 +30,7 @@ public struct VoiceTranscriptionView: View {
         let minHeight: CGFloat = 50
         let maxHeight: CGFloat = 250
         
-        guard !audioManager.liveTranscription.isEmpty else { return minHeight }
+        guard audioManager.isTranscribing && !audioManager.isSummarizing && !audioManager.liveTranscription.isEmpty else { return minHeight }
         return min(max(dynamicBoxHieght, verticalPadding + minHeight), maxHeight)
     }
     
@@ -141,7 +142,6 @@ public struct VoiceTranscriptionView: View {
                             ScrollView {
                                 VStack(alignment: .leading) {
                                     
-                                    
                                     HStack {
                                         if audioManager.isSummarizing {
                                             ShimmerText(text: transcriptNotesGenerating).padding(.top)
@@ -171,8 +171,8 @@ public struct VoiceTranscriptionView: View {
                                 
                                 Color.clear.frame(height: 1).id("typing-caret")
                                 
-                            }.scrollDisabled(audioManager.liveTranscription.isEmpty)
-                        }
+                            }.scrollDisabled(!audioManager.isTranscribing || audioManager.liveTranscription.isEmpty)
+                        }.id(audioManager.isTranscribing)
                         
                         
                         LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
@@ -190,7 +190,7 @@ public struct VoiceTranscriptionView: View {
                         .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
                         .allowsHitTesting(false)
                         
-                    }.frame(minHeight: 50, maxHeight: transcriptionBoxHeight)
+                    }.frame(height: transcriptionBoxHeight)
                         .onPreferenceChange(HeightPreferenceKey.self) { height in
                             dynamicBoxHieght = height
                         }
@@ -208,8 +208,11 @@ public struct VoiceTranscriptionView: View {
                     
                     
                     Button {
+                        isStartingAudioStream = !audioManager.isTranscribing
                         audioManager.isTranscribing.toggle()
                         Task {
+                            defer { isStartingAudioStream = false }
+                            
                             do {
                                 let impact = UIImpactFeedbackGenerator(style: .medium)
                                 impact.prepare()
@@ -232,6 +235,7 @@ public struct VoiceTranscriptionView: View {
                                 audioManager.isTranscribing = false
                                 isMoreCreditsNeeded = true
                             } catch {
+                                if isStartingAudioStream { audioManager.isTranscribing = false }
                                 print("failed to start audio session", ErrorDesc.callsiteError, error)
                             }
                         }
@@ -269,10 +273,16 @@ public struct VoiceTranscriptionView: View {
                                         transcriptionLiveActivity.stopLiveActivity()
                                     }
                             }
+                            
+                            if isStartingAudioStream {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .tint(.white)
+                            }
                         }
                     }.padding(.top)
                         .padding(.bottom)
-                        .disabled(audioManager.isSummarizing)
+                        .disabled(audioManager.isSummarizing || isStartingAudioStream)
                     
                 }.padding(.top)
                     .frame(maxHeight: .infinity)

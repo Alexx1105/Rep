@@ -61,14 +61,14 @@ public final class AudioTranscriptionManager: ObservableObject {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .defaultToSpeaker])
             try audioSession.setPreferredInputNumberOfChannels(1)
-          
-            Task.detached {
+            
+            await Task.detached {
                 do {
                     try AVAudioSession.sharedInstance().setActive(true)
                 } catch {
                     print("failed to config audio session:", ErrorDesc.configError, error)
                 }
-            }
+            }.value
             
         } catch {
             print("failed to config audio session", ErrorDesc.configError, error)
@@ -205,7 +205,7 @@ public final class AudioTranscriptionManager: ObservableObject {
                     print("task error:", ErrorDesc.taskError, error)
                 }
             }
-            //try await configAudioSession()
+            try await configAudioSession()
             try startMicCapture()
             
         } catch {
