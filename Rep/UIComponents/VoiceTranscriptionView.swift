@@ -206,83 +206,107 @@ public struct VoiceTranscriptionView: View {
                         }
                     }.padding()
                     
-                    
-                    Button {
-                        isStartingAudioStream = !audioManager.isTranscribing
-                        audioManager.isTranscribing.toggle()
-                        Task {
-                            defer { isStartingAudioStream = false }
-                            
-                            do {
-                                let impact = UIImpactFeedbackGenerator(style: .medium)
-                                impact.prepare()
-                                impact.impactOccurred()
+                    HStack(spacing: 50) {
+                        Button {
+                            let impact = UIImpactFeedbackGenerator(style: .light)
+                            impact.prepare()
+                            impact.impactOccurred()
+                            audioManager.isUserAudioMuted.toggle()
+                        } label: {
+                            ZStack {
+                                Circle().fill(Color.clear).glassEffect(.regular)
+                                    .frame(width: 45, height: 45)
                                 
-                                if audioManager.isTranscribing {
-                                    try await allowAudioInputAV()
-                                    
-                                    let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
-                                    try await audioManager.startAudioStream(session: session)
-                                    transcriptionStartedAt = Date()
+                                if !audioManager.isUserAudioMuted {
+                                    Image(systemName: "microphone.fill")
+                                        .foregroundStyle(Color.mmDark)
+                                        .font(.system(size: 20))
                                 } else {
-                                    try await audioManager.stopAudioStream(context: context) { delta in
-                                        streamingText += delta
-                                    }
-                                    audioManager.liveTranscription.removeAll()
+                                    Image(systemName: "microphone.slash.fill")
+                                        .foregroundStyle(Color.red)
+                                        .font(.system(size: 20))
                                 }
-                                
-                            } catch PaymentStoreError.insufficientTokens {
-                                audioManager.isTranscribing = false
-                                isMoreCreditsNeeded = true
-                            } catch {
-                                if isStartingAudioStream { audioManager.isTranscribing = false }
-                                print("failed to start audio session", ErrorDesc.callsiteError, error)
                             }
                         }
                         
-                    } label: {
-                        ZStack {
-                            Circle().fill(Color.clear).glassEffect(.regular)
-                                .frame(maxWidth: 80, maxHeight: 80)
-                                .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
+                        Button {
+                            isStartingAudioStream = !audioManager.isTranscribing
+                            audioManager.isTranscribing.toggle()
+                            Task {
+                                defer { isStartingAudioStream = false }
+                                
+                                do {
+                                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                                    impact.prepare()
+                                    impact.impactOccurred()
+                                    
+                                    if audioManager.isTranscribing {
+                                        try await allowAudioInputAV()
+                                        
+                                        let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
+                                        try await audioManager.startAudioStream(session: session)
+                                        transcriptionStartedAt = Date()
+                                    } else {
+                                        try await audioManager.stopAudioStream(context: context) { delta in
+                                            streamingText += delta
+                                        }
+                                        audioManager.liveTranscription.removeAll()
+                                    }
+                                    
+                                } catch PaymentStoreError.insufficientTokens {
+                                    audioManager.isTranscribing = false
+                                    isMoreCreditsNeeded = true
+                                } catch {
+                                    if isStartingAudioStream { audioManager.isTranscribing = false }
+                                    print("failed to start audio session", ErrorDesc.callsiteError, error)
+                                }
+                            }
                             
-                            if audioManager.isTranscribing {
-                                RoundedRectangle(cornerRadius: 12).fill(Color.red).frame(maxWidth: 45, maxHeight: 45)
+                        } label: {
+                            ZStack {
+                                Circle().fill(Color.clear).glassEffect(.regular)
+                                    .frame(maxWidth: 80, maxHeight: 80)
                                     .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
                                 
-                                    .task {
-                                        transcriptionLiveActivity.startLiveActivity(transcriptionStartedAt)
-                                    }
-                                
-                                    .task(id: audioManager.isTranscribing) {
-                                        guard audioManager.isTranscribing else { return }
-                                        
-                                        do {
-                                            while !Task.isCancelled {
-                                                try await transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
-                                                try await Task.sleep(for: .milliseconds(300))
-                                            }
-                                        } catch {
-                                            print("failed to update transcription live activity push", ErrorDesc.taskError, error)
+                                if audioManager.isTranscribing {
+                                    RoundedRectangle(cornerRadius: 12).fill(Color.red).frame(maxWidth: 45, maxHeight: 45)
+                                        .animation(.spring(response: 0.8, dampingFraction: 0.78), value: audioManager.isTranscribing)
+                                    
+                                        .task {
+                                            transcriptionLiveActivity.startLiveActivity(transcriptionStartedAt)
                                         }
-                                    }
+                                    
+                                        .task(id: audioManager.isTranscribing) {
+                                            guard audioManager.isTranscribing else { return }
+                                            
+                                            do {
+                                                while !Task.isCancelled {
+                                                    try await transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
+                                                    try await Task.sleep(for: .milliseconds(300))
+                                                }
+                                            } catch {
+                                                print("failed to update transcription live activity push", ErrorDesc.taskError, error)
+                                            }
+                                        }
+                                    
+                                } else {
+                                    Circle().fill(Color.red).frame(maxWidth: 70, maxHeight: 70)
+                                        .task {
+                                            transcriptionLiveActivity.stopLiveActivity()
+                                        }
+                                }
                                 
-                            } else {
-                                Circle().fill(Color.red).frame(maxWidth: 70, maxHeight: 70)
-                                    .task {
-                                        transcriptionLiveActivity.stopLiveActivity()
-                                    }
+                                if isStartingAudioStream {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                        .tint(.white)
+                                }
                             }
-                            
-                            if isStartingAudioStream {
-                                ProgressView()
-                                    .controlSize(.small)
-                                    .tint(.white)
-                            }
-                        }
-                    }.padding(.top)
-                        .padding(.bottom)
-                        .disabled(audioManager.isSummarizing || isStartingAudioStream)
+                        }.padding(.top)
+                            .padding(.bottom)
+                            .disabled(audioManager.isSummarizing || isStartingAudioStream)
+                        
+                    }.padding(.trailing, 100)
                     
                 }.padding(.top)
                     .frame(maxHeight: .infinity)
