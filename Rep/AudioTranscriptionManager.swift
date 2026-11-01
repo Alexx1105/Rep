@@ -5,7 +5,7 @@
 //  Created by alex haidar on 6/7/26.
 //
 /* All requests to the supabase edge functions
-   for the voice transcription with gpt-4o-mini-transcribe
+   for the voice transcription with gpt-realtime-whisper
    or future models will be handled here */
 
 
