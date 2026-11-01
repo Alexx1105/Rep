@@ -5,8 +5,8 @@
 //  Created by alex haidar on 6/7/26.
 //
 /* All requests to the supabase edge functions
- for the voice transcription with gpt-4o-mini-transcribe
- or future models will be handled here  */
+   for the voice transcription with gpt-4o-mini-transcribe
+   or future models will be handled here */
 
 
 import Foundation
@@ -40,6 +40,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     public static let shared = AudioTranscriptionManager()
     let paymentStoreCredits = CreditBucketsManager.shared
     
+    private var isListeningForTranscription: Bool = false
     private var webSocketTask: URLSessionWebSocketTask?
     private var activeAudioReservationKey: UUID?
     private var audioSessionStartedAt: Date?
@@ -199,6 +200,8 @@ public final class AudioTranscriptionManager: ObservableObject {
                 audioSessionDuration = nil
             }
             
+            isListeningForTranscription = true
+            
             Task {
                 do {
                     try await transcriptionEventListener(urlRequest: urlRequest)
@@ -210,6 +213,9 @@ public final class AudioTranscriptionManager: ObservableObject {
             try startMicCapture()
             
         } catch {
+            isListeningForTranscription = false
+            webSocketTask?.cancel(with: .goingAway, reason: .none)
+            webSocketTask = nil
             await releaseActiveAudioReservation(reason: "audio_start_failed")
             isTranscribing = false
             print("failed to start stream to openai transcription endpoint:", ErrorDesc.webSocketError, error)
@@ -219,16 +225,14 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     
     public func transcriptionEventListener(urlRequest: URLRequest) async throws {
-        
-        while isTranscribing {
+        while isListeningForTranscription {
             guard webSocketTask != nil else { throw ErrorDesc.webSocketError }
             
             do {
                 try await extractTranscriptionResponseDelta()
-                
-                print("connected web socket, response delta being extracted...")
             } catch {
-                print("audio stream interrupted ❗️", ErrorDesc.webSocketError, error)
+                guard isListeningForTranscription, !Task.isCancelled else { return }
+                print("audio stream interrupted:", ErrorDesc.webSocketError, error)
                 try await retryWebSocket(urlRequest: urlRequest)
             }
         }
@@ -237,6 +241,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     public func stopAudioStream(context: ModelContext, onChunk: @escaping (String) async -> Void) async throws {
         defer {
+            isListeningForTranscription = false
             webSocketTask?.cancel(with: .normalClosure, reason: .none)
             webSocketTask = nil
         }
@@ -248,7 +253,6 @@ public final class AudioTranscriptionManager: ObservableObject {
             
             audioEngine.inputNode.removeTap(onBus: 0)
             audioEngine.stop()
-            print("socket fully shut for this session")
             
             await MainActor.run {
                 self.didStopAudioStream = true
@@ -328,6 +332,7 @@ public final class AudioTranscriptionManager: ObservableObject {
     
     
     func cancelActiveAudioSession(reason: String = "audio_session_cancelled") async {
+        isListeningForTranscription = false
         audioEngine.inputNode.removeTap(onBus: 0)
         audioEngine.stop()
         webSocketTask?.cancel(with: .goingAway, reason: .none)
@@ -442,7 +447,6 @@ public final class AudioTranscriptionManager: ObservableObject {
         guard let jsonString = String(data: jsonData, encoding: .utf8) else { throw ErrorDesc.encodeError }
         
         try await webSocketTask.send(.string(jsonString))
-        print("sent audio chunk ✅")
     }
     
     
@@ -454,7 +458,6 @@ public final class AudioTranscriptionManager: ObservableObject {
         guard let jsonString = String(data: jsonData, encoding: .utf8) else { throw ErrorDesc.encodeError }
         
         try await webSocketTask?.send(.string(jsonString))
-        print("audio stream session commited ✅")
     }
     
     
@@ -549,7 +552,7 @@ public final class AudioTranscriptionManager: ObservableObject {
         } catch PaymentStoreError.insufficientTokens {
             throw PaymentStoreError.insufficientTokens
         } catch {
-            print("failed to return response ❗️", ErrorDesc.decodeError, error)
+            print("failed to return response:", ErrorDesc.decodeError, error)
             throw ErrorDesc.decodeError
         }
         return ""
