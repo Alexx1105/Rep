@@ -22,7 +22,7 @@ final class LocalLiveActivityManager {
     func startLiveActivity(_ startedAt: Date) {
         Task {
             do {
-                startTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: false, audioLevel: audioManager.audioLevels, startedAt: startedAt)
+                try await startTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: false, audioLevel: audioManager.audioLevels, startedAt: startedAt)
                 try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: audioManager.audioLevels, startedAt: startedAt)
                 
                 print("transcription live activity start successfully called in UI ✅")
@@ -32,20 +32,13 @@ final class LocalLiveActivityManager {
         }
     }
     
-    func pushLiveActivity(_ startedAt: Date) {
-        Task {
-            do {
-                
-                let liveActivityLevel = audioManager.audioLevels > 0.03 ? audioManager.audioLevels : 0.0  ///send 0.0 fallback to reset audio level freq
-                try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: liveActivityLevel, startedAt: startedAt)
-                
-                print("transcription live activity update successfully called in UI ✅")
-            } catch {
-                print("failed to push audio bytes to live activity", ErrorDesc.callsiteError, error)
-            }
-        }
-    }
-    
+    func pushLiveActivity(_ startedAt: Date) async throws {
+        let liveActivityLevel = audioManager.audioLevels > 0.03 ? audioManager.audioLevels : 0.0
+        try await updateTranscriptionLiveActivity(isRecording: audioManager.isTranscribing, isPaused: audioManager.didStopAudioStream, audioLevel: liveActivityLevel, startedAt: startedAt)
+        
+        print("transcription live activity update successfully called in UI ✅")
+}
+
     func stopLiveActivity() {
         Task {
             for activity in Activity<TranscriptionLiveActivityAttributes>.activities {

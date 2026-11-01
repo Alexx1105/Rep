@@ -13,15 +13,15 @@ public struct VoiceTranscriptionView: View {
     @State private var streamingText: String = ""
     @State private var dynamicBoxHieght: CGFloat = 0
     @State private var isSummarizing: Bool = false
-    @State var transcriptionStartedAt: Date
+    @State private var isStartingAudioStream: Bool = false
+    @State var transcriptionStartedAt = Date()
     @State var isMoreCreditsNeeded: Bool = false
     @State private var idempotentKey: UUID
     
     private var transcriptionPlaceholder: String = "Transcript will turn into Live Activity\n powered review notes."
     private var transcriptNotesGenerating: String = "Generating notes... "
     
-    public init(transcriptionStartedAt: Date = Date(), idempotentKey: UUID) {
-        self.transcriptionStartedAt = transcriptionStartedAt
+    public init(idempotentKey: UUID) {
         self.idempotentKey = idempotentKey
     }
     
@@ -30,7 +30,7 @@ public struct VoiceTranscriptionView: View {
         let minHeight: CGFloat = 50
         let maxHeight: CGFloat = 250
         
-        guard !audioManager.liveTranscription.isEmpty else { return minHeight }
+        guard audioManager.isTranscribing && !audioManager.isSummarizing && !audioManager.liveTranscription.isEmpty else { return minHeight }
         return min(max(dynamicBoxHieght, verticalPadding + minHeight), maxHeight)
     }
     
@@ -95,6 +95,19 @@ public struct VoiceTranscriptionView: View {
                     
                     Spacer()
                     
+                    if audioManager.isTranscribing {
+                        Text(transcriptionStartedAt, style: .timer).font(Font.system(size: 14))
+                            .fontDesign(.monospaced)
+                            .fontWeight(.regular)
+                            .foregroundStyle(Color.red)
+                            .padding(.top, 7)
+                            .padding(.horizontal)
+                            .padding(.vertical, 5)
+                            .background(Capsule().fill(Color.red.opacity(0.2)).padding(.top, 7))
+                    }
+                    
+                    Spacer()
+                    
                     Button {
                         showMacDirections = true
                     } label: {
@@ -122,95 +135,106 @@ public struct VoiceTranscriptionView: View {
                 
                 VStack {
                     let shape = RoundedRectangle(cornerRadius: 15)
-                    if audioManager.didStopAudioStream && !audioManager.finishedTranscript.isEmpty {
-                        EmptyView()
-                    } else {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 15))
-                            
-                            ScrollViewReader { proxy in
-                                ScrollView {
-                                    VStack(alignment: .leading) {
-                                        
-                                        
-                                        HStack {
-                                            if audioManager.isSummarizing {
-                                                ShimmerText(text: transcriptNotesGenerating).padding(.top)
-                                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                                Spacer(minLength: 30)
-                                                
-                                            } else if !audioManager.isTranscribing {
-                                                Text(transcriptionPlaceholder).padding(.top, 10)
-                                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                            }
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 15).fill(Color.clear).glassEffect(.regular, in: .rect(cornerRadius: 15))
+                        
+                        ScrollViewReader { proxy in
+                            ScrollView {
+                                VStack(alignment: .leading) {
+                                    
+                                    HStack {
+                                        if audioManager.isSummarizing {
+                                            ShimmerText(text: transcriptNotesGenerating).padding(.top)
+                                                .font(.system(size: 14, weight: .regular, design: .rounded))
                                             Spacer(minLength: 30)
-                                        }
-                                        
-                                        
-                                        if audioManager.isTranscribing {
-                                            TranscriptionView(transcription: audioManager.liveTranscription)
-                                                .animation(.easeOut(duration: 0.10), value: audioManager.liveTranscription)
-                                            Spacer(minLength: 10)
                                             
+                                        } else if !audioManager.isTranscribing {
+                                            Text(transcriptionPlaceholder).padding(.top, 10)
+                                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                         }
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.horizontal)
-                                    .onChange(of: audioManager.liveTranscription) { _,_ in
-                                        proxy.scrollTo("typing-caret", anchor: .bottom)
+                                        Spacer(minLength: 30)
                                     }
                                     
-                                    Color.clear.frame(height: 1).id("typing-caret")
                                     
-                                }.scrollDisabled(audioManager.liveTranscription.isEmpty)
-                            }
-                            
-                            
-                            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
-                                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
-                                                                      .init(color: Color.mmBackground.opacity(0.50), location: 0.05),
-                                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.10),]), startPoint: .top, endPoint: .bottom)
-                            .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
-                            .allowsHitTesting(false)
-                            
-                            
-                            LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.00),
-                                                                      .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
-                                                                      .init(color: Color.mmBackground.opacity(0.50), location: 0.10),
-                                                                      .init(color: Color.mmBackground.opacity(0.30), location: 0.15),]), startPoint: .bottom, endPoint: .top)
-                            .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
-                            .allowsHitTesting(false)
-                            
-                        }.frame(minHeight: 50, maxHeight: transcriptionBoxHeight)
-                            .onPreferenceChange(HeightPreferenceKey.self) { height in
-                                dynamicBoxHieght = height
-                            }
-                            .animation(.easeOut(duration: 0.5), value: transcriptionBoxHeight)
-                            .padding(.horizontal)
-                        Spacer(minLength: 15)
-                    }
-                    
-                    if audioManager.isTranscribing {
-                        EmptyView()
-                    }
-                    
-                    if audioManager.didStopAudioStream && !audioManager.finishedTranscript.isEmpty {
-                        EmptyView()
+                                    if audioManager.isTranscribing {
+                                        TranscriptionView(transcription: audioManager.liveTranscription)
+                                            .animation(.easeOut(duration: 0.10), value: audioManager.liveTranscription)
+                                        Spacer(minLength: 10)
+                                        
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal)
+                                .onChange(of: audioManager.liveTranscription) { _,_ in
+                                    proxy.scrollTo("typing-caret", anchor: .bottom)
+                                }
+                                
+                                Color.clear.frame(height: 1).id("typing-caret")
+                                
+                            }.scrollDisabled(!audioManager.isTranscribing || audioManager.liveTranscription.isEmpty)
+                        }.id(audioManager.isTranscribing)
                         
-                    } else {
-                        HStack(spacing: 3) {
-                            ForEach(0..<5) { wave in
-                                Capsule().frame(width: 40, height: AudioTranscriptionHelper.waveHeight(for: wave, audioLevel: audioManager.audioLevels))
-                                    .foregroundStyle(Color.mmDark)
-                                    .animation(.spring(response: 0.18, dampingFraction: 0.72), value: audioManager.audioLevels)
-                            }
-                        }.padding()
                         
+                        LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.02),
+                                                                  .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
+                                                                  .init(color: Color.mmBackground.opacity(0.50), location: 0.05),
+                                                                  .init(color: Color.mmBackground.opacity(0.30), location: 0.10),]), startPoint: .top, endPoint: .bottom)
+                        .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
+                        .allowsHitTesting(false)
+                        
+                        
+                        LinearGradient(gradient: Gradient(stops: [.init(color: Color.mmBackground.opacity(0.95), location: 0.00),
+                                                                  .init(color: Color.mmBackground.opacity(0.80), location: 0.03),
+                                                                  .init(color: Color.mmBackground.opacity(0.50), location: 0.10),
+                                                                  .init(color: Color.mmBackground.opacity(0.30), location: 0.15),]), startPoint: .bottom, endPoint: .top)
+                        .frame(maxWidth: .infinity, maxHeight: transcriptionBoxHeight).clipShape(shape)
+                        .allowsHitTesting(false)
+                        
+                    }.frame(height: transcriptionBoxHeight)
+                        .onPreferenceChange(HeightPreferenceKey.self) { height in
+                            dynamicBoxHieght = height
+                        }
+                        .animation(.easeOut(duration: 0.5), value: transcriptionBoxHeight)
+                        .padding(.horizontal)
+                    Spacer(minLength: 15)
+                    
+                    HStack(spacing: 3) {
+                        ForEach(0..<5) { wave in
+                            Capsule().frame(width: 40, height: AudioTranscriptionHelper.waveHeight(for: wave, audioLevel: audioManager.audioLevels))
+                                .foregroundStyle(Color.mmDark)
+                                .animation(.spring(response: 0.18, dampingFraction: 0.72), value: audioManager.audioLevels)
+                        }
+                    }.padding()
+                    
+                    HStack(spacing: 50) {
+                        Button {
+                            let impact = UIImpactFeedbackGenerator(style: .light)
+                            impact.prepare()
+                            impact.impactOccurred()
+                            audioManager.isUserAudioMuted.toggle()
+                        } label: {
+                            ZStack {
+                                Circle().fill(Color.clear).glassEffect(.regular)
+                                    .frame(width: 45, height: 45)
+                                
+                                if !audioManager.isUserAudioMuted {
+                                    Image(systemName: "microphone.fill")
+                                        .foregroundStyle(Color.mmDark)
+                                        .font(.system(size: 20))
+                                } else {
+                                    Image(systemName: "microphone.slash.fill")
+                                        .foregroundStyle(Color.red)
+                                        .font(.system(size: 20))
+                                }
+                            }
+                        }
                         
                         Button {
+                            isStartingAudioStream = !audioManager.isTranscribing
                             audioManager.isTranscribing.toggle()
-                            
                             Task {
+                                defer { isStartingAudioStream = false }
+                                
                                 do {
                                     let impact = UIImpactFeedbackGenerator(style: .medium)
                                     impact.prepare()
@@ -221,6 +245,7 @@ public struct VoiceTranscriptionView: View {
                                         
                                         let session = try await audioManager.openAudioSession(idempotentKey: idempotentKey)
                                         try await audioManager.startAudioStream(session: session)
+                                        transcriptionStartedAt = Date()
                                     } else {
                                         try await audioManager.stopAudioStream(context: context) { delta in
                                             streamingText += delta
@@ -232,6 +257,7 @@ public struct VoiceTranscriptionView: View {
                                     audioManager.isTranscribing = false
                                     isMoreCreditsNeeded = true
                                 } catch {
+                                    if isStartingAudioStream { audioManager.isTranscribing = false }
                                     print("failed to start audio session", ErrorDesc.callsiteError, error)
                                 }
                             }
@@ -250,8 +276,17 @@ public struct VoiceTranscriptionView: View {
                                             transcriptionLiveActivity.startLiveActivity(transcriptionStartedAt)
                                         }
                                     
-                                        .onChange(of: audioManager.audioLevels) { _,_ in
-                                            transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
+                                        .task(id: audioManager.isTranscribing) {
+                                            guard audioManager.isTranscribing else { return }
+                                            
+                                            do {
+                                                while !Task.isCancelled {
+                                                    try await transcriptionLiveActivity.pushLiveActivity(transcriptionStartedAt)
+                                                    try await Task.sleep(for: .milliseconds(300))
+                                                }
+                                            } catch {
+                                                print("failed to update transcription live activity push", ErrorDesc.taskError, error)
+                                            }
                                         }
                                     
                                 } else {
@@ -260,10 +295,18 @@ public struct VoiceTranscriptionView: View {
                                             transcriptionLiveActivity.stopLiveActivity()
                                         }
                                 }
+                                
+                                if isStartingAudioStream {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                        .tint(.white)
+                                }
                             }
                         }.padding(.top)
                             .padding(.bottom)
-                    }
+                            .disabled(audioManager.isSummarizing || isStartingAudioStream)
+                        
+                    }.padding(.trailing, 100)
                     
                 }.padding(.top)
                     .frame(maxHeight: .infinity)
@@ -286,11 +329,12 @@ public struct VoiceTranscriptionView: View {
                     await audioManager.cancelActiveAudioSession(reason: "audio_view_dismissed")
                 }
             }
+        
     }
 }
 
 
 
 #Preview {
-    VoiceTranscriptionView(transcriptionStartedAt: Date(), idempotentKey: UUID())
+    VoiceTranscriptionView(idempotentKey: UUID())
 }

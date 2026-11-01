@@ -33,16 +33,16 @@ public struct PushToSupabaseOpenAi: Encodable {
     }
 }
 
-public struct PushToSupabaseRepDesktopNotes: Encodable {
+public struct PushToSupabaseTranscriptionNotes: Encodable {
     let token: String
-    let userId: String
+    let pageID: String
     let title: String
     let fullNotes: String
     let contentHash: String
     
     enum CodingKeys: String, CodingKey {
         case token = "token"
-        case userId = "user_id"
+        case pageID = "page_id"
         case title = "page_title"
         case fullNotes = "page_data"
         case contentHash = "content_hash"

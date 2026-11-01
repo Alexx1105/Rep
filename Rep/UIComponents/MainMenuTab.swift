@@ -133,6 +133,14 @@ struct MainMenuTab: View {
                 }
                 
                 Spacer()
+                
+                if let duration = repMobileAudioTitle?.duration {
+                    Text(Duration.seconds(duration), format: .time(pattern: .minuteSecond))
+                        .font(.system(size: 14, weight: .regular, design: .monospaced))
+                        .foregroundStyle(Color.mmDark).opacity(0.5)
+                        .fixedSize()
+                }
+                
                 Image(systemName: "chevron.right")
                     .foregroundStyle(Color.mmDark)
                     .opacity(0.8)

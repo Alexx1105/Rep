@@ -10,6 +10,18 @@ struct transcriptionSummmaryView: View {
     @State public var defaultSelectedType: PickerView.PickerType = .notes
     @Binding var idempotentKey: UUID
     
+    func resetTranscriptionState() {
+        idempotentKey = UUID()
+        audioManager.isTranscribing = false
+        audioManager.isSummarizing = false
+        audioManager.audioLevels = 0
+        audioManager.didStopAudioStream = false
+        audioManager.finishedTranscript = ""
+        audioManager.liveTranscription = ""
+        audioManager.isTranscriptFinished = false
+        audioManager.summarizedNotes = ""
+    }
+    
     
     var body: some View {
         
@@ -72,15 +84,7 @@ struct transcriptionSummmaryView: View {
                     PickerView(pickerType: $defaultSelectedType)
                     Spacer(minLength: 5)
                     Button {
-                        idempotentKey = UUID()
-                        audioManager.isTranscribing = false
-                        audioManager.isSummarizing = false
-                        audioManager.audioLevels = 0
-                        audioManager.didStopAudioStream = false
-                        audioManager.finishedTranscript = ""
-                        audioManager.liveTranscription = ""
-                        audioManager.isTranscriptFinished = false
-                        audioManager.summarizedNotes = ""
+                       resetTranscriptionState()
                     } label: {
                         ZStack {
                             Circle().fill(Color.clear).frame(width: 50, height: 50)
