@@ -115,17 +115,12 @@ struct SettingsView: View {
                                         .opacity(textOpacity)
                                     
                                     Toggle("Auto Sync", isOn: $AutoSync.isAutoSync)
-                                        .disabled(!paymentStore.hasPaidAccess)
+                                        .disabled(!paymentStore.hasPaidAccess && !AutoSync.isAutoSync)
                                         .fontWeight(.semibold)
                                         .opacity(textOpacity)
                                         .tint(.blue)
                                         .onChange(of: AutoSync.isAutoSync) { _, newValue in
                                             print("auto sync toggled in settings view: \(newValue)")
-                                        }
-                                        .onChange(of: paymentStore.hasPaidAccess) { _,_ in
-                                            if !paymentStore.hasPaidAccess {
-                                                AutoSync.isAutoSync = false
-                                            }
                                         }
                                     
                                 }.frame(alignment: .leading)
