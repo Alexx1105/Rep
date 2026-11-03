@@ -174,9 +174,11 @@ struct TOSPage: View {
             } label: {
                 Text("Agree")
                     .fontWeight(.semibold)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.glassProminent)
+            .tint(.blue)
             .buttonBorderShape(.capsule)
             .controlSize(.large)
             .disabled(!hasScrolledToBottom)

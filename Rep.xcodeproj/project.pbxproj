@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20148D93098168100B4B2BA /* CategoryTabs.swift */; };
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
 		B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */; };
@@ -133,6 +134,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B20148D93098168100B4B2BA /* CategoryTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTabs.swift; sourceTree = "<group>"; };
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = combinedDataSources.swift; sourceTree = "<group>"; };
@@ -356,6 +358,7 @@
 		B3ED98CF4BC35A3484ED0C10 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				B20148D93098168100B4B2BA /* CategoryTabs.swift */,
 				B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */,
 				B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */,
 				B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */,
@@ -600,6 +603,7 @@
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OauthProviderManager.swift in Sources */,
+				B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */,
 				B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

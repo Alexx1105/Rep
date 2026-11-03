@@ -35,7 +35,7 @@ struct MainMenu: View {
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
-
+    
     private var notesTopBlur: some View {
         LinearGradient(
             colors: [
@@ -49,7 +49,7 @@ struct MainMenu: View {
         .frame(height: 20)
         .allowsHitTesting(false)
     }
-
+    
     private var notesBottomBlur: some View {
         LinearGradient(
             colors: [
@@ -69,6 +69,10 @@ struct MainMenu: View {
     @State private var tabSlideOver = false
     @State private var deleteMultipleTabs = Set<String>()
     @State private var selectedCheckBox = false
+    @State private var selectedFilterCategory: CategoryFilter = {
+        let savedCategory = UserDefaults.standard.string(forKey: "selectedFilterCategory") ?? ""
+        return CategoryFilter(rawValue: savedCategory) ?? .allNotes
+    }()
     
     @ObservedObject private var AutoSync = SyncController.shared
     
@@ -108,6 +112,32 @@ struct MainMenu: View {
         obsidianPages.map { .obsidianPageTitle($0)} + googlePages.map { .googlePageTitle($0)}
     }
     
+    private var filteredMainMenuSources: [CombinedDataSource] {
+        mainMenuSources.filter { source in
+            switch selectedFilterCategory {
+            case .allNotes:
+                return true
+            case .pluginProivderNotes:
+                switch source {
+                case .notionContent, .obsidianPageTitle, .googlePageTitle:
+                    return true
+                default:
+                    return false
+                }
+            case .audioTranscriptionNotes:
+                switch source {
+                case .repDesktopTranscription, .repMobileTranscription:
+                    return true
+                default:
+                    return false
+                }
+            case .aiChatNotes:
+                if case .openaiChatContent = source { return true }
+                return false
+            }
+        }
+    }
+    
     var body: some View {
         
         VStack {
@@ -144,12 +174,9 @@ struct MainMenu: View {
                 Spacer()
             }.frame(maxWidth: .infinity, maxHeight: 50)
                 .opacity(showUserEmail.first?.personEmail != nil ? 1 : 0)
-            
-            
             Spacer()
-            //Button(action: {debugStartDynamicRepLiveActivity()}) { Rectangle()}   /* for debugging live activity */
             HStack {
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading) {
                     if AutoSync.isAutoSync {
                         ZStack {
                             Capsule()
@@ -182,7 +209,9 @@ struct MainMenu: View {
                     Text("Your Notes:")
                         .fontWeight(.semibold)
                         .opacity(textOpacity)
-                        
+                    
+                    
+                    
                 }
                 Spacer()
                 Menu {
@@ -239,7 +268,7 @@ struct MainMenu: View {
                                 } catch is CancellationError {
                                     return
                                 } catch {
-                                    print("remote tab deletion failed ❌: \(error.localizedDescription)")
+                                    print("remote tab deletion failed: \(error.localizedDescription)")
                                 }
                             }
                             tabSlideOver = false
@@ -263,15 +292,20 @@ struct MainMenu: View {
                 }
                 
             }
-            .frame(maxWidth: .infinity, maxHeight: 95 )
+            .frame(maxWidth: .infinity)
             .padding(.horizontal)
-            Spacer()
+            
+            VStack {
+                CategoryTabs(selectedFilterCategory: $selectedFilterCategory)
+            }.frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading)
+                .padding(.vertical, 2)
             
             VStack {
                 ZStack {
                     ScrollView {
                         Spacer()
-                        ForEach(mainMenuSources, id:\.id) { title in
+                        ForEach(filteredMainMenuSources, id:\.id) { title in
                             HStack(spacing: 20) {
                                 MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
                             }
@@ -280,14 +314,14 @@ struct MainMenu: View {
                     .frame(maxHeight: .infinity)
                     .contentMargins(.top, 20, for: .scrollContent)
                     .contentMargins(.bottom, 80, for: .scrollContent)
-
+                    
                     VStack(spacing: 0) {
                         notesTopBlur
                         Spacer()
                         notesBottomBlur
                     }
                 }
-                .padding()
+                .padding([.horizontal, .bottom])
             }
             .foregroundStyle(Color.white.opacity(0.8))
             
@@ -295,6 +329,9 @@ struct MainMenu: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.mmBackground)
         .navigationBarBackButtonHidden()
+        .onChange(of: selectedFilterCategory) { _, category in
+            UserDefaults.standard.set(category.rawValue, forKey: "selectedFilterCategory")
+        }
         
         
         .task {
@@ -321,7 +358,7 @@ struct MainMenu: View {
             }
         }
         
-        .onAppear {                      ///init task controller after UI renders
+        .onAppear {                     
             if taskController == nil {
                 taskController = TaskController(pages: context, context: context)
             }
