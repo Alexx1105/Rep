@@ -4,12 +4,9 @@
 //
 //  Created by alex haidar on 3/13/26.
 //
-/* General utility helpers  */
-
+/* General utility helpers */
 import Foundation
 import SwiftData
-import ActivityKit
-import KimchiKit
 import Supabase
 
 
@@ -55,19 +52,6 @@ final class ImportedNotesFetch {
         
         guard !result.isEmpty else { throw ErrorDefinition.emptyContent }
         return result
-    }
-}
-
-
-public final class PushTokenManager {
-    public static func generatePushToken() async -> String {
-        let liveActvityToken = await Activity<DynamicRepAttributes>.pushToStartTokenUpdates.first(where: {_ in true })
-        guard liveActvityToken != nil else { return "" }
-        
-        let tokenHex: String = liveActvityToken!.map{String(format: "%02x", $0)}.joined()
-        print("push token hex: \(tokenHex)")
-        
-        return tokenHex
     }
 }
 

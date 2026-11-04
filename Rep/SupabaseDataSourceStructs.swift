@@ -80,3 +80,8 @@ public struct PushToSupabaseGoogleDocs: Encodable {
         case contentHash = "content_hash"
     }
 }
+
+
+struct PushTokenUpdate: Encodable {
+    let token: String
+}

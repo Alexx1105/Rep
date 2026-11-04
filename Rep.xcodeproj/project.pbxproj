@@ -79,6 +79,7 @@
 		B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3CFF79DB455B634A844A062 /* SkeletonLoader.swift */; };
 		B3EF374DAB89329BAE2519B4 /* TabSelectionCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */; };
 		B3FA7E5351F7A40F39DA747A /* TranscriptionSummaryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */; };
+		79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7454E186714FF59D350185 /* PushTokenManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -208,6 +209,7 @@
 		B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSelectionCircle.swift; sourceTree = "<group>"; };
 		B3EBC20D9D8FDFAB7E4766BD /* MainMenuDataSourceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuDataSourceList.swift; sourceTree = "<group>"; };
 		B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastNotification.swift; sourceTree = "<group>"; };
+		DE7454E186714FF59D350185 /* PushTokenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTokenManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -299,6 +301,7 @@
 				B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */,
 				B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */,
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
+				DE7454E186714FF59D350185 /* PushTokenManager.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */,
 				B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */,
@@ -578,6 +581,7 @@
 				B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */,
 				B2270333302BA69C00F308B9 /* SupabaseDataSourceStructs.swift in Sources */,
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
+				79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */,
 				B2AEBC0D3067048C0067549B /* DynamicNotesCoordinator.swift in Sources */,
 				B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */,
 				B2AEBC49307A94590067549B /* PluginCoordinator.swift in Sources */,
