@@ -57,7 +57,7 @@ struct CategoryTabs: View {
                             
                         }.padding(.horizontal)
                             .background(Capsule(style: .circular)
-                                .fill(selectedFilterCategory == category ? Color.blue : Color.gray).opacity(0.3)
+                                .fill(selectedFilterCategory == category ? Color.blue : Color.gray).opacity(0.2)
                                 .frame(maxWidth: .infinity, maxHeight: 55))
                             .fixedSize(horizontal: true, vertical: false)
                     }
