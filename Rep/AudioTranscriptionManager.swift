@@ -62,7 +62,6 @@ public final class AudioTranscriptionManager: ObservableObject {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .defaultToSpeaker])
-            try audioSession.setPreferredInputNumberOfChannels(1)
             
             await Task.detached {
                 do {
@@ -72,6 +71,7 @@ public final class AudioTranscriptionManager: ObservableObject {
                 }
             }.value
             
+            try audioSession.setPreferredInputNumberOfChannels(1)
         } catch {
             print("failed to config audio session", ErrorDesc.configError, error)
             throw ErrorDesc.configError

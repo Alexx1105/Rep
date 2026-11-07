@@ -476,6 +476,11 @@
 					};
 					B2B837C22BCB102F00BBC748 = {
 						CreatedOnToolsVersion = 15.3;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					B2BBED3E3032140E00526E22 = {
 						CreatedOnToolsVersion = 26.0;
