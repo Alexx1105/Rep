@@ -30,7 +30,7 @@ struct MainMenuTab: View {
                         .foregroundStyle(Color.white)
                         .opacity(0.5)
                     
-                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? obsidianPageTitle?.pageID ?? googlePageTitle?.pageID ?? "", dataSource: dataSource)) {
+                    NavigationLink(destination: DynamicRepControlsView(pageID: userPageTitle?.pageID ?? obsidianPageTitle?.pageID ?? googlePageTitle?.pageID ?? openaiChatTitle?.openaiId ?? repDesktopAudioTitle?.userId ?? repMobileAudioTitle?.userId ?? "", dataSource: dataSource)) {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     

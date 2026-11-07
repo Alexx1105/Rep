@@ -6,6 +6,9 @@ import KimchiKit
 import ActivityKit
 
 struct ToastNotification: View {
+    var title: String = "Page/s Successfully Imported"
+    var subtitle: String? = "Close Out The Import Dialog"
+
     var body: some View {
         
         ZStack {
@@ -16,13 +19,15 @@ struct ToastNotification: View {
             HStack(alignment: .center, spacing: 15) {
                 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Page/s Successfully Imported")
+                    Text(title)
                         .font(Font.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(Color.mmDark)
                         .padding(.leading)
                     
-                    Text("Close Out The Import Dialog")
-                        .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
-                        .padding(.leading)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(Font.system(size: 12, weight: .medium, design: .rounded)).opacity(0.5)
+                            .padding(.leading)
+                    }
                 }
                 
                 ZStack {
@@ -67,7 +72,7 @@ struct PluginAddedToast: View {
                         .foregroundStyle(Color.intervalBlue)
                     
                     Image(systemName: "checkmark.circle").font(.system(size: 17)).foregroundStyle(Color.kimchiLabs)
-                }
+                }.padding(.horizontal, 2)
             }
         }
     }

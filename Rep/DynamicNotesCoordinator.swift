@@ -129,11 +129,14 @@ public final class DynamicNotesCoordinator: ObservableObject {
     }
     
     
-    func updateNotesCluster(batchSize: Int) async {
+    @discardableResult
+    func updateNotesCluster(batchSize: Int) async -> Bool {
         do {
             try await supabase.updateNotesClusterCards(batchSize: batchSize, pageID: dataSourceId)
+            return true
         } catch {
             print("failed to update notes cluster size", ErrorDesc.callsiteError, error)
+            return false
         }
     }
     
