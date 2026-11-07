@@ -77,6 +77,7 @@ struct DynamicRepControlsView: View {
     @Environment(\.modelContext) var modelContextPage
     
     @StateObject var dynamicNotesCoordinator: DynamicNotesCoordinator
+    @State private var showNotesSettingsToast = false
     
     private var elementOpacityDark: Double { colorScheme == .dark ? 0.1 : 0.5 }
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
@@ -328,7 +329,9 @@ struct DynamicRepControlsView: View {
                                 ClusterPickerView(clusterPicker: $picker)
                                     .onChange(of: picker) {
                                         Task {
-                                            await dynamicNotesCoordinator.updateNotesCluster(batchSize: picker.batchSize)
+                                            if await dynamicNotesCoordinator.updateNotesCluster(batchSize: picker.batchSize) {
+                                                await Toast.shared.callToastOnPageLoad($showNotesSettingsToast)
+                                            }
                                         }
                                     }
                                     .padding(.horizontal)
@@ -374,6 +377,22 @@ struct DynamicRepControlsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.mmBackground)
         .navigationBarBackButtonHidden()
+        .overlay(alignment: .top) {
+            if showNotesSettingsToast {
+                ToastNotification(title: "notes settings updated", subtitle: nil)
+                    .transition(.move(edge: .top).combined(with: .blurReplace))
+                    .allowsHitTesting(false)
+                    .fixedSize(horizontal: false, vertical: false)
+                    .padding(.top, 1)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: showNotesSettingsToast)
+        .sensoryFeedback(.selection, trigger: storeSelectedOption)
+        .sensoryFeedback(.selection, trigger: storeSelectedHyperModeOption)
+        .sensoryFeedback(.selection, trigger: hyperToggleEnabled)
+        .sensoryFeedback(.selection, trigger: repeatEnabled)
+        .sensoryFeedback(.selection, trigger: picker)
+        .sensoryFeedback(.selection, trigger: notesOrder)
     }
 }
 

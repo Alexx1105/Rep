@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20148D93098168100B4B2BA /* CategoryTabs.swift */; };
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
 		B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */; };
@@ -78,6 +79,7 @@
 		B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3CFF79DB455B634A844A062 /* SkeletonLoader.swift */; };
 		B3EF374DAB89329BAE2519B4 /* TabSelectionCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */; };
 		B3FA7E5351F7A40F39DA747A /* TranscriptionSummaryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */; };
+		79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7454E186714FF59D350185 /* PushTokenManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,6 +135,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B20148D93098168100B4B2BA /* CategoryTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTabs.swift; sourceTree = "<group>"; };
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = combinedDataSources.swift; sourceTree = "<group>"; };
@@ -206,6 +209,7 @@
 		B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSelectionCircle.swift; sourceTree = "<group>"; };
 		B3EBC20D9D8FDFAB7E4766BD /* MainMenuDataSourceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuDataSourceList.swift; sourceTree = "<group>"; };
 		B3F1EDD368A8DD2B583E6420 /* ToastNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastNotification.swift; sourceTree = "<group>"; };
+		DE7454E186714FF59D350185 /* PushTokenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTokenManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -297,6 +301,7 @@
 				B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */,
 				B2270332302BA69100F308B9 /* SupabaseDataSourceStructs.swift */,
 				B2CDE6942F6383AD00B33DA9 /* GlobalHelpers.swift */,
+				DE7454E186714FF59D350185 /* PushTokenManager.swift */,
 				B2575D0C2EE120D900B82793 /* PaymentStore.swift */,
 				B2BBED3930315DBC00526E22 /* PaymentStoreBillingStructs.swift */,
 				B2BBED483032A6D600526E22 /* PaymentStoreCreditsManager.swift */,
@@ -356,6 +361,7 @@
 		B3ED98CF4BC35A3484ED0C10 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				B20148D93098168100B4B2BA /* CategoryTabs.swift */,
 				B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */,
 				B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */,
 				B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */,
@@ -470,6 +476,11 @@
 					};
 					B2B837C22BCB102F00BBC748 = {
 						CreatedOnToolsVersion = 15.3;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					B2BBED3E3032140E00526E22 = {
 						CreatedOnToolsVersion = 26.0;
@@ -575,6 +586,7 @@
 				B2D8FE762F78A72200034A83 /* SupabaseClientManager.swift in Sources */,
 				B2270333302BA69C00F308B9 /* SupabaseDataSourceStructs.swift in Sources */,
 				B2CDE6952F6383B600B33DA9 /* GlobalHelpers.swift in Sources */,
+				79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */,
 				B2AEBC0D3067048C0067549B /* DynamicNotesCoordinator.swift in Sources */,
 				B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */,
 				B2AEBC49307A94590067549B /* PluginCoordinator.swift in Sources */,
@@ -600,6 +612,7 @@
 				B21427D92F38FB9200D86624 /* SyncController.swift in Sources */,
 				B292781F3028DA19007F567E /* LocalLiveActivityManager.swift in Sources */,
 				B22E10F22D04F7C0003F3D9F /* OauthProviderManager.swift in Sources */,
+				B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */,
 				B2BBED3A30315DC700526E22 /* PaymentStoreBillingStructs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -789,7 +802,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -812,7 +825,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.beta;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1021,7 +1034,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -1044,7 +1057,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1062,7 +1075,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -1085,7 +1098,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

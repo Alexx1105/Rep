@@ -175,13 +175,13 @@ public func debugStartIntervalLiveActivity() {          ///for manaully debuggin
 
 
 @available(iOS 18.0, *)
-public func startTranscriptionLiveActivity(isRecording: Bool, isPaused: Bool, audioLevel: CGFloat, startedAt: Date) async throws {  //TODO: test
+public func startTranscriptionLiveActivity(isRecording: Bool, isPaused: Bool, audioLevel: CGFloat, startedAt: Date) async throws {
     guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
     let attributes = TranscriptionLiveActivityAttributes()
     let state = TranscriptionLiveActivityAttributes.ContentState(isRecording: isRecording, isPaused: isPaused, audioLevel: audioLevel, startedAt: startedAt)
     
-    let activity = try Activity.request(attributes: attributes, content: .init(state: state, staleDate: nil, relevanceScore: 1.0), pushType: nil, style: .transient)
+    let activity = try Activity.request(attributes: attributes, content: .init(state: state, staleDate: nil, relevanceScore: 1.0), pushType: nil, style: .standard)
     
     await TranscriptionLiveActivityManager.shared.setActivity(activity: activity)
     print("Live Activity started 🔄")

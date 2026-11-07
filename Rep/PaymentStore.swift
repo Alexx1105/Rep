@@ -65,10 +65,37 @@ final class PaymentStore: ObservableObject {
     }
     
     
+    private func cacheEntitlement(_ snapshot: EntitlementSnapshot, for userID: UUID) {
+        do {
+            let data = try JSONEncoder().encode(snapshot)
+            UserDefaults.standard.set(data, forKey: "billing.entitlement.\(userID.uuidString)")
+        } catch {
+            print("failed to cache entitlement:", error)
+        }
+    }
+
+    private func restoreCachedEntitlement(for userID: UUID) {
+        entitlement = nil
+        guard let data = UserDefaults.standard.data(forKey: "billing.entitlement.\(userID.uuidString)"),
+              let snapshot = try? JSONDecoder().decode(EntitlementSnapshot.self, from: data) else { return }
+
+        if snapshot.plan != .free {
+            guard let effectiveUntil = snapshot.effectiveUntil else { return }
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let expiration = formatter.date(from: effectiveUntil) ?? ISO8601DateFormatter().date(from: effectiveUntil)
+            guard let expiration, expiration > Date() else { return }
+        }
+        entitlement = snapshot
+    }
+
+
     func prepareForAuthenticatedUser() async {
         state = .loading
         
         do {
+            let session = try await supabaseDBClient.auth.session
+            restoreCachedEntitlement(for: session.user.id)
             self.appAccountToken = try await supabase.loadAppAccountToken()
             await AudioTranscriptionManager.shared.recoverInterruptedAudioReservation()
 
@@ -186,6 +213,9 @@ final class PaymentStore: ObservableObject {
         entitlement = EntitlementSnapshot(plan: resolved.effective_plan_key, status: resolved.subscription_status, productId: entitlement?.productId,
                                           effectiveFrom: resolved.effective_at, effectiveUntil: resolved.expires_at, willAutoRenew: resolved.auto_renew_enabled,
                                           version: resolved.entitlement_version)
+        if let entitlement {
+            cacheEntitlement(entitlement, for: session.user.id)
+        }
     }
     
     
@@ -216,9 +246,11 @@ final class PaymentStore: ObservableObject {
             inFlightTransactionIDs.insert(transaction.id)
             defer { inFlightTransactionIDs.remove(transaction.id) }
             
+            let session = try await supabaseDBClient.auth.session
             let response = try await syncPurchase(signedTransaction: verification.jwsRepresentation)
             
             entitlement = response.entitlement
+            cacheEntitlement(response.entitlement, for: session.user.id)
             usage = response.usage
             
             if finishAfterSync {

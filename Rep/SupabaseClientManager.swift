@@ -26,7 +26,8 @@ public final class SupabaseClientManager: ObservableObject {
             guard !token.isEmpty && !row.isEmpty && !pageID.isEmpty else { throw SupabaseError.nilDataError }
             
             let schema: PushToSupabaseNotion = PushToSupabaseNotion(token: token, page_data: row, page_id: pageID, page_title: pageTitle, content_hash: content_hash)
-            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            let _ = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            await PushTokenManager.cacheInitialPushToken(token)
             
         } catch {
             print("[notion] supabse insertion errror", SupabaseError.upsertError, error)
@@ -38,7 +39,8 @@ public final class SupabaseClientManager: ObservableObject {
         do {
             guard !token.isEmpty && !pageID.isEmpty else { throw SupabaseError.nilDataError }
             let schema: PushToSupabaseObsidian = PushToSupabaseObsidian(token: token, pageID: pageID, title: title, content: content, contentHash: contentHash)
-            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            let _ = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            await PushTokenManager.cacheInitialPushToken(token)
             
         } catch {
             print("[obsidian] supabase insertion error", SupabaseError.upsertError, error)
@@ -50,7 +52,8 @@ public final class SupabaseClientManager: ObservableObject {
         do {
             guard !token.isEmpty && !pageID.isEmpty else { throw SupabaseError.nilDataError }
             let schema: PushToSupabaseGoogleDocs = PushToSupabaseGoogleDocs(token: token, pageID: pageID, title: title, content: content, contentHash: contentHash)
-            let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            let _ = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, content_hash, page_data, page_title").execute()
+            await PushTokenManager.cacheInitialPushToken(token)
             
         } catch {
             print("[google docs] supabase insertion error", SupabaseError.upsertError, error)
@@ -67,10 +70,11 @@ public final class SupabaseClientManager: ObservableObject {
             
             let schema: PushToSupabaseOpenAi = PushToSupabaseOpenAi(token: token, openaiID: openaiID, title: title, content: content, contentHash: hashed)
             let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
+            await PushTokenManager.cacheInitialPushToken(token)
             
-            print("==========\npage data successfully inserted ✅:", send)
+            print("==========\npage data successfully inserted :", send)
         } catch {
-            print("[openai chat] supabse insertion errror ❗️", SupabaseError.upsertError, error)
+            print("[openai chat] supabse insertion error:", SupabaseError.upsertError, error)
         }
     }
     
@@ -83,7 +87,8 @@ public final class SupabaseClientManager: ObservableObject {
         
         let schema: PushToSupabaseTranscriptionNotes = PushToSupabaseTranscriptionNotes(token: token, pageID: pageID, title: title, fullNotes: fullNotes, contentHash: hashed)
         let send = try await supabaseDBClient.from("push_tokens_dev").upsert([schema], onConflict: "page_id, content_hash").select("token, page_id, page_data, page_title").execute()
-        print("==========\npage data successfully inserted ✅:", send)
+        await PushTokenManager.cacheInitialPushToken(token)
+        print("==========\npage data successfully inserted:", send)
     }
     
     
@@ -97,7 +102,7 @@ public final class SupabaseClientManager: ObservableObject {
             guard !desktopNote.isEmpty else { continue }
             
             try await supabaseAudioTranscriptionNotesUpsert(pageID: pageID, title: title, fullNotes: desktopNote, token: token)
-            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
+            print("rep desktop helper transcription notes successfully upserted into supabase")
         }
     }
     
@@ -112,7 +117,7 @@ public final class SupabaseClientManager: ObservableObject {
             guard !desktopNote.isEmpty else { continue }
             
             try await supabaseAudioTranscriptionNotesUpsert(pageID: pageID, title: title, fullNotes: desktopNote, token: token)
-            print("rep desktop helper transcription notes successfully upserted into supabase ✅")
+            print("rep desktop helper transcription notes successfully upserted into supabase")
         }
     }
     

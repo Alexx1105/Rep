@@ -96,8 +96,6 @@ struct RepApp: App {
                                                                    GooglePageTitle.self, GooglePageContent.self)
     }
     
- 
-    
     @AppStorage("appearence.toggle") private var toggleEnabled = false
     @AppStorage("user.signedIn") private var isUserAuthed: Bool = false
     
@@ -107,8 +105,9 @@ struct RepApp: App {
     @State private var isPresented: Bool = false
     @State private var isCheckingSession = true
     @State private var notesSettingsRoute: NotesSettingsRoute?
+    @State private var pushTokenManager = PushTokenManager()
+    
     var body: some Scene {
-        
         WindowGroup {
             ZStack {
                 if isCheckingSession {
@@ -127,6 +126,32 @@ struct RepApp: App {
                     }
                     PolledDesktopNotesPopover(isPresented: $desktopNotesPoller.didPollerReturnDesktopNotes)
                 }
+            }.task(id: isUserAuthed) {
+                guard isUserAuthed else {
+                    pushTokenManager.task?.cancel()
+                    pushTokenManager.task = nil
+                    return
+                }
+                
+                do {
+                    let session = try await supabaseDBClient.auth.session
+                    let tokenStorageKey: String = "push.lastSyncedToken.\(session.user.id.uuidString)"
+                    
+                    while !Task.isCancelled {
+                        if let previousPushToken: String = UserDefaults.standard.string(forKey: tokenStorageKey) {
+                            try Task.checkCancellation()
+                            try await pushTokenManager.updatePushTokenListener(previousToken: previousPushToken)
+                        }
+                        try await Task.sleep(for: .seconds(3))
+                    }
+                    
+                } catch {
+                    print("failed to update user push token", ErrorDesc.callsiteError, error)
+                }
+            }
+            .task(id: isUserAuthed) {
+                guard isUserAuthed else { return }
+                await PaymentStore.shared.prepareForAuthenticatedUser()
             }
             .task {
                 if isUserAuthed {
