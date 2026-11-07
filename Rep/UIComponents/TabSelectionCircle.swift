@@ -14,7 +14,7 @@ struct TabSelectionCircle: View {
             .frame(width: 32, height: 32)
             .transition(.move(edge: .trailing).combined(with: .slide))
             .padding(.leading, 1)
-            .overlay { Image(systemName: "checkmark").foregroundStyle(Color.checkmark)}
+            .overlay { Image(systemName: "checkmark").foregroundStyle(Color.mmBackground)}
     }
 }
 

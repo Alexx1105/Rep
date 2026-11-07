@@ -34,13 +34,16 @@ struct MainMenuTab: View {
                         Label("Live activities", systemImage: "clock.badge")
                     }
                     
-                } label: {
-                    Image(systemName: "clock.arrow.2.circlepath")
-                        .foregroundStyle(Color.mmDark)
-                        .opacity(0.8)
-                        .frame(width: 35, height: 35)
-                        .background(Circle().fill(Color.clear).glassEffect(.regular))
-                }
+                    } label: {
+                        Image(systemName: "clock.arrow.2.circlepath")
+                            .foregroundStyle(Color.mmDark)
+                            .opacity(0.8)
+                            .frame(width: 30, height: 30)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    .controlSize(.small)
+                
                 
                 HStack(spacing: 10) {
                     if let emoji: String = userPageTitle?.emoji {

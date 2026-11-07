@@ -304,10 +304,14 @@ struct MainMenu: View {
             VStack {
                 ZStack {
                     ScrollView {
-                        Spacer()
-                        ForEach(filteredMainMenuSources, id:\.id) { title in
-                            HStack(spacing: 20) {
-                                MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
+                        GlassEffectContainer(spacing: 0) {
+                            LazyVStack {
+                                Spacer()
+                                ForEach(filteredMainMenuSources, id:\.id) { title in
+                                    HStack(spacing: 20) {
+                                        MainMenuDataSourceList(tabSlideOver: $tabSlideOver, deleteMultipleTabs: $deleteMultipleTabs, title: title)
+                                    }
+                                }
                             }
                         }
                     }
