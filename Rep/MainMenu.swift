@@ -343,11 +343,6 @@ struct MainMenu: View {
             }
         }
         
-        .task(id: isUserAuthed) {
-            guard isUserAuthed else { return }
-            await PaymentStore.shared.prepareForAuthenticatedUser()
-        }
-        
         .onChange(of: AutoSync.isAutoSync) { _, synced in
             guard let controller = taskController else { return }
             

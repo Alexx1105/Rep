@@ -149,6 +149,10 @@ struct RepApp: App {
                     print("failed to update user push token", ErrorDesc.callsiteError, error)
                 }
             }
+            .task(id: isUserAuthed) {
+                guard isUserAuthed else { return }
+                await PaymentStore.shared.prepareForAuthenticatedUser()
+            }
             .task {
                 if isUserAuthed {
                     do {
