@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7454E186714FF59D350185 /* PushTokenManager.swift */; };
 		B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20148D93098168100B4B2BA /* CategoryTabs.swift */; };
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
@@ -79,7 +80,6 @@
 		B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3CFF79DB455B634A844A062 /* SkeletonLoader.swift */; };
 		B3EF374DAB89329BAE2519B4 /* TabSelectionCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E999FD14714C367329CFC4 /* TabSelectionCircle.swift */; };
 		B3FA7E5351F7A40F39DA747A /* TranscriptionSummaryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */; };
-		79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7454E186714FF59D350185 /* PushTokenManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -663,7 +663,7 @@
 				CODE_SIGN_ENTITLEMENTS = RepLiveActivities/DynamicRepExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RepLiveActivities/Info.plist;
@@ -679,7 +679,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.DynamicRepExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -698,7 +698,7 @@
 				CODE_SIGN_ENTITLEMENTS = RepLiveActivities/DynamicRepExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RepLiveActivities/Info.plist;
@@ -714,7 +714,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.DynamicRepExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -802,7 +802,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -843,7 +843,7 @@
 				CODE_SIGN_ENTITLEMENTS = RepLiveActivities/DynamicRepExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RepLiveActivities/Info.plist;
@@ -859,7 +859,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.beta.DynamicRepExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1034,7 +1034,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -1075,7 +1075,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;

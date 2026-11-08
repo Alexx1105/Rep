@@ -63,10 +63,10 @@ struct ImportedNotes: View {
                     switch titleSource {
                         
                     case (.notionContent(_ )):
-                        if let emojis: String? = filterTitle.first?.emoji, let title: String? = filterTitle.first?.text {
+                        if let pageTitle = filterTitle.first {
                             HStack(spacing: 10) {
-                                Text(emojis ?? "")
-                                Text(title ?? "")
+                                Text(pageTitle.emoji ?? "")
+                                Text(pageTitle.text)
                                     .fontWeight(.semibold)
                                     .truncationMode(.middle)
                                     .lineLimit(1)
@@ -86,49 +86,35 @@ struct ImportedNotes: View {
                         }
                         
                     case .obsidianPageTitle(let pageTitle):
-                        if let emojis: String? = pageTitle.emoji, let title: String? = pageTitle.text {
-                            HStack(spacing: 10) {
-                                Text(emojis ?? "")
-                                Text(title ?? "")
-                                    .fontWeight(.semibold)
-                                    .truncationMode(.middle)
-                                    .lineLimit(1)
-                                
-                                Image("obsidian")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 18, height: 18)
-                                    .padding(.trailing)
-                                    .opacity(textOpacity)
-                            }
-                        } else {
-                            Rectangle()
-                                .cornerRadius(5)
-                                .frame(width: 150, height: 20)
-                                .opacity(0.1)
+                        HStack(spacing: 10) {
+                            Text(pageTitle.emoji ?? "")
+                            Text(pageTitle.text)
+                                .fontWeight(.semibold)
+                                .truncationMode(.middle)
+                                .lineLimit(1)
+
+                            Image("obsidian")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .padding(.trailing)
+                                .opacity(textOpacity)
                         }
                         
                     case .googlePageTitle(let pageTitle):
-                        if let emojis: String? = pageTitle.emoji, let title: String? = pageTitle.text {
-                            HStack(spacing: 10) {
-                                Text(emojis ?? "")
-                                Text(title ?? "")
-                                    .fontWeight(.semibold)
-                                    .truncationMode(.middle)
-                                    .lineLimit(1)
-                                
-                                Image("googleDocs")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 18, height: 18)
-                                    .padding(.trailing)
-                                    .opacity(textOpacity)
-                            }
-                        } else {
-                            Rectangle()
-                                .cornerRadius(5)
-                                .frame(width: 150, height: 20)
-                                .opacity(0.1)
+                        HStack(spacing: 10) {
+                            Text(pageTitle.emoji ?? "")
+                            Text(pageTitle.text)
+                                .fontWeight(.semibold)
+                                .truncationMode(.middle)
+                                .lineLimit(1)
+
+                            Image("googleDocs")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .padding(.trailing)
+                                .opacity(textOpacity)
                         }
                         
                     case .openaiChatContent(let openaiChatTitle):
