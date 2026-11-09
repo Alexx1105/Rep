@@ -4,7 +4,8 @@
 //
 //  Created by alex haidar on 4/25/26.
 //
-/* All requests to the supabase edge functions for the AI chats will be handled here  */
+/* All requests to the supabase edge functions
+   for the AI chats will be handled here  */
 import Foundation
 import Supabase
 import SwiftData
@@ -22,11 +23,6 @@ public final class AIRequestManager: ObservableObject {
         let userMessage: String
         let gptModel: String
         let userFile: [URL]
-    }
-    
-    enum modelTier: Codable {
-        case gptMini
-        case gptFull
     }
     
     
@@ -63,10 +59,10 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, userFileUrl: [URL]?, userPhotoData: [Data]?, gptModel: String = "mini", context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
+    public func openAIRequest(userMessage: String, userFileUrl: [URL]?, userPhotoData: [Data]?, gptModel: String, context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
         
-        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
+        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
         
         let session = try await supabaseDBClient.auth.session

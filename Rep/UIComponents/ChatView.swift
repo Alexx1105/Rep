@@ -33,7 +33,23 @@ struct ChatView: View {
     @State var task: Task<Void, Never>?
     @State var isMoreCreditsNeeded: Bool = false
     
+    @AppStorage("selectedAiProviderID") private var selectedAiProviderID: String = "local"
+    
     @FocusState private var isChatFocused: Bool
+    
+    
+    struct AIModelProviders: Identifiable, Hashable {
+        let id: String
+        let name: String
+        let image: String
+        var isSystemImage: Bool = false
+
+        static let all: [AIModelProviders] = [
+            AIModelProviders(id: "mini", name: "GPT-6.1 luna", image: "openaiLogo", isSystemImage: false),
+            AIModelProviders(id: "full", name: "GPT-6.1 sol", image: "openaiLogo", isSystemImage: false),
+            AIModelProviders(id: "local", name: "Siri AI (local)", image: "apple.intelligence", isSystemImage: true)
+        ]
+    }
     
     
     var body: some View {
@@ -138,20 +154,28 @@ struct ChatView: View {
                         
                         HStack {
                             Menu {
-                                Button {
-                                    
-                                } label: {
-                                    Label("GPT-5.4 mini", image: "openaiLogo")  //TODO: explain that its faster
-                                        .font(.system(size: 5))
-                                        .fixedSize(horizontal: false, vertical: true)
+                                Picker("Model", selection: $selectedAiProviderID) {
+                                    ForEach(AIModelProviders.all) { model in
+                                        Group {
+                                            if model.isSystemImage {
+                                                Label(model.name, systemImage: model.image)
+                                            } else {
+                                                Label(model.name, image: model.image)
+                                                    .font(.system(size: 5))
+                                                    .fixedSize(horizontal: false, vertical: true)
+                                            }
+                                        }
+                                        .tag(model.id)
+                                    }
                                 }
-                                
+                                .pickerStyle(.inline)
                             } label: {
                                 Image(systemName: "ellipsis")
                                     .font(.system(size: 20))
                                     .foregroundStyle(Color.mmDark)
                                     .padding()
                             }
+                        
                             Button {
                                 isNewChat = true
                                 Chat.shared.responseMessage.removeAll()
@@ -377,7 +401,8 @@ struct ChatView: View {
                 selectedPhotos.removeAll()
             }
             do {
-                try await Chat.sendChatMessage(userFile: file, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                let modelTier: Chat.ModelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
+                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
             } catch {
                 chatError = error.localizedDescription
                 print("chat error:", error)

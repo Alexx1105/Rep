@@ -73,8 +73,14 @@ public class Chat: ObservableObject {
     }
     
     
+    public enum ModelTier: String, Codable {
+        case gptMini = "mini"
+        case gptFull = "full"
+    }
+    
+    
     @MainActor
-    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
+    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
         let idempotentKey: UUID = UUID()
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
@@ -101,7 +107,7 @@ public class Chat: ObservableObject {
         let requestBuffer = chatBuffer()
         
         do {
-            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context, idempotentKey: idempotentKey) { chunk in
+            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: modelTier.rawValue, context: context, idempotentKey: idempotentKey) { chunk in
                 
                 await requestBuffer.append(chunk)
                 pendingUIText += chunk
