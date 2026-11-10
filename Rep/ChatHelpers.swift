@@ -5,7 +5,8 @@
 //  Created by alex haidar on 4/20/26.
 //
 /* helper functions, methods, and classes for the AI Chat view
- and voice transcription and accessing system level APIs/view controllers for the front-end here */
+   and voice transcription and accessing system level APIs/view
+   controllers for the front-end here */
 
 import Foundation
 import SwiftUI
@@ -15,7 +16,7 @@ import UIKit
 import SwiftData
 
 
-final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {     ///FYI: acts a a bridge between SwiftUI & UIKit
+final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {
     let onSelect: ([URL]) -> Void
     init(onSelect: @escaping ([URL]) -> Void) {
         self.onSelect = onSelect
@@ -76,6 +77,7 @@ public class Chat: ObservableObject {
     public enum ModelTier: String, Codable {
         case gptMini = "mini"
         case gptFull = "full"
+        case appleFoundationModel = "local"
     }
     
     
@@ -106,38 +108,46 @@ public class Chat: ObservableObject {
         var pendingUIText: String = ""
         let requestBuffer = chatBuffer()
         
-        do {
-            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: modelTier.rawValue, context: context, idempotentKey: idempotentKey) { chunk in
-                
-                await requestBuffer.append(chunk)
-                pendingUIText += chunk
-                
-                guard pendingUIText.count >= 16 else { return }
-                
-                let format = pendingUIText
-                pendingUIText.removeAll(keepingCapacity: true)
-                
-                await MainActor.run {
-                    if let addLastRawChunk = shared.responseMessage.indices.last {
-                        shared.responseMessage[addLastRawChunk].text.append(format)
+        if modelTier == .appleFoundationModel {
+            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput) { snapshot in
+                guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
+                shared.responseMessage[firstIndex].text = snapshot
+            }
+            await requestBuffer.append(answer)
+            
+        } else {
+            do {
+                try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: modelTier.rawValue, context: context, idempotentKey: idempotentKey) { chunk in
+                    
+                    await requestBuffer.append(chunk)
+                    pendingUIText += chunk
+                    
+                    guard pendingUIText.count >= 5 else { return }
+                    
+                    let format = pendingUIText
+                    pendingUIText.removeAll(keepingCapacity: true)
+                    
+                    await MainActor.run {
+                        if let addLastRawChunk = shared.responseMessage.indices.last {
+                            shared.responseMessage[addLastRawChunk].text.append(format)
+                        }
                     }
                 }
                 
+                onMeta: { meta in
+                    metadataText = meta
+                    print("metadata:", metadataText)
+                }
+                
+            } catch PaymentStoreError.insufficientTokens {
+                shared.responseMessage.removeAll(where: { $0.id == localId })
+                onCreditsNeeded()
+                return
+            } catch {
+                shared.responseMessage.removeAll(where: { $0.id == localId })
+                print("billing or function call failure", ErrorDesc.callsiteError, error)
+                throw error
             }
-            
-            onMeta: { meta in
-                metadataText = meta
-                print("metadata:", metadataText) //Use later
-            }
-            
-        } catch PaymentStoreError.insufficientTokens {
-            shared.responseMessage.removeAll(where: { $0.id == localId })
-            onCreditsNeeded()
-            return
-        } catch {
-            shared.responseMessage.removeAll(where: { $0.id == localId })
-            print("billing or function call failure", ErrorDesc.callsiteError, error)
-            throw error
         }
         
         

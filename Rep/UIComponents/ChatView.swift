@@ -47,7 +47,7 @@ struct ChatView: View {
         static let all: [AIModelProviders] = [
             AIModelProviders(id: "mini", name: "GPT-6.1 luna", image: "openaiLogo", isSystemImage: false),
             AIModelProviders(id: "full", name: "GPT-6.1 sol", image: "openaiLogo", isSystemImage: false),
-            AIModelProviders(id: "local", name: "Siri AI (local)", image: "apple.intelligence", isSystemImage: true)
+            AIModelProviders(id: "local", name: "Apple Intelligence (local)", image: "apple.intelligence", isSystemImage: true)
         ]
     }
     
@@ -108,8 +108,14 @@ struct ChatView: View {
                         task = Task { @MainActor in
                             guard !Task.isCancelled else { return }
                             
-                            try? await Task.sleep(for: .milliseconds(700))
-                            proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            try? await Task.sleep(for: .milliseconds(50))
+                            guard !Task.isCancelled else {
+                                task = nil
+                                return
+                            }
+                            withAnimation(.linear(duration: 0.3)) {
+                                proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            }
                             task = nil
                         }
                     }
