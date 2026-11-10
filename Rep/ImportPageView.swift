@@ -69,16 +69,15 @@ struct NotionImportPageView: View {
                             .overlay(RoundedRectangle(cornerRadius: 30).fill(Color.clear).glassEffect(.regular))
                         
                         HStack(spacing: 10) {
-                            Image(systemName: "list.bullet.circle.fill")
-                                .resizable()
-                                .frame(width: 25, height: 25)
+                            Image(systemName: "text.line.3.summary")
+                                .font(.system(size: 16))
                                 .foregroundStyle(Color.mmDark)
                                 .opacity(textOpacity)
                             
                             Text("Generate With AI")
                                 .foregroundStyle(Color.mmDark)
                                 .opacity(textOpacity)
-                                .font(.system(size: 16))
+                                
                                 .fontWeight(.medium)
                             Spacer()
                         }.padding(.horizontal)
