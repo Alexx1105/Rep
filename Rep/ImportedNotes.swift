@@ -254,16 +254,8 @@ struct ImportedNotes: View {
                             }
                         } else {
                             ScrollView {
-                                Text(chatText)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.leading)
-                                    .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                    .lineLimit(nil)
-                                    .lineHeight(.loose)
-                                    .textSelection(.enabled)
-                                    .tint(.white)
-                                    .padding(.trailing)
-                                    .padding(.top)
+                                AINotesContentView(text: chatText)
+                                    .padding(.horizontal, 16)
                                 Spacer().frame(height: 30)
                             }
                         }
@@ -279,17 +271,10 @@ struct ImportedNotes: View {
                         } else {
                             ScrollView {
                                 if selectedTab == .notes {
-                                    Text(noteText)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.leading)
-                                        .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                        .lineLimit(nil)
-                                        .lineHeight(.loose)
-                                        .textSelection(.enabled)
-                                        .tint(.white)
-                                        .padding(.trailing)
-                                        .padding(.top)
+                                    AINotesContentView(text: noteText)
+                                        .padding(.horizontal, 16)
                                     Spacer().frame(height: 50)
+                                        .padding(.horizontal)
                                 }
                                 
                                 if selectedTab == .transcript {
@@ -320,16 +305,8 @@ struct ImportedNotes: View {
                         } else {
                             ScrollView {
                                 if selectedTab == .notes {
-                                    Text(noteText)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.leading)
-                                        .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                        .lineLimit(nil)
-                                        .lineHeight(.loose)
-                                        .textSelection(.enabled)
-                                        .tint(.white)
-                                        .padding(.trailing)
-                                        .padding(.top)
+                                    AINotesContentView(text: noteText)
+                                        .padding(.horizontal, 16)
                                     Spacer().frame(height: 50)
                                 }
                                 
@@ -530,4 +507,3 @@ extension CombinedDataSource {
         )
     )
 }
-

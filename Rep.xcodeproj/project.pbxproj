@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7454E186714FF59D350185 /* PushTokenManager.swift */; };
+		7B3A4C58ADFA4E3C94390E15 /* AINotesCustomRenderings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632478E9ECF74F959A7FD001 /* AINotesCustomRenderings.swift */; };
 		B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20148D93098168100B4B2BA /* CategoryTabs.swift */; };
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
@@ -137,6 +138,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		632478E9ECF74F959A7FD001 /* AINotesCustomRenderings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AINotesCustomRenderings.swift; sourceTree = "<group>"; };
 		B20148D93098168100B4B2BA /* CategoryTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTabs.swift; sourceTree = "<group>"; };
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -384,6 +386,7 @@
 				B3EBC20D9D8FDFAB7E4766BD /* MainMenuDataSourceList.swift */,
 				B3D62D98C2980D9D3790AC25 /* PickerView.swift */,
 				B3A06C8C01B5FC3E84026961 /* transcriptionSummmaryView.swift */,
+				632478E9ECF74F959A7FD001 /* AINotesCustomRenderings.swift */,
 				B3043C921D38E360E9E22AF1 /* VoiceTranscriptionView.swift */,
 				B3166AA61CCE4883A3FBEA93 /* MacHelperDirections.swift */,
 				B32F0A8B2062691FC583E61D /* TranscriptionSummaryPicker.swift */,
@@ -585,6 +588,7 @@
 				B316D301EC078AFF6FBC7A64 /* PickerView.swift in Sources */,
 				B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */,
 				B3E4DFB146BC0B9897B2758C /* transcriptionSummmaryView.swift in Sources */,
+				7B3A4C58ADFA4E3C94390E15 /* AINotesCustomRenderings.swift in Sources */,
 				B2F47B1D30A15F4D00FE03F9 /* FoundationModelsManager.swift in Sources */,
 				B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */,
 				B3D928544D2C101A23894C79 /* MacHelperDirections.swift in Sources */,
