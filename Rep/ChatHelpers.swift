@@ -68,6 +68,8 @@ public class Chat: ObservableObject {
     static let shared = Chat()
     @Published var chat: String = ""
     @Published var responseMessage: [messageModel] = []
+    @Published private(set) var isSyncingChat: Bool = false
+    private var pendingChatSaves = 0
     
     public struct messageModel: Identifiable {
         public let id: String
@@ -83,7 +85,7 @@ public class Chat: ObservableObject {
     
     
     @MainActor
-    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
+    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
         let idempotentKey: UUID = UUID()
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
@@ -162,6 +164,14 @@ public class Chat: ObservableObject {
         }
         
         guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
+
+        shared.pendingChatSaves += 1
+        shared.isSyncingChat = true
+        defer {
+            shared.pendingChatSaves -= 1
+            shared.isSyncingChat = shared.pendingChatSaves > 0
+        }
+        onResponseComplete()
         
         do {
             let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)

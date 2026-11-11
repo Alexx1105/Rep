@@ -54,7 +54,7 @@ struct ChatView: View {
         static let all: [AIModelProviders] = [
             AIModelProviders(id: "mini", name: "GPT-6.1 luna", image: "openaiLogo", isSystemImage: false),
             AIModelProviders(id: "full", name: "GPT-6.1 sol", image: "openaiLogo", isSystemImage: false),
-            AIModelProviders(id: "local", name: "Apple Intelligence (local)", image: "apple.intelligence", isSystemImage: true)
+            AIModelProviders(id: "local", name: "Apple Foundation Model", image: "apple.intelligence", isSystemImage: true)
         ]
     }
     
@@ -68,17 +68,33 @@ struct ChatView: View {
                         Spacer(minLength: 65)
                         
                         ForEach(Chat.shared.responseMessage, id: \.id) { response in
-                            Text(response.text)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.leading)
-                                .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
+                            VStack(alignment: .leading, spacing: 20) {
+                                
+                                let lines: [String] = response.text.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                                
+                                ForEach(Array(lines.enumerated()), id: \.offset) { index, textLine in
+                                    if index == 0 {
+                                        Text(textLine).fontWeight(.bold)
+                                            .padding(.vertical, 6)
+                                    
+                                    } else {
+                                        if !textLine.trimmingCharacters(in: .whitespaces).isEmpty {
+                                            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                                Circle().frame(width: 8, height: 8).foregroundStyle(Color.mmDark)
+                                                
+                                                Text(textLine)
+                                            }
+                                        }
+                                    }
+                                }
+                            }.frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical)
+                                .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium).fontDesign(.rounded)
                                 .listRowBackground(Color.mmBackground)
                                 .lineLimit(nil)
                                 .textSelection(.enabled)
-                                .tint(.white)
-                                .transition(
-                                    .opacity.combined(with: .move(edge: .bottom))
-                                )
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
                         }
                         
                         if isShimmerTextVisible {
@@ -379,7 +395,8 @@ struct ChatView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 4)
                         .foregroundStyle(Color.mmDark).opacity(0.5)
-                        
+                        .contentTransition(.opacity)
+                        .animation(.easeInOut(duration: 0.2), value: selectedModel)
                         
                         Spacer()
                         Button {
@@ -446,16 +463,27 @@ struct ChatView: View {
         let file = fileUrls
         
         Task {
+            var didCompleteResponse = false
             defer {
-                isGenerating = false
-                isShimmerTextVisible = false
-                isTextShimmering = false
-                fileUrls.removeAll()
-                selectedPhotos.removeAll()
+                
+                if !didCompleteResponse {
+                    isGenerating = false
+                    isShimmerTextVisible = false
+                    isTextShimmering = false
+                    fileUrls.removeAll()
+                    selectedPhotos.removeAll()
+                }
             }
             do {
                 let modelTier: Chat.ModelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
-                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
+                    didCompleteResponse = true
+                    isGenerating = false
+                    isShimmerTextVisible = false
+                    isTextShimmering = false
+                    fileUrls.removeAll()
+                    selectedPhotos.removeAll()
+                })
             } catch {
                 chatError = error.localizedDescription
                 print("chat error:", error)
@@ -466,6 +494,23 @@ struct ChatView: View {
 
 
 
-#Preview {
+#Preview("AI Response Styling") {
     ChatView()
+        .onAppear {
+            Chat.shared.responseMessage = [
+                Chat.messageModel(id: "preview-ai-response", text: """
+                Building Stronger Study Habits
+
+                Spaced repetition helps you remember information by reviewing it at increasing intervals. Each review strengthens recall and makes the next study session more effective.
+
+                Active recall means retrieving an answer from memory before checking your notes. Try explaining a concept in your own words, then compare your explanation with the source.
+
+                Keep each flashcard focused on one idea. A short question with a specific answer is easier to review than a card containing several unrelated facts.
+
+                Review difficult material more often and familiar material less often. For example, revisit a new definition tomorrow, then a few days later, and again the following week.
+
+                Consistent, brief sessions make studying manageable. Use a few minutes between activities to review your notes and practice recalling the most important details.
+                """)
+            ]
+        }
 }
