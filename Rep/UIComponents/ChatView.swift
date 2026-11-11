@@ -14,6 +14,9 @@ struct ChatView: View {
     
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     private var messagePlaceholder: String = "Upload notes or Ask..."
+    private var canSendMessage: Bool {
+        !isGenerating && !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     @StateObject private var chatState = Chat.shared
     
@@ -34,6 +37,10 @@ struct ChatView: View {
     @State var isMoreCreditsNeeded: Bool = false
     
     @AppStorage("selectedAiProviderID") private var selectedAiProviderID: String = "local"
+    private var selectedModel: AIModelProviders {
+        AIModelProviders.all.first { $0.id == selectedAiProviderID }
+        ?? AIModelProviders.all[0]
+    }
     
     @FocusState private var isChatFocused: Bool
     
@@ -43,7 +50,7 @@ struct ChatView: View {
         let name: String
         let image: String
         var isSystemImage: Bool = false
-
+        
         static let all: [AIModelProviders] = [
             AIModelProviders(id: "mini", name: "GPT-6.1 luna", image: "openaiLogo", isSystemImage: false),
             AIModelProviders(id: "full", name: "GPT-6.1 sol", image: "openaiLogo", isSystemImage: false),
@@ -181,7 +188,7 @@ struct ChatView: View {
                                     .foregroundStyle(Color.mmDark)
                                     .padding()
                             }
-                        
+                            
                             Button {
                                 isNewChat = true
                                 Chat.shared.responseMessage.removeAll()
@@ -276,29 +283,54 @@ struct ChatView: View {
                             }
                         }
                     
-                    ForEach(fileUrls, id: \.self) { file in
-                        ZStack {
-                            Capsule()
-                                .frame(maxWidth: .infinity, maxHeight: 28)
-                                .glassEffect(.regular)
-                            
-                            HStack(spacing: 5) {
-                                Text(file.lastPathComponent).font(Font.system(size: 12))
-                                    .truncationMode(.middle)
-                                    .fontWeight(.semibold)
-                                    .fontDesign(.rounded)
-                                
-                                Button {
-                                    fileUrls.removeAll(where: { $0 == file })
-                                } label: {
-                                    Image(systemName: "x.circle.fill").fixedSize()
-                                        .foregroundStyle(Color.mmDark)
+                    if !fileUrls.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(fileUrls, id: \.self) { file in
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.secondary.opacity(0.15))
+                                        
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Image(systemName: "doc.fill")
+                                                .font(.system(size: 20))
+                                                .foregroundStyle(.secondary)
+                                            Spacer(minLength: 0)
+                                            Text(file.lastPathComponent).font(Font.system(size: 12))
+                                                .truncationMode(.middle)
+                                                .lineLimit(2)
+                                                .fontWeight(.semibold)
+                                                .fontDesign(.rounded)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(10)
+                                    }
+                                    .frame(width: 96, height: 96)
+                                    .overlay(alignment: .topTrailing) {
+                                        Button {
+                                            fileUrls.removeAll(where: { $0 == file })
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .symbolRenderingMode(.palette)
+                                                .foregroundStyle(.white, .black.opacity(0.65))
+                                                .font(.system(size: 22))
+                                                .padding(6)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("Remove \(file.lastPathComponent)")
+                                    }
                                 }
-                            }.padding(6)
-                        }.fixedSize()
-                    }.offset(y: -keyboardHeight)
+                            }
+                        }
+                        .frame(height: 96)
+                        .offset(y: -keyboardHeight)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
                     
-                    PhotoPickerList(selectedPhotos: $selectedPhotos, keyboardHeight: keyboardHeight)
+                    if !selectedPhotos.isEmpty {
+                        PhotoPickerList(selectedPhotos: $selectedPhotos, keyboardHeight: keyboardHeight)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
                     
                     HStack(alignment: .bottom) {
                         Menu {
@@ -327,29 +359,41 @@ struct ChatView: View {
                                 Label("Upload File(s)", systemImage: "folder.fill")
                             }
                         } label: {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.2).foregroundStyle(Color.intervalBlue)
-                                HStack(spacing: 2) {
-                                    Image(systemName: "plus.app").foregroundStyle(Color.intervalBlue)
-                                    Text("Upload")
-                                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Color.intervalBlue)
-                                }
+                            Image(systemName: "plus").foregroundStyle(Color.mmDark)
+                                .font(.system(size: 25))
+                        }
+                        
+                        HStack(spacing: 5) {
+                            Text(selectedModel.name)
+                            if selectedModel.isSystemImage {
+                                Image(systemName: selectedModel.image)
+                            } else {
+                                Image(selectedModel.image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 16, height: 16)
                             }
                         }
+                        .font(.system(size: 14))
+                        .fontDesign(.rounded).fontWeight(.regular)
+                        .padding(.horizontal)
+                        .padding(.bottom, 4)
+                        .foregroundStyle(Color.mmDark).opacity(0.5)
+                        
                         
                         Spacer()
                         Button {
                             sendMessage()
                         } label: {
-                            ZStack {    
-                                Circle().fill(Color.mmDark)
+                            ZStack {
+                                Circle().fill(canSendMessage ? Color.blue : Color.gray.opacity(0.4))
                                     .frame(maxWidth: 30, maxHeight: 30)
                                 
-                                Image(systemName: "arrow.up").foregroundStyle(Color.checkmark)
+                                Image(systemName: "arrow.up").foregroundStyle(.white)
                             }
                         }.padding(.trailing)
-                            .disabled(isGenerating)
+                            .disabled(!canSendMessage)
+                            .animation(.easeInOut(duration: 0.1), value: canSendMessage)
                         
                     }.offset(y: -keyboardHeight)
                 }.padding(.leading)
@@ -359,6 +403,9 @@ struct ChatView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal))
                     .padding(.bottom)
+                    .animation(.snappy(duration: 0.25), value: chatState.chat)
+                    .animation(.snappy(duration: 0.25), value: fileUrls.count)
+                    .animation(.snappy(duration: 0.25), value: selectedPhotos.count)
                 
             }
             UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeChatSheet() })
@@ -387,7 +434,7 @@ struct ChatView: View {
             Text(chatError ?? "Please try again.")
         }
     }
-
+    
     private func sendMessage() {
         guard !isGenerating, !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         showEmptyState = false
@@ -397,7 +444,7 @@ struct ChatView: View {
         isTextShimmering = true
         let photos = selectedPhotos
         let file = fileUrls
-
+        
         Task {
             defer {
                 isGenerating = false
