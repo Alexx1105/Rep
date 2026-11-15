@@ -15,9 +15,10 @@ public enum FileFormat: CaseIterable {
     case plaintext
     case pdfText
     case pdfImageOcr
+    case photoImage
 }
 
-//TODO: handle large file batches im multiple smaller requests for smaller context budget
+//TODO: handle large file batches in multiple smaller requests for smaller context budget
 //TODO: handle unpacking zips
 
 public func fileExtractor(fileUrl: URL, fileFormat: FileFormat) async throws -> String {
@@ -88,6 +89,47 @@ public func fileExtractor(fileUrl: URL, fileFormat: FileFormat) async throws -> 
         let text: String = pageTexts.joined(separator: "\n\n")
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw ErrorDesc.pdfExtractionError }
         return text
+        
+        
+    case .photoImage:
+        let hasAccess = fileUrl.startAccessingSecurityScopedResource()
+        defer {
+            if hasAccess {
+                fileUrl.stopAccessingSecurityScopedResource()
+            }
+        }
+        
+        let handler: VNImageRequestHandler = VNImageRequestHandler(url: fileUrl, options: [:])
+        return try recognizePhotoText(using: handler)
     }
-    
 }
+
+func photoTextExtractor(photoData: Data) async throws -> String {
+    let extraction: Task = Task.detached(priority: .userInitiated) {
+        let handler: VNImageRequestHandler = VNImageRequestHandler(data: photoData, options: [:])
+        return try recognizePhotoText(using: handler)
+    }
+    return try await withTaskCancellationHandler {
+        try await extraction.value
+    } onCancel: {
+        extraction.cancel()
+    }
+}
+
+private func recognizePhotoText(using handler: VNImageRequestHandler) throws -> String {
+    try Task.checkCancellation()
+    let request = VNRecognizeTextRequest()
+    
+    request.recognitionLevel = .accurate
+    request.automaticallyDetectsLanguage = true
+    request.usesLanguageCorrection = true
+    
+    try handler.perform([request])
+    try Task.checkCancellation()
+    let text = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+    
+    guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw ErrorDesc.decodeError }
+    return text
+}
+
+

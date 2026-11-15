@@ -114,7 +114,7 @@ public class Chat: ObservableObject {
         let requestBuffer = chatBuffer()
         
         if modelTier == .appleFoundationModel {
-            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput, userFileUrl: userFile,  ontextSnapshot: { snapshot in
+            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, ontextSnapshot: { snapshot in
                 guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
                     shared.responseMessage[firstIndex].text = snapshot
