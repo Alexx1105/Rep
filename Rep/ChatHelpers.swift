@@ -113,7 +113,11 @@ public class Chat: ObservableObject {
         var pendingUIText: String = ""
         let requestBuffer = chatBuffer()
         
-        if modelTier == .appleFoundationModel {
+        let hasUploadedZip = userFile?.contains { $0.pathExtension.lowercased() == "zip" } ?? false
+        let selectedModel: String = modelTier == .appleFoundationModel ? ModelTier.gptMini.rawValue : modelTier.rawValue
+        let usesAppleFoundationModel = modelTier == .appleFoundationModel && !hasUploadedZip
+        
+        if usesAppleFoundationModel {
             let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, ontextSnapshot: { snapshot in
                 guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
@@ -124,7 +128,7 @@ public class Chat: ObservableObject {
             
         } else {
             do {
-                try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: modelTier.rawValue, chatID: requestChatID, context: context, idempotentKey: idempotentKey) { chunk in
+                try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: selectedModel, chatID: requestChatID, context: context, idempotentKey: idempotentKey) { chunk in
                     
                     await requestBuffer.append(chunk)
                     pendingUIText += chunk
@@ -176,7 +180,7 @@ public class Chat: ObservableObject {
         onResponseComplete()
         
         do {
-            let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)
+            let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId, isAppleFoundationModel: usesAppleFoundationModel)
             context.insert(cacheChat)
             try context.save()
             

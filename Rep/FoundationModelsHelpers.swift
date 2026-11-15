@@ -19,7 +19,6 @@ public enum FileFormat: CaseIterable {
 }
 
 //TODO: handle large file batches in multiple smaller requests for smaller context budget
-//TODO: handle unpacking zips
 
 public func fileExtractor(fileUrl: URL, fileFormat: FileFormat) async throws -> String {
     switch fileFormat {

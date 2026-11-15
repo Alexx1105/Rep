@@ -100,10 +100,12 @@ import SwiftUI
 @Model final class OpenAIChat {
     @Attribute(.unique) public var openaiId: String
     var content: String
+    var isAppleFoundationModel: Bool?
     
-    init(content: String, openaiId: String) {
+    init(content: String, openaiId: String, isAppleFoundationModel: Bool = false) {
         self.content = content
         self.openaiId = openaiId
+        self.isAppleFoundationModel = isAppleFoundationModel
     }
 }
 

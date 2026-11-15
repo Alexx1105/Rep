@@ -37,6 +37,11 @@ struct ChatView: View {
     @State var isMoreCreditsNeeded: Bool = false
     
     @AppStorage("selectedAiProviderID") private var selectedAiProviderID: String = "local"
+    private var needsZipModelSwitch: Bool {
+        selectedAiProviderID == "local" && fileUrls.contains {
+            $0.pathExtension.lowercased() == "zip"
+        }
+    }
     private var selectedModel: AIModelProviders {
         AIModelProviders.all.first { $0.id == selectedAiProviderID }
         ?? AIModelProviders.all[0]
@@ -434,7 +439,14 @@ struct ChatView: View {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
             }
-        }.onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
+        }
+        .onChange(of: needsZipModelSwitch, initial: true) { _, needsSwitch in
+            guard needsSwitch else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedAiProviderID = "mini"
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
             
             if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 keyboardHeight = frame.height + 5

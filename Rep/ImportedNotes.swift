@@ -125,12 +125,20 @@ struct ImportedNotes: View {
                                 .truncationMode(.middle)
                                 .lineLimit(1)
                             
-                            Image("openaiLogo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 25, height: 25)
-                                .padding(.trailing)
-                                .opacity(textOpacity)
+                            if openaiChatTitle.isAppleFoundationModel == true {
+                                Image(systemName: "apple.intelligence")
+                                    .font(.system(size: 17, weight: .medium))
+                                    .padding(.trailing)
+                                    .opacity(textOpacity)
+                                    .accessibilityLabel("Apple Intelligence")
+                            } else {
+                                Image("openaiLogo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .padding(.trailing)
+                                    .opacity(textOpacity)
+                            }
                         }
                         
                     case .repDesktopTranscription(let desktopNotes):
