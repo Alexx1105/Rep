@@ -19,6 +19,7 @@
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OauthProviderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */; };
 		B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */; };
+		B242F85730A94A710059FF5C /* FoundationModelsHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B242F85630A94A690059FF5C /* FoundationModelsHelpers.swift */; };
 		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
@@ -150,6 +151,7 @@
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
 		B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthProviderManager.swift; sourceTree = "<group>"; };
 		B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradePlanAlertSheet.swift; sourceTree = "<group>"; };
+		B242F85630A94A690059FF5C /* FoundationModelsHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelsHelpers.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B24A69832F57D97D00FBB5FB /* TosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosPage.swift; sourceTree = "<group>"; };
 		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 		B2B837C52BCB102F00BBC748 /* Rep */ = {
 			isa = PBXGroup;
 			children = (
+				B242F85630A94A690059FF5C /* FoundationModelsHelpers.swift */,
 				B2F47B1E30A161A300FE03F9 /* FoundationModelsPrompt.swift */,
 				B2F47B1C30A15F4400FE03F9 /* FoundationModelsManager.swift */,
 				B2D362FE2E2C855900C3012C /* .gitignore */,
@@ -582,6 +585,7 @@
 				B304C27FAA75682CFAB44F27 /* NotesControlToggles.swift in Sources */,
 				B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */,
 				B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */,
+				B242F85730A94A710059FF5C /* FoundationModelsHelpers.swift in Sources */,
 				B3D3BD8D45064655708BF23E /* ChatDialogToast.swift in Sources */,
 				B337C6418EFD8CA5DE9847BA /* ChatView.swift in Sources */,
 				B3DF5FDBE44CD85DC6EB0B63 /* MainMenuDataSourceList.swift in Sources */,

@@ -111,11 +111,13 @@ import SwiftUI
     @Attribute(.unique) public var id: String
     var model: String
     var status: String
+    var chatID: UUID?        ///client side id
     
-    init(id: String, model: String, status: String) {
+    init(id: String, model: String, status: String, chatID: UUID) {
         self.id = id
         self.model = model
         self.status = status
+        self.chatID = chatID
     }
 }
 

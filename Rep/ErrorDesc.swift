@@ -47,6 +47,8 @@ enum ErrorDesc: LocalizedError {
     case urlError
     case fileNotAccessible
     case streamError
+    case pdfExtractionError
+    case pdfAccessError
 }
 
 enum ErrorDefinition: Error {

@@ -88,6 +88,7 @@ public class Chat: ObservableObject {
     @MainActor
     public static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
         let idempotentKey: UUID = UUID()
+        let requestChatID = shared.chatID
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
         
@@ -113,17 +114,17 @@ public class Chat: ObservableObject {
         let requestBuffer = chatBuffer()
         
         if modelTier == .appleFoundationModel {
-            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput, ontextSnapshot: { snapshot in
+            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput, userFileUrl: userFile,  ontextSnapshot: { snapshot in
                 guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
                     shared.responseMessage[firstIndex].text = snapshot
                 }
-            }, chatID: shared.chatID)
+            }, chatID: requestChatID)
             await requestBuffer.append(answer)
             
         } else {
             do {
-                try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: modelTier.rawValue, context: context, idempotentKey: idempotentKey) { chunk in
+                try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: modelTier.rawValue, chatID: requestChatID, context: context, idempotentKey: idempotentKey) { chunk in
                     
                     await requestBuffer.append(chunk)
                     pendingUIText += chunk

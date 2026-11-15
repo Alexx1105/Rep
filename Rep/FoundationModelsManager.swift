@@ -33,21 +33,37 @@ final class FoundationModelsManager {
         if let existingSession = allSessions[chatID] {
             return existingSession
         }
-        
         allSessions[chatID] = session
         return session
     }
     
     
-    static func callFoundationModel(userMessage: String, ontextSnapshot: (String) -> Void, chatID: UUID) async throws -> String {
+    static func callFoundationModel(userMessage: String, userFileUrl: [URL]?, ontextSnapshot: (String) -> Void, chatID: UUID) async throws -> String {
         checkModelAvailability()
         
         let options: GenerationOptions = GenerationOptions(temperature: 0.3, maximumResponseTokens: 4096)
         let session: LanguageModelSession = LanguageModelSession(model: SystemLanguageModel.default, instructions: promptConfig)
         let chatSessionContext = retainChatSessionContext(session: session, chatID: chatID)
+
+        var prompt = userMessage
+        for fileURL in userFileUrl ?? [] {
+            let documentText: String
+            switch fileURL.pathExtension.lowercased() {
+            case "pdf":
+                do {
+                    documentText = try await fileExtractor(fileUrl: fileURL, fileFormat: .pdfText)
+                } catch ErrorDesc.pdfExtractionError {
+                    documentText = try await fileExtractor(fileUrl: fileURL, fileFormat: .pdfImageOcr)
+                }
+            case "txt", "md", "csv", "tsv":
+                documentText = try await fileExtractor(fileUrl: fileURL, fileFormat: .plaintext)
+            default:
+                throw ErrorDesc.decodeError
+            }
+            prompt += "\n\nSource document: \(fileURL.lastPathComponent)\n\(documentText)\nEnd of source document."
+        }
         
-        let responseStream: LanguageModelSession.ResponseStream = chatSessionContext.streamResponse(to: userMessage, options: options)
-        print("context size:", SystemLanguageModel.default.contextSize)
+        let responseStream: LanguageModelSession.ResponseStream = chatSessionContext.streamResponse(to: prompt, options: options)
         
         var answer: String = ""
         for try await text in responseStream {

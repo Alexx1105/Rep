@@ -207,6 +207,7 @@ struct ChatView: View {
                             
                             Button {
                                 isNewChat = true
+                                Chat.shared.chatID = UUID()
                                 Chat.shared.responseMessage.removeAll()
                                 
                             } label: {
