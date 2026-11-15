@@ -8,7 +8,6 @@
 import Foundation
 import FoundationModels
 
-//TODO: add support for prewarming
 
 @MainActor
 final class FoundationModelsManager {
@@ -43,6 +42,7 @@ final class FoundationModelsManager {
         
         let options: GenerationOptions = GenerationOptions(temperature: 0.3, maximumResponseTokens: 4096)
         let session: LanguageModelSession = LanguageModelSession(model: SystemLanguageModel.default, instructions: promptConfig)
+        session.prewarm()
         let chatSessionContext = retainChatSessionContext(session: session, chatID: chatID)
 
         var prompt = userMessage
