@@ -8,6 +8,7 @@ import ActivityKit
 
 
 struct ChatView: View {
+    var pageID: String? = nil
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var closeChatSheet
     @Environment(\.modelContext) private var context
@@ -35,6 +36,8 @@ struct ChatView: View {
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
     @State var isMoreCreditsNeeded: Bool = false
+    @State private var showChatHistory = false
+    @State private var existingChat: OpenAIChat?
     
     @AppStorage("selectedAiProviderID") private var selectedAiProviderID: String = "local"
     private var needsZipModelSwitch: Bool {
@@ -168,13 +171,15 @@ struct ChatView: View {
             VStack {
                 HStack(alignment: .top) {
                     Button {
-                        withAnimation { closeChatSheet() }
+                        withAnimation(.snappy(duration: 0.3)) {
+                            showChatHistory = true
+                        }
                     } label: {
                         ZStack {
                             Circle().fill(Color.clear).glassEffect(.regular)
                                 .frame(width: 45, height: 45)
                             
-                            Image(systemName: "xmark")
+                            Image(systemName: "clock")
                                 .foregroundStyle(Color.mmDark)
                                 .font(.system(size: 20))
                         }
@@ -211,10 +216,7 @@ struct ChatView: View {
                             }
                             
                             Button {
-                                isNewChat = true
-                                Chat.shared.chatID = UUID()
-                                Chat.shared.responseMessage.removeAll()
-                                
+                                startNewChat()
                             } label: {
                                 Image(systemName: "pencil.line")
                                     .font(.system(size: 20))
@@ -432,8 +434,36 @@ struct ChatView: View {
                 
             }
             UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeChatSheet() })
-        }.sheet(isPresented: $showPhotoPicker) {
+        }
+        .overlay(alignment: .leading) {
+            if showChatHistory {
+                ChatHistoryDrawer(onClose: {
+                    withAnimation(.snappy(duration: 0.3)) {
+                        showChatHistory = false
+                    }
+                }, onSelect: { pageID in
+                    withAnimation(.snappy(duration: 0.3)) {
+                        loadChat(pageID: pageID)
+                        showChatHistory = false
+                    }
+                }, onNewChat: {
+                    withAnimation(.snappy(duration: 0.3)) {
+                        startNewChat()
+                        showChatHistory = false
+                    }
+                })
+                .transition(.move(edge: .leading))
+                .zIndex(1)
+            }
+        }
+        .sheet(isPresented: $showPhotoPicker) {
             PhotoPicker(selectedPhotos: $selectedPhotos)
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .task(id: pageID) {
+            guard let pageID else { return }
+            loadChat(pageID: pageID)
         }
         .sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
@@ -465,6 +495,23 @@ struct ChatView: View {
         }
     }
     
+    private func startNewChat() {
+        isNewChat = true
+        existingChat = nil
+        Chat.shared.chatID = UUID()
+        Chat.shared.responseMessage.removeAll()
+    }
+
+    private func loadChat(pageID: String) {
+        do {
+            guard let chat = try Chat.loadSavedChat(pageID: pageID, context: context) else { return }
+            existingChat = chat
+            selectedAiProviderID = chat.isAppleFoundationModel == true ? "local" : "mini"
+        } catch {
+            chatError = error.localizedDescription
+        }
+    }
+
     private func sendMessage() {
         guard !isGenerating, !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         showEmptyState = false
@@ -489,7 +536,7 @@ struct ChatView: View {
             }
             do {
                 let modelTier: Chat.ModelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
-                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
+                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, existingChat: existingChat, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
                     didCompleteResponse = true
                     isGenerating = false
                     isShimmerTextVisible = false

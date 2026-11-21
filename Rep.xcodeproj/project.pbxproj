@@ -12,6 +12,7 @@
 		B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20148D93098168100B4B2BA /* CategoryTabs.swift */; };
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
+		B20F39E130B1292900BAA29D /* ChatHistoryDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20F39E030B1292100BAA29D /* ChatHistoryDrawer.swift */; };
 		B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */; };
 		B21427D92F38FB9200D86624 /* SyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21427D82F38FB9200D86624 /* SyncController.swift */; };
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
@@ -144,6 +145,7 @@
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = combinedDataSources.swift; sourceTree = "<group>"; };
+		B20F39E030B1292100BAA29D /* ChatHistoryDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHistoryDrawer.swift; sourceTree = "<group>"; };
 		B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHelpers.swift; sourceTree = "<group>"; };
 		B21427D82F38FB9200D86624 /* SyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncController.swift; sourceTree = "<group>"; };
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
@@ -372,6 +374,7 @@
 		B3ED98CF4BC35A3484ED0C10 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				B20F39E030B1292100BAA29D /* ChatHistoryDrawer.swift */,
 				B20148D93098168100B4B2BA /* CategoryTabs.swift */,
 				B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */,
 				B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */,
@@ -570,6 +573,7 @@
 				B25D6AEB2FD5AFD8004801B7 /* AudioTranscriptionManager.swift in Sources */,
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
+				B20F39E130B1292900BAA29D /* ChatHistoryDrawer.swift in Sources */,
 				B2AEBC113069D1A80067549B /* DynamicNotesStructs.swift in Sources */,
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
 				B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */,

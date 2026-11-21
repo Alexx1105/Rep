@@ -83,14 +83,32 @@ public class Chat: ObservableObject {
         case gptFull = "full"
         case appleFoundationModel = "local"
     }
+
+    
+    @MainActor
+    static func loadSavedChat(pageID: String, context: ModelContext) throws -> OpenAIChat? {
+        let descriptor = FetchDescriptor<OpenAIChat>(predicate: #Predicate { $0.openaiId == pageID })
+        guard let chat = try context.fetch(descriptor).first else { return nil }
+        
+        shared.chatID = UUID(uuidString: pageID) ?? UUID()
+        shared.chat = ""
+        shared.responseMessage = [messageModel(id: chat.openaiId, text: chat.content)]
+        return chat
+    }
     
     
     @MainActor
-    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
+    static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], existingChat: OpenAIChat? = nil, onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
         let idempotentKey: UUID = UUID()
         let requestChatID = shared.chatID
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
+        let requestInput: String
+        if let existingChat {
+            requestInput = "Existing saved chat content:\n\(existingChat.content)\n\nUser request:\n\(trimUserInput)\n\nReturn the updated content in full."
+        } else {
+            requestInput = trimUserInput
+        }
         
         Chat.shared.chat = ""
         let localId: String = UUID().uuidString
@@ -118,7 +136,7 @@ public class Chat: ObservableObject {
         let usesAppleFoundationModel = modelTier == .appleFoundationModel && !hasUploadedZip
         
         if usesAppleFoundationModel {
-            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, ontextSnapshot: { snapshot in
+            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: requestInput, userFileUrl: userFile, userPhotoData: userPhotoData, ontextSnapshot: { snapshot in
                 guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
                     shared.responseMessage[firstIndex].text = snapshot
@@ -128,7 +146,7 @@ public class Chat: ObservableObject {
             
         } else {
             do {
-                try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: selectedModel, chatID: requestChatID, context: context, idempotentKey: idempotentKey) { chunk in
+                try await AIRequestManager.shared.openAIRequest(userMessage: requestInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: selectedModel, chatID: requestChatID, context: context, idempotentKey: idempotentKey) { chunk in
                     
                     await requestBuffer.append(chunk)
                     pendingUIText += chunk
@@ -180,15 +198,32 @@ public class Chat: ObservableObject {
         onResponseComplete()
         
         do {
-            let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId, isAppleFoundationModel: usesAppleFoundationModel)
-            context.insert(cacheChat)
+            let savedPageID: String
+            if let existingChat {
+                existingChat.content = fullSnapahot
+                existingChat.isAppleFoundationModel = usesAppleFoundationModel
+                savedPageID = existingChat.openaiId
+            } else {
+                let cacheChat = OpenAIChat(content: fullSnapahot, openaiId: localId, isAppleFoundationModel: usesAppleFoundationModel)
+                context.insert(cacheChat)
+                savedPageID = localId
+            }
             try context.save()
+
+            if existingChat != nil {
+                shared.responseMessage.removeAll { $0.id == localId }
+                if let index = shared.responseMessage.firstIndex(where: { $0.id == savedPageID }) {
+                    shared.responseMessage[index].text = fullSnapahot
+                } else {
+                    shared.responseMessage.append(messageModel(id: savedPageID, text: fullSnapahot))
+                }
+            }
             
             let title: String = String(fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines).prefix(20))
             let trimmedText: String = fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines)
             
             guard !title.isEmpty && !trimmedText.isEmpty else { throw ErrorDesc.nilValue }
-            try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: localId, title: title)
+            try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: savedPageID, title: title)
             
         } catch {
             print("failed to persist chat session:", ErrorDesc.persistenceError, error)
