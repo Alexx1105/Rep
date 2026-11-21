@@ -83,7 +83,7 @@ public class Chat: ObservableObject {
         case gptFull = "full"
         case appleFoundationModel = "local"
     }
-
+    
     
     @MainActor
     static func loadSavedChat(pageID: String, context: ModelContext) throws -> OpenAIChat? {
@@ -98,7 +98,7 @@ public class Chat: ObservableObject {
     
     
     @MainActor
-    static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], existingChat: OpenAIChat? = nil, onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
+    static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], capturedImage: [Data] = [], existingChat: OpenAIChat? = nil, onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
         let idempotentKey: UUID = UUID()
         let requestChatID = shared.chatID
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -120,7 +120,7 @@ public class Chat: ObservableObject {
         
         if let userFile { print("sending selected file: \(userFile)") }
         
-        var userPhotoData: [Data] = []
+        var userPhotoData = capturedImage
         for photoData in selectedPhotos {
             if let transferPhoto: PhotoTransfer = try await photoData.loadTransferable(type: PhotoTransfer.self) {
                 userPhotoData.append(transferPhoto.photo)
@@ -188,7 +188,7 @@ public class Chat: ObservableObject {
         }
         
         guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
-
+        
         shared.pendingChatSaves += 1
         shared.isSyncingChat = true
         defer {
@@ -209,7 +209,7 @@ public class Chat: ObservableObject {
                 savedPageID = localId
             }
             try context.save()
-
+            
             if existingChat != nil {
                 shared.responseMessage.removeAll { $0.id == localId }
                 if let index = shared.responseMessage.firstIndex(where: { $0.id == savedPageID }) {
@@ -255,37 +255,60 @@ struct DocPicker: UIViewControllerRepresentable {
 }
 
 
-//struct CameraPicker: UIViewControllerRepresentable {
-//    var onImagePicked: (UIImage?) -> Void
-//    var onCancel: (() -> Void)? = nil
-//
-//    func makeCoordinator() -> Coordinator { Coordinator(pickerParent: self) }
-//
-//    func makeUIViewController(context: Context) -> UIImagePickerController {
-//        let picker = UIImagePickerController()
-//        picker.sourceType = .camera
-//        picker.cameraCaptureMode = .photo
-//        picker.delegate = context.coordinator
-//        return picker
-//    }
-//
-//    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-//
-//    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-//        let pickerParent: CameraPicker
-//        init(pickerParent: CameraPicker) { self.pickerParent = pickerParent }
-//
-//        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-//            pickerParent.onImagePicked(info[.originalImage] as? UIImage)
-//            picker.presentingViewController?.dismiss(animated: true)
-//        }
-//
-//        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-//            pickerParent.onCancel?()
-//            picker.presentingViewController?.dismiss(animated: true)
-//        }
-//    }
-//}
+struct CameraPicker: UIViewControllerRepresentable {
+    var onImagePicked: (UIImage?) -> Void
+    var onCancel: (() -> Void)? = nil
+    
+    func makeCoordinator() -> Coordinator { Coordinator(pickerParent: self) }
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.cameraCaptureMode = .photo
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let pickerParent: CameraPicker
+        init(pickerParent: CameraPicker) { self.pickerParent = pickerParent }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            pickerParent.onImagePicked(info[.originalImage] as? UIImage)
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            pickerParent.onCancel?()
+        }
+    }
+}
+
+
+struct CapturedPhotoAttachmentTile: View {
+    let image: UIImage
+    let onRemove: () -> Void
+
+    var body: some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFill()
+            .frame(width: 96, height: 96)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(alignment: .topTrailing) {
+                Button(action: onRemove) {
+                    Image(systemName: "xmark.circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, .black.opacity(0.65))
+                        .font(.system(size: 22))
+                        .padding(6)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Remove captured photo")
+            }
+    }
+}
 
 
 struct PhotoPickerList: View {
@@ -399,7 +422,7 @@ struct PhotoPicker: View {
                         HStack(alignment: .bottom , spacing: 5) {
                             ForEach(0..<5) { square in
                                 RoundedRectangle(cornerRadius: 12).frame(maxWidth: 55, maxHeight: 55)
-                                .foregroundStyle(Color.mmDark).opacity(0.1)
+                                    .foregroundStyle(Color.mmDark).opacity(0.1)
                                 
                             }
                         }.padding(.top, 2)

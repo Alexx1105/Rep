@@ -40,11 +40,12 @@ struct ChatView: View {
     @State private var existingChat: OpenAIChat?
     
     @AppStorage("selectedAiProviderID") private var selectedAiProviderID: String = "local"
-    private var needsZipModelSwitch: Bool {
-        selectedAiProviderID == "local" && fileUrls.contains {
-            $0.pathExtension.lowercased() == "zip"
-        }
+    
+    
+    private var needsOpenAIModelSwitch: Bool {
+        selectedAiProviderID == "local" && (imageCaptured != nil || fileUrls.contains { $0.pathExtension.lowercased() == "zip" })
     }
+    
     private var selectedModel: AIModelProviders {
         AIModelProviders.all.first { $0.id == selectedAiProviderID }
         ?? AIModelProviders.all[0]
@@ -84,7 +85,7 @@ struct ChatView: View {
                                     if index == 0 {
                                         Text(textLine).fontWeight(.bold)
                                             .padding(.vertical, 6)
-                                    
+                                        
                                     } else {
                                         if !textLine.trimmingCharacters(in: .whitespaces).isEmpty {
                                             HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -351,6 +352,14 @@ struct ChatView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
                     
+                    if let imageCaptured {
+                        CapturedPhotoAttachmentTile(image: imageCaptured) {
+                            self.imageCaptured = nil
+                        }
+                        .offset(y: -keyboardHeight)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+
                     if !selectedPhotos.isEmpty {
                         PhotoPickerList(selectedPhotos: $selectedPhotos, keyboardHeight: keyboardHeight)
                             .transition(.opacity.combined(with: .move(edge: .bottom)))
@@ -358,6 +367,15 @@ struct ChatView: View {
                     
                     HStack(alignment: .bottom) {
                         Menu {
+                            Button {
+                                guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+                                    chatError = "The camera is unavailable on this device. Try a physical iPhone or iPad."
+                                    return
+                                }
+                                showCameraPicker = true
+                            } label: {
+                                Label("Take Photo", systemImage: "camera")
+                            }
                             Button {
                                 showPhotoPicker = true
                             } label: {
@@ -456,6 +474,16 @@ struct ChatView: View {
                 .zIndex(1)
             }
         }
+        .fullScreenCover(isPresented: $showCameraPicker) {
+            CameraPicker(onImagePicked: { image in
+                imageCaptured = image
+                showCameraPicker = false
+            }, onCancel: {
+                showCameraPicker = false
+            })
+            .ignoresSafeArea(edges: .bottom)
+            .clipShape(RoundedRectangle(cornerRadius: 30))
+        }
         .sheet(isPresented: $showPhotoPicker) {
             PhotoPicker(selectedPhotos: $selectedPhotos)
         }
@@ -470,7 +498,7 @@ struct ChatView: View {
                 fileUrls = url
             }
         }
-        .onChange(of: needsZipModelSwitch, initial: true) { _, needsSwitch in
+        .onChange(of: needsOpenAIModelSwitch, initial: true) { _, needsSwitch in
             guard needsSwitch else { return }
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedAiProviderID = "mini"
@@ -501,7 +529,7 @@ struct ChatView: View {
         Chat.shared.chatID = UUID()
         Chat.shared.responseMessage.removeAll()
     }
-
+    
     private func loadChat(pageID: String) {
         do {
             guard let chat = try Chat.loadSavedChat(pageID: pageID, context: context) else { return }
@@ -511,7 +539,7 @@ struct ChatView: View {
             chatError = error.localizedDescription
         }
     }
-
+    
     private func sendMessage() {
         guard !isGenerating, !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         showEmptyState = false
@@ -522,27 +550,37 @@ struct ChatView: View {
         let photos = selectedPhotos
         let file = fileUrls
         
+        let capturedPhotos: [Data]
+        if let data = imageCaptured?.jpegData(compressionQuality: 0.85) {
+            capturedPhotos = [data]
+        } else {
+            capturedPhotos = []
+        }
+        
         Task {
             var didCompleteResponse = false
+            
             defer {
-                
                 if !didCompleteResponse {
                     isGenerating = false
                     isShimmerTextVisible = false
                     isTextShimmering = false
                     fileUrls.removeAll()
                     selectedPhotos.removeAll()
+                    imageCaptured = nil
                 }
             }
+            
             do {
                 let modelTier: Chat.ModelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
-                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, existingChat: existingChat, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
+                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, capturedImage: capturedPhotos, existingChat: existingChat, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
                     didCompleteResponse = true
                     isGenerating = false
                     isShimmerTextVisible = false
                     isTextShimmering = false
                     fileUrls.removeAll()
                     selectedPhotos.removeAll()
+                    imageCaptured = nil
                 })
             } catch {
                 chatError = error.localizedDescription
@@ -560,15 +598,15 @@ struct ChatView: View {
             Chat.shared.responseMessage = [
                 Chat.messageModel(id: "preview-ai-response", text: """
                 Building Stronger Study Habits
-
+                
                 Spaced repetition helps you remember information by reviewing it at increasing intervals. Each review strengthens recall and makes the next study session more effective.
-
+                
                 Active recall means retrieving an answer from memory before checking your notes. Try explaining a concept in your own words, then compare your explanation with the source.
-
+                
                 Keep each flashcard focused on one idea. A short question with a specific answer is easier to review than a card containing several unrelated facts.
-
+                
                 Review difficult material more often and familiar material less often. For example, revisit a new definition tomorrow, then a few days later, and again the following week.
-
+                
                 Consistent, brief sessions make studying manageable. Use a few minutes between activities to review your notes and practice recalling the most important details.
                 """)
             ]
