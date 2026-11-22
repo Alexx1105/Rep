@@ -10,9 +10,9 @@ struct AINotesContentView: View {
     let text: String
     
     private var lines: [String] {
-        text.components(separatedBy: "\n")
-            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        text.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
+    
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -26,7 +26,7 @@ struct AINotesContentView: View {
                         Circle()
                             .frame(width: 8, height: 8)
                             .foregroundStyle(Color.mmDark)
-                        Text(bulletContent(textLine))
+                        Text(textLine)
                     }
                 }
             }
@@ -42,18 +42,6 @@ struct AINotesContentView: View {
         .textSelection(.enabled)
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }
-    
-    
-    private func bulletContent(_ line: String) -> String {
-        var trimmed = line.trimmingCharacters(in: .whitespaces)
-    
-        while trimmed.hasPrefix("•") {
-            trimmed = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
-        }
-        
-        if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") {
-            return String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
-        }
-        return trimmed
-    }
 }
+
+

@@ -11,40 +11,35 @@ import FoundationModels
 
 @MainActor
 final class FoundationModelsManager {
-    private static var allSessions: [UUID : LanguageModelSession] = [:]
+    private static var managers: [UUID: FoundationModelsManager] = [:]
     
-    
-    private static func checkModelAvailability() {
-        var isModelAvailable: Bool {
-            switch SystemLanguageModel.default.availability {
-            case .available:
-                print("model is available")
-                return true
-            case .unavailable:
-                print("apple intelligence AFM model is not available")
-                return false
-            }
-        }
+    private let session: LanguageModelSession
+    private init(session: LanguageModelSession) {
+        self.session = session
+        session.prewarm()
     }
-
     
-    private static func retainChatSessionContext(session: LanguageModelSession, chatID: UUID) -> LanguageModelSession {
-        if let existingSession = allSessions[chatID] {
-            return existingSession
+    static func prewarmIfAvailable(chatID: UUID) {
+        guard case .available = SystemLanguageModel.default.availability else { return }
+        _ = manager(for: chatID)
+    }
+    
+    private static func manager(for chatID: UUID) -> FoundationModelsManager {
+        if let existingManager = managers[chatID] {
+            return existingManager
         }
-        allSessions[chatID] = session
-        return session
+        
+        let session = LanguageModelSession(model: SystemLanguageModel.default, instructions: promptConfig)
+        let manager = FoundationModelsManager(session: session)
+        managers[chatID] = manager
+        return manager
     }
     
     
     static func callFoundationModel(userMessage: String, userFileUrl: [URL]?, userPhotoData: [Data] = [], ontextSnapshot: (String) -> Void, chatID: UUID) async throws -> String {
-        checkModelAvailability()
-        
         let options: GenerationOptions = GenerationOptions(temperature: 0.3, maximumResponseTokens: 4096)
-        let session: LanguageModelSession = LanguageModelSession(model: SystemLanguageModel.default, instructions: promptConfig)
-        session.prewarm()
-        let chatSessionContext = retainChatSessionContext(session: session, chatID: chatID)
-
+        let session = manager(for: chatID).session
+        
         var prompt = userMessage
         for fileURL in userFileUrl ?? [] {
             let documentText: String
@@ -64,14 +59,14 @@ final class FoundationModelsManager {
             }
             prompt += "\n\nSource document: \(fileURL.lastPathComponent)\n\(documentText)\nEnd of source document."
         }
-
+        
         for (index, photoData) in userPhotoData.enumerated() {
             try Task.checkCancellation()
             let photoText = try await photoTextExtractor(photoData: photoData)
             prompt += "\n\nSource photo \(index + 1):\n\(photoText)\nEnd of source photo."
         }
         
-        let responseStream: LanguageModelSession.ResponseStream = chatSessionContext.streamResponse(to: prompt, options: options)
+        let responseStream: LanguageModelSession.ResponseStream = session.streamResponse(to: prompt, options: options)
         
         var answer: String = ""
         for try await text in responseStream {

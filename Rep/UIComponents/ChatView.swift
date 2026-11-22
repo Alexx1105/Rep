@@ -77,10 +77,9 @@ struct ChatView: View {
                         Spacer(minLength: 65)
                         
                         ForEach(Chat.shared.responseMessage, id: \.id) { response in
+                            let lines: [String] = response.text.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                            
                             VStack(alignment: .leading, spacing: 20) {
-                                
-                                let lines: [String] = response.text.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-                                
                                 ForEach(Array(lines.enumerated()), id: \.offset) { index, textLine in
                                     if index == 0 {
                                         Text(textLine).fontWeight(.bold)
@@ -93,17 +92,20 @@ struct ChatView: View {
                                                 
                                                 Text(textLine)
                                             }
+                                            .transition(.opacity)
                                         }
                                     }
                                 }
-                            }.frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical)
-                                .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium).fontDesign(.rounded)
-                                .listRowBackground(Color.mmBackground)
-                                .lineLimit(nil)
-                                .textSelection(.enabled)
-                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            }
+                            .animation(.easeOut(duration: 0.2), value: lines.count)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical)
+                            .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium).fontDesign(.rounded)
+                            .listRowBackground(Color.mmBackground)
+                            .lineLimit(nil)
+                            .textSelection(.enabled)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
                         }
                         
                         if isShimmerTextVisible {
@@ -497,6 +499,10 @@ struct ChatView: View {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
             }
+        }
+        .onChange(of: isChatFocused) { _, isFocused in
+            guard isFocused, selectedAiProviderID == "local", !needsOpenAIModelSwitch else { return }
+            FoundationModelsManager.prewarmIfAvailable(chatID: chatState.chatID)
         }
         .onChange(of: needsOpenAIModelSwitch, initial: true) { _, needsSwitch in
             guard needsSwitch else { return }

@@ -136,11 +136,17 @@ public class Chat: ObservableObject {
         let usesAppleFoundationModel = modelTier == .appleFoundationModel && !hasUploadedZip
         
         if usesAppleFoundationModel {
+            let clock = ContinuousClock()
+            var lastPublished: ContinuousClock.Instant?
+            
             let answer = try await FoundationModelsManager.callFoundationModel(userMessage: requestInput, userFileUrl: userFile, userPhotoData: userPhotoData, ontextSnapshot: { snapshot in
+                let now = clock.now
+                if let previous = lastPublished, previous.duration(to: now) < .milliseconds(100) { return }
+                
                 guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
-                withAnimation(.easeOut(duration: 0.2)) {
-                    shared.responseMessage[firstIndex].text = snapshot
-                }
+                lastPublished = now
+                shared.responseMessage[firstIndex].text = snapshot
+                
             }, chatID: requestChatID)
             await requestBuffer.append(answer)
             
