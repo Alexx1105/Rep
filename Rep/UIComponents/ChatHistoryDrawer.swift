@@ -106,6 +106,16 @@ struct ChatHistoryDrawer: View {
             }
             .frame(width: geometry.size.width * 2 / 3)
             .frame(maxHeight: .infinity)
+            .contentShape(RoundedRectangle(cornerRadius: 30))
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 20)
+                    .onEnded { drag in
+                        let horizontal = drag.translation.width
+                        let vertical = drag.translation.height
+                        guard horizontal <= -50, -horizontal > abs(vertical) else { return }
+                        onClose()
+                    }
+            )
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
