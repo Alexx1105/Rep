@@ -85,7 +85,7 @@ struct NotionImportPageView: View {
                 }.sheet(isPresented: $showChatView) {
                     if showChatView {
                         ChatView()
-                            .ignoresSafeArea()
+                            .ignoresSafeArea(edges: .bottom)
                     }
                 }
             }.padding(.horizontal)

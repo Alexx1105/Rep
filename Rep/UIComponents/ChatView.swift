@@ -172,67 +172,6 @@ struct ChatView: View {
             .ignoresSafeArea()
             
             VStack {
-                HStack(alignment: .top) {
-                    Button {
-                        withAnimation(.snappy(duration: 0.3)) {
-                            showChatHistory = true
-                        }
-                    } label: {
-                        ZStack {
-                            Circle().fill(Color.clear).glassEffect(.regular)
-                                .frame(width: 45, height: 45)
-                            
-                            Image(systemName: "clock")
-                                .foregroundStyle(Color.mmDark)
-                                .font(.system(size: 20))
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 25))
-                            .frame(width: 110, height: 45)
-                        
-                        HStack {
-                            Menu {
-                                Picker("Model", selection: $selectedAiProviderID) {
-                                    ForEach(AIModelProviders.all) { model in
-                                        Group {
-                                            if model.isSystemImage {
-                                                Label(model.name, systemImage: model.image)
-                                            } else {
-                                                Label(model.name, image: model.image)
-                                                    .font(.system(size: 5))
-                                                    .fixedSize(horizontal: false, vertical: true)
-                                            }
-                                        }
-                                        .tag(model.id)
-                                    }
-                                }
-                                .pickerStyle(.inline)
-                            } label: {
-                                Image(systemName: "ellipsis")
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.mmDark)
-                                    .padding()
-                            }
-                            
-                            Button {
-                                startNewChat()
-                            } label: {
-                                Image(systemName: "pencil.line")
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.mmDark)
-                                    .padding()
-                            }
-                        }
-                    }
-                    
-                }.padding(.top)
-                    .padding(.horizontal)
-                
-                
                 if Chat.shared.responseMessage.isEmpty {
                     VStack(spacing: 20) {
                         VStack(spacing: 5) {
@@ -455,6 +394,10 @@ struct ChatView: View {
             }
             UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeChatSheet() })
         }
+        .frame(minHeight: 0, maxHeight: .infinity)
+        .overlay(alignment: .top) {
+            chatToolbar
+        }
         .overlay(alignment: .leading) {
             if showChatHistory {
                 ChatHistoryDrawer(onClose: {
@@ -529,6 +472,69 @@ struct ChatView: View {
         }
     }
     
+    private var chatToolbar: some View {
+        HStack(alignment: .top) {
+            Button {
+                withAnimation(.snappy(duration: 0.3)) {
+                    showChatHistory = true
+                }
+            } label: {
+                ZStack {
+                    Circle().fill(Color.clear).glassEffect(.regular)
+                        .frame(width: 45, height: 45)
+
+                    Image(systemName: "clock")
+                        .foregroundStyle(Color.mmDark)
+                        .font(.system(size: 20))
+                }
+            }
+
+            Spacer()
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 25))
+                    .frame(width: 110, height: 45)
+
+                HStack {
+                    Menu {
+                        Picker("Model", selection: $selectedAiProviderID) {
+                            ForEach(AIModelProviders.all) { model in
+                                Group {
+                                    if model.isSystemImage {
+                                        Label(model.name, systemImage: model.image)
+                                    } else {
+                                        Label(model.name, image: model.image)
+                                            .font(.system(size: 5))
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .tag(model.id)
+                            }
+                        }
+                        .pickerStyle(.inline)
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.mmDark)
+                            .padding()
+                    }
+
+                    Button {
+                        startNewChat()
+                    } label: {
+                        Image(systemName: "pencil.line")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.mmDark)
+                            .padding()
+                    }
+                }
+            }
+
+        }
+        .padding(.top)
+        .padding(.horizontal)
+    }
+
     private func startNewChat() {
         isNewChat = true
         existingChat = nil

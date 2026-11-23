@@ -71,7 +71,7 @@ public final class AIRequestManager: ObservableObject {
         let _  = try await Self.sendChatContextMetadata(chatID: chatID, context: context)
         let previousResponseID: String? = previousResponseIDs[chatID]
         
-        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat-dev")!
+        let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
         
         let session = try await supabaseDBClient.auth.session
