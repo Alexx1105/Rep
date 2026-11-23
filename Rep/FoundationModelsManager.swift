@@ -67,7 +67,6 @@ final class FoundationModelsManager {
         }
         
         let responseStream: LanguageModelSession.ResponseStream = session.streamResponse(to: prompt, options: options)
-        
         var answer: String = ""
         for try await text in responseStream {
             answer = text.content
