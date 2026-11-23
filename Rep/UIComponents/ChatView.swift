@@ -562,7 +562,15 @@ struct ChatView: View {
         } else {
             capturedPhotos = []
         }
-        
+
+        if needsOpenAIModelSwitch {
+            selectedAiProviderID = "mini"
+        }
+        let modelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
+        fileUrls.removeAll()
+        selectedPhotos.removeAll()
+        imageCaptured = nil
+
         Task {
             var didCompleteResponse = false
             
@@ -571,22 +579,15 @@ struct ChatView: View {
                     isGenerating = false
                     isShimmerTextVisible = false
                     isTextShimmering = false
-                    fileUrls.removeAll()
-                    selectedPhotos.removeAll()
-                    imageCaptured = nil
                 }
             }
             
             do {
-                let modelTier: Chat.ModelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
                 try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, capturedImage: capturedPhotos, existingChat: existingChat, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
                     didCompleteResponse = true
                     isGenerating = false
                     isShimmerTextVisible = false
                     isTextShimmering = false
-                    fileUrls.removeAll()
-                    selectedPhotos.removeAll()
-                    imageCaptured = nil
                 })
             } catch {
                 chatError = error.localizedDescription
