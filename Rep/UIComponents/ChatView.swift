@@ -43,7 +43,7 @@ struct ChatView: View {
     
     
     private var needsOpenAIModelSwitch: Bool {
-        selectedAiProviderID == "local" && (imageCaptured != nil || fileUrls.contains { $0.pathExtension.lowercased() == "zip" })
+        selectedAiProviderID == "local" && (imageCaptured != nil || fileUrls.contains(where: Chat.fileRequiresOpenAI))
     }
     
     private var selectedModel: AIModelProviders {

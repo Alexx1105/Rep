@@ -83,6 +83,13 @@ public class Chat: ObservableObject {
         case gptFull = "full"
         case appleFoundationModel = "local"
     }
+
+    static func fileRequiresOpenAI(_ url: URL) -> Bool {
+        switch url.pathExtension.lowercased() {
+        case "zip", "docx": return true
+        default: return false
+        }
+    }
     
     
     @MainActor
@@ -131,9 +138,9 @@ public class Chat: ObservableObject {
         var pendingUIText: String = ""
         let requestBuffer = chatBuffer()
         
-        let hasUploadedZip = userFile?.contains { $0.pathExtension.lowercased() == "zip" } ?? false
+        let hasOpenAIOnlyFile = userFile?.contains(where: fileRequiresOpenAI) ?? false
         let selectedModel: String = modelTier == .appleFoundationModel ? ModelTier.gptMini.rawValue : modelTier.rawValue
-        let usesAppleFoundationModel = modelTier == .appleFoundationModel && !hasUploadedZip
+        let usesAppleFoundationModel = modelTier == .appleFoundationModel && !hasOpenAIOnlyFile
         
         if usesAppleFoundationModel {
             let clock = ContinuousClock()
