@@ -11,6 +11,15 @@ public typealias OpenAIStreamMeta = StreamEvent
 typealias TitleAndBulletContent = DecodedParentResponse
 
 
+public struct RepCustomResponse: Decodable {
+    let rep_response: RepResponseMeta
+    
+    public struct RepResponseMeta: Decodable {
+        let id: String
+        let status: String
+    }
+}
+
 public struct StreamEvent: Decodable {
     public let type: String
     public let delta: String?

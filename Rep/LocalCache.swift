@@ -100,10 +100,12 @@ import SwiftUI
 @Model final class OpenAIChat {
     @Attribute(.unique) public var openaiId: String
     var content: String
+    var isAppleFoundationModel: Bool?
     
-    init(content: String, openaiId: String) {
+    init(content: String, openaiId: String, isAppleFoundationModel: Bool = false) {
         self.content = content
         self.openaiId = openaiId
+        self.isAppleFoundationModel = isAppleFoundationModel
     }
 }
 
@@ -111,11 +113,13 @@ import SwiftUI
     @Attribute(.unique) public var id: String
     var model: String
     var status: String
+    var chatID: UUID?        ///client side id
     
-    init(id: String, model: String, status: String) {
+    init(id: String, model: String, status: String, chatID: UUID) {
         self.id = id
         self.model = model
         self.status = status
+        self.chatID = chatID
     }
 }
 

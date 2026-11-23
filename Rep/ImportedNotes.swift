@@ -125,12 +125,20 @@ struct ImportedNotes: View {
                                 .truncationMode(.middle)
                                 .lineLimit(1)
                             
-                            Image("openaiLogo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 25, height: 25)
-                                .padding(.trailing)
-                                .opacity(textOpacity)
+                            if openaiChatTitle.isAppleFoundationModel == true {
+                                Image(systemName: "apple.intelligence")
+                                    .font(.system(size: 17, weight: .medium))
+                                    .padding(.trailing)
+                                    .opacity(textOpacity)
+                                    .accessibilityLabel("Apple Intelligence")
+                            } else {
+                                Image("openaiLogo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .padding(.trailing)
+                                    .opacity(textOpacity)
+                            }
                         }
                         
                     case .repDesktopTranscription(let desktopNotes):
@@ -254,16 +262,8 @@ struct ImportedNotes: View {
                             }
                         } else {
                             ScrollView {
-                                Text(chatText)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.leading)
-                                    .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                    .lineLimit(nil)
-                                    .lineHeight(.loose)
-                                    .textSelection(.enabled)
-                                    .tint(.white)
-                                    .padding(.trailing)
-                                    .padding(.top)
+                                AINotesContentView(text: chatText)
+                                    .padding(.horizontal, 16)
                                 Spacer().frame(height: 30)
                             }
                         }
@@ -279,17 +279,10 @@ struct ImportedNotes: View {
                         } else {
                             ScrollView {
                                 if selectedTab == .notes {
-                                    Text(noteText)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.leading)
-                                        .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                        .lineLimit(nil)
-                                        .lineHeight(.loose)
-                                        .textSelection(.enabled)
-                                        .tint(.white)
-                                        .padding(.trailing)
-                                        .padding(.top)
+                                    AINotesContentView(text: noteText)
+                                        .padding(.horizontal, 16)
                                     Spacer().frame(height: 50)
+                                        .padding(.horizontal)
                                 }
                                 
                                 if selectedTab == .transcript {
@@ -320,16 +313,8 @@ struct ImportedNotes: View {
                         } else {
                             ScrollView {
                                 if selectedTab == .notes {
-                                    Text(noteText)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.leading)
-                                        .font(.system(size: 16)).lineSpacing(2).fontWeight(.medium)
-                                        .lineLimit(nil)
-                                        .lineHeight(.loose)
-                                        .textSelection(.enabled)
-                                        .tint(.white)
-                                        .padding(.trailing)
-                                        .padding(.top)
+                                    AINotesContentView(text: noteText)
+                                        .padding(.horizontal, 16)
                                     Spacer().frame(height: 50)
                                 }
                                 
@@ -530,4 +515,3 @@ extension CombinedDataSource {
         )
     )
 }
-

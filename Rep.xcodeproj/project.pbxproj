@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		79613BA0B83A433690D5EBCE /* PushTokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7454E186714FF59D350185 /* PushTokenManager.swift */; };
+		7B3A4C58ADFA4E3C94390E15 /* AINotesCustomRenderings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632478E9ECF74F959A7FD001 /* AINotesCustomRenderings.swift */; };
 		B20148DA309816A200B4B2BA /* CategoryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20148D93098168100B4B2BA /* CategoryTabs.swift */; };
 		B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B205064F2D98A3CC0082FEA2 /* LocalCache.swift */; };
 		B206A73F2FB8E4A900906CB3 /* combinedDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */; };
+		B20F39E130B1292900BAA29D /* ChatHistoryDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20F39E030B1292100BAA29D /* ChatHistoryDrawer.swift */; };
 		B212332B2F96AAF2001F39D1 /* ChatHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */; };
 		B21427D92F38FB9200D86624 /* SyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21427D82F38FB9200D86624 /* SyncController.swift */; };
 		B2177BB12CBB3DA500DDF4E7 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */; };
@@ -18,6 +20,7 @@
 		B22E10F02D04F723003F3D9F /* AuthBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */; };
 		B22E10F22D04F7C0003F3D9F /* OauthProviderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */; };
 		B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */; };
+		B242F85730A94A710059FF5C /* FoundationModelsHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B242F85630A94A690059FF5C /* FoundationModelsHelpers.swift */; };
 		B24A69842F57D98100FBB5FB /* TosPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24A69832F57D97D00FBB5FB /* TosPage.swift */; };
 		B24EBC8A2E463F3C00E7FB01 /* DynamicRepTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25A0A472D91D9E300420892 /* DynamicRepTest.swift */; };
 		B254B0FF2D6A1FE100A0541F /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */; };
@@ -62,6 +65,8 @@
 		B2E40A942F7E130100D32ECE /* ErrorDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E40A932F7E130100D32ECE /* ErrorDesc.swift */; };
 		B2EAF0552FDE2D2F00532E80 /* AudioTranscriptionDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */; };
 		B2EC7FCE2E80C86100613126 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B2EC7FCD2E80C86100613126 /* Supabase */; };
+		B2F47B1D30A15F4D00FE03F9 /* FoundationModelsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F47B1C30A15F4400FE03F9 /* FoundationModelsManager.swift */; };
+		B2F47B1F30A161B400FE03F9 /* FoundationModelsPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F47B1E30A161A300FE03F9 /* FoundationModelsPrompt.swift */; };
 		B2F82DAC2E9F330800006533 /* UIComponentsGlobal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */; };
 		B2FF4B972CCD5C3A00A26EC7 /* ImportPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */; };
 		B3037C07E2589B245CC72A6D /* MainMenuTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30709FB764900BE992DFBFA /* MainMenuTab.swift */; };
@@ -135,10 +140,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		632478E9ECF74F959A7FD001 /* AINotesCustomRenderings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AINotesCustomRenderings.swift; sourceTree = "<group>"; };
 		B20148D93098168100B4B2BA /* CategoryTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTabs.swift; sourceTree = "<group>"; };
 		B205064F2D98A3CC0082FEA2 /* LocalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCache.swift; sourceTree = "<group>"; };
 		B205A9582D73B62D00FFF047 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B206A73E2FB8E4A200906CB3 /* combinedDataSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = combinedDataSources.swift; sourceTree = "<group>"; };
+		B20F39E030B1292100BAA29D /* ChatHistoryDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHistoryDrawer.swift; sourceTree = "<group>"; };
 		B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHelpers.swift; sourceTree = "<group>"; };
 		B21427D82F38FB9200D86624 /* SyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncController.swift; sourceTree = "<group>"; };
 		B2177BAE2CBB3DA500DDF4E7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
@@ -146,6 +153,7 @@
 		B22E10ED2D04F71E003F3D9F /* AuthBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthBackend.swift; sourceTree = "<group>"; };
 		B22E10F12D04F7AF003F3D9F /* OauthProviderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthProviderManager.swift; sourceTree = "<group>"; };
 		B235698E3043CD9300D5EA99 /* UpgradePlanAlertSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradePlanAlertSheet.swift; sourceTree = "<group>"; };
+		B242F85630A94A690059FF5C /* FoundationModelsHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelsHelpers.swift; sourceTree = "<group>"; };
 		B248E14F2CE052DF005B9649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B24A69832F57D97D00FBB5FB /* TosPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosPage.swift; sourceTree = "<group>"; };
 		B254B0F72D6A1D2F00A0541F /* Rep.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Rep.entitlements; sourceTree = "<group>"; };
@@ -191,6 +199,8 @@
 		B2D8FE752F78A72200034A83 /* SupabaseClientManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClientManager.swift; sourceTree = "<group>"; };
 		B2E40A932F7E130100D32ECE /* ErrorDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDesc.swift; sourceTree = "<group>"; };
 		B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscriptionDataHelpers.swift; sourceTree = "<group>"; };
+		B2F47B1C30A15F4400FE03F9 /* FoundationModelsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelsManager.swift; sourceTree = "<group>"; };
+		B2F47B1E30A161A300FE03F9 /* FoundationModelsPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelsPrompt.swift; sourceTree = "<group>"; };
 		B2F82DAB2E9F32F400006533 /* UIComponentsGlobal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIComponentsGlobal.swift; sourceTree = "<group>"; };
 		B2FF4B952CCD5C3A00A26EC7 /* ImportPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPageView.swift; sourceTree = "<group>"; };
 		B3043C921D38E360E9E22AF1 /* VoiceTranscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTranscriptionView.swift; sourceTree = "<group>"; };
@@ -295,6 +305,9 @@
 		B2B837C52BCB102F00BBC748 /* Rep */ = {
 			isa = PBXGroup;
 			children = (
+				B242F85630A94A690059FF5C /* FoundationModelsHelpers.swift */,
+				B2F47B1E30A161A300FE03F9 /* FoundationModelsPrompt.swift */,
+				B2F47B1C30A15F4400FE03F9 /* FoundationModelsManager.swift */,
 				B2D362FE2E2C855900C3012C /* .gitignore */,
 				B26D98A82EE26CDB003DEA64 /* StoreKitTestCertificate.cer */,
 				B24A69832F57D97D00FBB5FB /* TosPage.swift */,
@@ -314,6 +327,7 @@
 				B254B0FC2D6A1FD500A0541F /* UserPermissions.swift */,
 				B212332A2F96AAD0001F39D1 /* ChatHelpers.swift */,
 				B281FE382FA6492300C3EEC5 /* AIDataStructs.swift */,
+				632478E9ECF74F959A7FD001 /* AINotesCustomRenderings.swift */,
 				B288975E2F9DAD0A00423F83 /* ChatRequestManager.swift */,
 				B2EAF0542FDE2D2000532E80 /* AudioTranscriptionDataHelpers.swift */,
 				B25D6AEA2FD5AFD8004801B7 /* AudioTranscriptionManager.swift */,
@@ -361,6 +375,7 @@
 		B3ED98CF4BC35A3484ED0C10 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				B20F39E030B1292100BAA29D /* ChatHistoryDrawer.swift */,
 				B20148D93098168100B4B2BA /* CategoryTabs.swift */,
 				B2AEBC3E3072BBAE0067549B /* ProviderPluginTabs.swift */,
 				B2AEBC3C3072AA0F0067549B /* ImportProviderPluginList.swift */,
@@ -558,6 +573,7 @@
 				B25D6AEB2FD5AFD8004801B7 /* AudioTranscriptionManager.swift in Sources */,
 				B26A46632CCFC4250064AF46 /* LaunchScreen.swift in Sources */,
 				B26842D12CC704DB00471001 /* MainMenu.swift in Sources */,
+				B20F39E130B1292900BAA29D /* ChatHistoryDrawer.swift in Sources */,
 				B2AEBC113069D1A80067549B /* DynamicNotesStructs.swift in Sources */,
 				B2575D0D2EE120E200B82793 /* PaymentStore.swift in Sources */,
 				B235698F3043CDAC00D5EA99 /* UpgradePlanAlertSheet.swift in Sources */,
@@ -573,12 +589,15 @@
 				B304C27FAA75682CFAB44F27 /* NotesControlToggles.swift in Sources */,
 				B3E950182E81E708D3CF019B /* SkeletonLoader.swift in Sources */,
 				B3D4AC5EF86FC9B7FB78B9AA /* ToastNotification.swift in Sources */,
+				B242F85730A94A710059FF5C /* FoundationModelsHelpers.swift in Sources */,
 				B3D3BD8D45064655708BF23E /* ChatDialogToast.swift in Sources */,
 				B337C6418EFD8CA5DE9847BA /* ChatView.swift in Sources */,
 				B3DF5FDBE44CD85DC6EB0B63 /* MainMenuDataSourceList.swift in Sources */,
 				B316D301EC078AFF6FBC7A64 /* PickerView.swift in Sources */,
 				B29A120A303B4C56000A0031 /* PaymentPricingCoordinator.swift in Sources */,
 				B3E4DFB146BC0B9897B2758C /* transcriptionSummmaryView.swift in Sources */,
+				7B3A4C58ADFA4E3C94390E15 /* AINotesCustomRenderings.swift in Sources */,
+				B2F47B1D30A15F4D00FE03F9 /* FoundationModelsManager.swift in Sources */,
 				B345E1A6A42E0997650285BC /* VoiceTranscriptionView.swift in Sources */,
 				B3D928544D2C101A23894C79 /* MacHelperDirections.swift in Sources */,
 				B3FA7E5351F7A40F39DA747A /* TranscriptionSummaryPicker.swift in Sources */,
@@ -595,6 +614,7 @@
 				B2EAF0552FDE2D2F00532E80 /* AudioTranscriptionDataHelpers.swift in Sources */,
 				B2B3F6F32F6E444700FD1367 /* DynamicNotesControlsView.swift in Sources */,
 				B20506502D98A3E50082FEA2 /* LocalCache.swift in Sources */,
+				B2F47B1F30A161B400FE03F9 /* FoundationModelsPrompt.swift in Sources */,
 				B271C1902CD1CEC400710E70 /* NavPath.swift in Sources */,
 				B2AEBC47307A8E9B0067549B /* PluginRegistry.swift in Sources */,
 				B26A46672CD04C210064AF46 /* SignOutView.swift in Sources */,
@@ -802,7 +822,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -810,6 +830,7 @@
 				INFOPLIST_FILE = Rep/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Rep uses your camera to capture photos for your chat notes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rep uses your microphone to transcribe meetings and lectures.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
@@ -825,7 +846,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.5;
+				MARKETING_VERSION = 2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com.beta;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1034,7 +1055,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -1042,6 +1063,7 @@
 				INFOPLIST_FILE = Rep/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Rep uses your camera to capture photos for your chat notes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rep uses your microphone to transcribe meetings and lectures.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
@@ -1057,7 +1079,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.5;
+				MARKETING_VERSION = 2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1075,7 +1097,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rep/Rep.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = L96XRPBK46;
 				ENABLE_PREVIEWS = YES;
@@ -1083,6 +1105,7 @@
 				INFOPLIST_FILE = Rep/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rep;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Rep uses your camera to capture photos for your chat notes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rep uses your microphone to transcribe meetings and lectures.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
@@ -1098,7 +1121,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.5;
+				MARKETING_VERSION = 2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = MuscleMemory.KimchiLabs.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

@@ -168,7 +168,7 @@ struct SettingsView: View {
                             
                             VStack(alignment: .leading, spacing: 1) {
                                
-                                Text("Danger Zone")
+                                Text("Log Out")
                                     .fontWeight(.semibold)
                                     .opacity(textOpacity)
                                     .padding(.top)

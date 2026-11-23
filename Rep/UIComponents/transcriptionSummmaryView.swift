@@ -40,7 +40,7 @@ struct transcriptionSummmaryView: View {
                             .foregroundStyle(Color.mmDark).opacity(0.5)
                             .font(.system(size: 14, weight: .regular, design: .monospaced))
                             .kerning(-0.5)
-                            .lineSpacing(1)
+                            .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
                             .lineLimit(nil)
                             .multilineTextAlignment(.leading)
@@ -49,13 +49,9 @@ struct transcriptionSummmaryView: View {
                             .softReveal(trigger: audioManager.finishedTranscript)
                         
                     case .notes:
-                        Text(audioManager.summarizedNotes)
-                            .font(.system(size: 14)).lineSpacing(3).fontWeight(.medium)
+                        AINotesContentView(text: audioManager.summarizedNotes)
+                            .padding(.horizontal, 16)
                             .foregroundStyle(Color.mmDark)
-                            .padding(.horizontal)
-                            .lineLimit(nil)
-                            .multilineTextAlignment(.leading)
-                            .padding(.top)
                             .softReveal(trigger: audioManager.summarizedNotes)
                     }
                     

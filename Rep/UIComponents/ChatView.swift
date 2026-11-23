@@ -8,12 +8,16 @@ import ActivityKit
 
 
 struct ChatView: View {
+    var pageID: String? = nil
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var closeChatSheet
     @Environment(\.modelContext) private var context
     
     private var textOpacity: Double { colorScheme == .dark ? 0.8 : 0.8 }
     private var messagePlaceholder: String = "Upload notes or Ask..."
+    private var canSendMessage: Bool {
+        !isGenerating && !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     @StateObject private var chatState = Chat.shared
     
@@ -32,8 +36,36 @@ struct ChatView: View {
     @State var showEmptyState: Bool = false
     @State var task: Task<Void, Never>?
     @State var isMoreCreditsNeeded: Bool = false
+    @State private var showChatHistory = false
+    @State private var existingChat: OpenAIChat?
+    
+    @AppStorage("selectedAiProviderID") private var selectedAiProviderID: String = "local"
+    
+    
+    private var needsOpenAIModelSwitch: Bool {
+        selectedAiProviderID == "local" && (imageCaptured != nil || fileUrls.contains(where: Chat.fileRequiresOpenAI))
+    }
+    
+    private var selectedModel: AIModelProviders {
+        AIModelProviders.all.first { $0.id == selectedAiProviderID }
+        ?? AIModelProviders.all[0]
+    }
     
     @FocusState private var isChatFocused: Bool
+    
+    
+    struct AIModelProviders: Identifiable, Hashable {
+        let id: String
+        let name: String
+        let image: String
+        var isSystemImage: Bool = false
+        
+        static let all: [AIModelProviders] = [
+            AIModelProviders(id: "mini", name: "GPT-6.1 luna", image: "openaiLogo", isSystemImage: false),
+            AIModelProviders(id: "full", name: "GPT-6.1 sol", image: "openaiLogo", isSystemImage: false),
+            AIModelProviders(id: "local", name: "Apple Foundation Model", image: "apple.intelligence", isSystemImage: true)
+        ]
+    }
     
     
     var body: some View {
@@ -45,17 +77,35 @@ struct ChatView: View {
                         Spacer(minLength: 65)
                         
                         ForEach(Chat.shared.responseMessage, id: \.id) { response in
-                            Text(response.text)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.leading)
-                                .font(.system(size: 16)).lineSpacing(3).fontWeight(.medium)
-                                .listRowBackground(Color.mmBackground)
-                                .lineLimit(nil)
-                                .textSelection(.enabled)
-                                .tint(.white)
-                                .transition(
-                                    .opacity.combined(with: .move(edge: .bottom))
-                                )
+                            let lines: [String] = response.text.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                            
+                            VStack(alignment: .leading, spacing: 20) {
+                                ForEach(Array(lines.enumerated()), id: \.offset) { index, textLine in
+                                    if index == 0 {
+                                        Text(textLine).fontWeight(.bold)
+                                            .padding(.vertical, 6)
+                                        
+                                    } else {
+                                        if !textLine.trimmingCharacters(in: .whitespaces).isEmpty {
+                                            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                                Circle().frame(width: 8, height: 8).foregroundStyle(Color.mmDark)
+                                                
+                                                Text(textLine)
+                                            }
+                                            .transition(.opacity)
+                                        }
+                                    }
+                                }
+                            }
+                            .animation(.easeOut(duration: 0.2), value: lines.count)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical)
+                            .font(.system(size: 16)).lineSpacing(5).fontWeight(.medium).fontDesign(.rounded)
+                            .listRowBackground(Color.mmBackground)
+                            .lineLimit(nil)
+                            .textSelection(.enabled)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
                         }
                         
                         if isShimmerTextVisible {
@@ -92,8 +142,14 @@ struct ChatView: View {
                         task = Task { @MainActor in
                             guard !Task.isCancelled else { return }
                             
-                            try? await Task.sleep(for: .milliseconds(700))
-                            proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            try? await Task.sleep(for: .milliseconds(50))
+                            guard !Task.isCancelled else {
+                                task = nil
+                                return
+                            }
+                            withAnimation(.linear(duration: 0.3)) {
+                                proxy.scrollTo("chat-bottom", anchor: .bottom)
+                            }
                             task = nil
                         }
                     }
@@ -116,59 +172,6 @@ struct ChatView: View {
             .ignoresSafeArea()
             
             VStack {
-                HStack(alignment: .top) {
-                    Button {
-                        withAnimation { closeChatSheet() }
-                    } label: {
-                        ZStack {
-                            Circle().fill(Color.clear).glassEffect(.regular)
-                                .frame(width: 45, height: 45)
-                            
-                            Image(systemName: "xmark")
-                                .foregroundStyle(Color.mmDark)
-                                .font(.system(size: 20))
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 25))
-                            .frame(width: 110, height: 45)
-                        
-                        HStack {
-                            Menu {
-                                Button {
-                                    
-                                } label: {
-                                    Label("GPT-5.4 mini", image: "openaiLogo")  //TODO: explain that its faster
-                                        .font(.system(size: 5))
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                                
-                            } label: {
-                                Image(systemName: "ellipsis")
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.mmDark)
-                                    .padding()
-                            }
-                            Button {
-                                isNewChat = true
-                                Chat.shared.responseMessage.removeAll()
-                                
-                            } label: {
-                                Image(systemName: "pencil.line")
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.mmDark)
-                                    .padding()
-                            }
-                        }
-                    }
-                    
-                }.padding(.top)
-                    .padding(.horizontal)
-                
-                
                 if Chat.shared.responseMessage.isEmpty {
                     VStack(spacing: 20) {
                         VStack(spacing: 5) {
@@ -246,32 +249,74 @@ struct ChatView: View {
                             }
                         }
                     
-                    ForEach(fileUrls, id: \.self) { file in
-                        ZStack {
-                            Capsule()
-                                .frame(maxWidth: .infinity, maxHeight: 28)
-                                .glassEffect(.regular)
-                            
-                            HStack(spacing: 5) {
-                                Text(file.lastPathComponent).font(Font.system(size: 12))
-                                    .truncationMode(.middle)
-                                    .fontWeight(.semibold)
-                                    .fontDesign(.rounded)
-                                
-                                Button {
-                                    fileUrls.removeAll(where: { $0 == file })
-                                } label: {
-                                    Image(systemName: "x.circle.fill").fixedSize()
-                                        .foregroundStyle(Color.mmDark)
+                    if !fileUrls.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(fileUrls, id: \.self) { file in
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.secondary.opacity(0.15))
+                                        
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Image(systemName: "doc.fill")
+                                                .font(.system(size: 20))
+                                                .foregroundStyle(.secondary)
+                                            Spacer(minLength: 0)
+                                            Text(file.lastPathComponent).font(Font.system(size: 12))
+                                                .truncationMode(.middle)
+                                                .lineLimit(2)
+                                                .fontWeight(.semibold)
+                                                .fontDesign(.rounded)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(10)
+                                    }
+                                    .frame(width: 96, height: 96)
+                                    .overlay(alignment: .topTrailing) {
+                                        Button {
+                                            fileUrls.removeAll(where: { $0 == file })
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .symbolRenderingMode(.palette)
+                                                .foregroundStyle(.white, .black.opacity(0.65))
+                                                .font(.system(size: 22))
+                                                .padding(6)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("Remove \(file.lastPathComponent)")
+                                    }
                                 }
-                            }.padding(6)
-                        }.fixedSize()
-                    }.offset(y: -keyboardHeight)
+                            }
+                        }
+                        .frame(height: 96)
+                        .offset(y: -keyboardHeight)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
                     
-                    PhotoPickerList(selectedPhotos: $selectedPhotos, keyboardHeight: keyboardHeight)
+                    if let imageCaptured {
+                        CapturedPhotoAttachmentTile(image: imageCaptured) {
+                            self.imageCaptured = nil
+                        }
+                        .offset(y: -keyboardHeight)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+
+                    if !selectedPhotos.isEmpty {
+                        PhotoPickerList(selectedPhotos: $selectedPhotos, keyboardHeight: keyboardHeight)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
                     
                     HStack(alignment: .bottom) {
                         Menu {
+                            Button {
+                                guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+                                    chatError = "The camera is unavailable on this device. Try a physical iPhone or iPad."
+                                    return
+                                }
+                                showCameraPicker = true
+                            } label: {
+                                Label("Take Photo", systemImage: "camera")
+                            }
                             Button {
                                 showPhotoPicker = true
                             } label: {
@@ -297,29 +342,42 @@ struct ChatView: View {
                                 Label("Upload File(s)", systemImage: "folder.fill")
                             }
                         } label: {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12).frame(maxWidth: 80, maxHeight: 30).opacity(0.2).foregroundStyle(Color.intervalBlue)
-                                HStack(spacing: 2) {
-                                    Image(systemName: "plus.app").foregroundStyle(Color.intervalBlue)
-                                    Text("Upload")
-                                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Color.intervalBlue)
-                                }
+                            Image(systemName: "plus").foregroundStyle(Color.mmDark)
+                                .font(.system(size: 25))
+                        }
+                        
+                        HStack(spacing: 5) {
+                            Text(selectedModel.name)
+                            if selectedModel.isSystemImage {
+                                Image(systemName: selectedModel.image)
+                            } else {
+                                Image(selectedModel.image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 16, height: 16)
                             }
                         }
+                        .font(.system(size: 14))
+                        .fontDesign(.rounded).fontWeight(.regular)
+                        .padding(.horizontal)
+                        .padding(.bottom, 4)
+                        .foregroundStyle(Color.mmDark).opacity(0.5)
+                        .contentTransition(.opacity)
+                        .animation(.easeInOut(duration: 0.2), value: selectedModel)
                         
                         Spacer()
                         Button {
                             sendMessage()
                         } label: {
-                            ZStack {    
-                                Circle().fill(Color.mmDark)
+                            ZStack {
+                                Circle().fill(canSendMessage ? Color.blue : Color.gray.opacity(0.4))
                                     .frame(maxWidth: 30, maxHeight: 30)
                                 
-                                Image(systemName: "arrow.up").foregroundStyle(Color.checkmark)
+                                Image(systemName: "arrow.up").foregroundStyle(.white)
                             }
                         }.padding(.trailing)
-                            .disabled(isGenerating)
+                            .disabled(!canSendMessage)
+                            .animation(.easeInOut(duration: 0.1), value: canSendMessage)
                         
                     }.offset(y: -keyboardHeight)
                 }.padding(.leading)
@@ -329,17 +387,73 @@ struct ChatView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal))
                     .padding(.bottom)
+                    .animation(.snappy(duration: 0.25), value: chatState.chat)
+                    .animation(.snappy(duration: 0.25), value: fileUrls.count)
+                    .animation(.snappy(duration: 0.25), value: selectedPhotos.count)
                 
             }
             UpgradePlanAlertSheet(isPresented: $isMoreCreditsNeeded, onDismiss: { closeChatSheet() })
-        }.sheet(isPresented: $showPhotoPicker) {
+        }
+        .frame(minHeight: 0, maxHeight: .infinity)
+        .overlay(alignment: .top) {
+            chatToolbar
+        }
+        .overlay(alignment: .leading) {
+            if showChatHistory {
+                ChatHistoryDrawer(onClose: {
+                    withAnimation(.snappy(duration: 0.3)) {
+                        showChatHistory = false
+                    }
+                }, onSelect: { pageID in
+                    withAnimation(.snappy(duration: 0.3)) {
+                        loadChat(pageID: pageID)
+                        showChatHistory = false
+                    }
+                }, onNewChat: {
+                    withAnimation(.snappy(duration: 0.3)) {
+                        startNewChat()
+                        showChatHistory = false
+                    }
+                })
+                .transition(.move(edge: .leading))
+                .zIndex(1)
+            }
+        }
+        .fullScreenCover(isPresented: $showCameraPicker) {
+            CameraPicker(onImagePicked: { image in
+                imageCaptured = image
+                showCameraPicker = false
+            }, onCancel: {
+                showCameraPicker = false
+            })
+            .ignoresSafeArea(edges: .bottom)
+            .clipShape(RoundedRectangle(cornerRadius: 30))
+        }
+        .sheet(isPresented: $showPhotoPicker) {
             PhotoPicker(selectedPhotos: $selectedPhotos)
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .task(id: pageID) {
+            guard let pageID else { return }
+            loadChat(pageID: pageID)
         }
         .sheet(isPresented: $showFilePicker) {
             DocPicker(contentType: [.item, .folder], allowMultipleFileSelect: true) { url in
                 fileUrls = url
             }
-        }.onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
+        }
+        .onChange(of: isChatFocused) { _, isFocused in
+            guard isFocused, selectedAiProviderID == "local", !needsOpenAIModelSwitch else { return }
+            FoundationModelsManager.prewarmIfAvailable(chatID: chatState.chatID)
+        }
+        .onChange(of: needsOpenAIModelSwitch, initial: true) { _, needsSwitch in
+            guard needsSwitch else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedAiProviderID = "mini"
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { note in
             
             if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 keyboardHeight = frame.height + 5
@@ -357,7 +471,87 @@ struct ChatView: View {
             Text(chatError ?? "Please try again.")
         }
     }
+    
+    private var chatToolbar: some View {
+        HStack(alignment: .top) {
+            Button {
+                withAnimation(.snappy(duration: 0.3)) {
+                    showChatHistory = true
+                }
+            } label: {
+                ZStack {
+                    Circle().fill(Color.clear).glassEffect(.regular)
+                        .frame(width: 45, height: 45)
 
+                    Image(systemName: "clock")
+                        .foregroundStyle(Color.mmDark)
+                        .font(.system(size: 20))
+                }
+            }
+
+            Spacer()
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 25).fill(Color.clear).glassEffect( .regular, in: .rect(cornerRadius: 25))
+                    .frame(width: 110, height: 45)
+
+                HStack {
+                    Menu {
+                        Picker("Model", selection: $selectedAiProviderID) {
+                            ForEach(AIModelProviders.all) { model in
+                                Group {
+                                    if model.isSystemImage {
+                                        Label(model.name, systemImage: model.image)
+                                    } else {
+                                        Label(model.name, image: model.image)
+                                            .font(.system(size: 5))
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .tag(model.id)
+                            }
+                        }
+                        .pickerStyle(.inline)
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.mmDark)
+                            .padding()
+                    }
+
+                    Button {
+                        startNewChat()
+                    } label: {
+                        Image(systemName: "pencil.line")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.mmDark)
+                            .padding()
+                    }
+                }
+            }
+
+        }
+        .padding(.top)
+        .padding(.horizontal)
+    }
+
+    private func startNewChat() {
+        isNewChat = true
+        existingChat = nil
+        Chat.shared.chatID = UUID()
+        Chat.shared.responseMessage.removeAll()
+    }
+    
+    private func loadChat(pageID: String) {
+        do {
+            guard let chat = try Chat.loadSavedChat(pageID: pageID, context: context) else { return }
+            existingChat = chat
+            selectedAiProviderID = chat.isAppleFoundationModel == true ? "local" : "mini"
+        } catch {
+            chatError = error.localizedDescription
+        }
+    }
+    
     private func sendMessage() {
         guard !isGenerating, !chatState.chat.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         showEmptyState = false
@@ -367,17 +561,40 @@ struct ChatView: View {
         isTextShimmering = true
         let photos = selectedPhotos
         let file = fileUrls
+        
+        let capturedPhotos: [Data]
+        if let data = imageCaptured?.jpegData(compressionQuality: 0.85) {
+            capturedPhotos = [data]
+        } else {
+            capturedPhotos = []
+        }
+
+        if needsOpenAIModelSwitch {
+            selectedAiProviderID = "mini"
+        }
+        let modelTier = Chat.ModelTier(rawValue: selectedAiProviderID) ?? .gptMini
+        fileUrls.removeAll()
+        selectedPhotos.removeAll()
+        imageCaptured = nil
 
         Task {
+            var didCompleteResponse = false
+            
             defer {
-                isGenerating = false
-                isShimmerTextVisible = false
-                isTextShimmering = false
-                fileUrls.removeAll()
-                selectedPhotos.removeAll()
+                if !didCompleteResponse {
+                    isGenerating = false
+                    isShimmerTextVisible = false
+                    isTextShimmering = false
+                }
             }
+            
             do {
-                try await Chat.sendChatMessage(userFile: file, context: context, selectedPhotos: photos, onCreditsNeeded: { isMoreCreditsNeeded = true })
+                try await Chat.sendChatMessage(userFile: file, context: context, modelTier: modelTier, selectedPhotos: photos, capturedImage: capturedPhotos, existingChat: existingChat, onCreditsNeeded: { isMoreCreditsNeeded = true }, onResponseComplete: {
+                    didCompleteResponse = true
+                    isGenerating = false
+                    isShimmerTextVisible = false
+                    isTextShimmering = false
+                })
             } catch {
                 chatError = error.localizedDescription
                 print("chat error:", error)
@@ -388,6 +605,23 @@ struct ChatView: View {
 
 
 
-#Preview {
+#Preview("AI Response Styling") {
     ChatView()
+        .onAppear {
+            Chat.shared.responseMessage = [
+                Chat.messageModel(id: "preview-ai-response", text: """
+                Building Stronger Study Habits
+                
+                Spaced repetition helps you remember information by reviewing it at increasing intervals. Each review strengthens recall and makes the next study session more effective.
+                
+                Active recall means retrieving an answer from memory before checking your notes. Try explaining a concept in your own words, then compare your explanation with the source.
+                
+                Keep each flashcard focused on one idea. A short question with a specific answer is easier to review than a card containing several unrelated facts.
+                
+                Review difficult material more often and familiar material less often. For example, revisit a new definition tomorrow, then a few days later, and again the following week.
+                
+                Consistent, brief sessions make studying manageable. Use a few minutes between activities to review your notes and practice recalling the most important details.
+                """)
+            ]
+        }
 }

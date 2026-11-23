@@ -11,42 +11,62 @@ import Foundation
 
 struct ShimmerText: View {
     let text: String
-    
-    @State private var shineOffset: CGFloat = -1
-    
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var sweepProgress: CGFloat = 0
+
     var body: some View {
-        Text(text)
-            .opacity(0.35)
+        let label = Text(text)
             .fontDesign(.rounded)
             .fontWeight(.medium)
+
+        label
+            .foregroundStyle(Color.mmDark)
+            .opacity(reduceMotion ? 1 : 0.55)
             .overlay {
-                GeometryReader { geo in
-                    LinearGradient(
-                        colors: [
-                            .clear,
-                            .white.opacity(0.15),
-                            .white.opacity(0.95),
-                            .white.opacity(0.15),
-                            .clear
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: geo.size.width * 0.75)
-                    .offset(x: shineOffset * geo.size.width)
-                    .mask(
-                        Text(text)
-                           
-                            
-                    )
+                if !reduceMotion {
+                    GeometryReader { geometry in
+                        let width = geometry.size.width
+                        let bandWidth = width * 0.65
+
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.mmDark.opacity(0), location: 0),
+                                .init(color: Color.mmDark.opacity(0.18), location: 0.24),
+                                .init(color: Color.mmDark.opacity(0.7), location: 0.5),
+                                .init(color: Color.mmDark.opacity(0.18), location: 0.76),
+                                .init(color: Color.mmDark.opacity(0), location: 1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .frame(width: bandWidth)
+                        .offset(x: sweepProgress * (width + bandWidth) - bandWidth)
+                    }
+                    .mask { label }
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
                 }
             }
             .onAppear {
-                withAnimation(.linear(duration: 1.7).repeatForever(autoreverses: false)) {
-                    shineOffset = 1.8
+                sweepProgress = 0
+                withAnimation(.linear(duration: 0.9).repeatForever(autoreverses: false)) {
+                    sweepProgress = 1
                 }
             }
     }
 }
 
+#Preview("Shimmer Text · Light") {
+    ShimmerText(text: "Generating notes ...")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.mmBackground.ignoresSafeArea())
+        .preferredColorScheme(.light)
+}
 
+#Preview("Shimmer Text · Dark") {
+    ShimmerText(text: "Generating notes ...")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.mmBackground.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+}

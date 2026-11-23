@@ -4,7 +4,8 @@
 //
 //  Created by alex haidar on 4/25/26.
 //
-/* All requests to the supabase edge functions for the AI chats will be handled here  */
+/* All requests to the supabase edge functions
+   for the AI chats will be handled here  */
 import Foundation
 import Supabase
 import SwiftData
@@ -22,11 +23,6 @@ public final class AIRequestManager: ObservableObject {
         let userMessage: String
         let gptModel: String
         let userFile: [URL]
-    }
-    
-    enum modelTier: Codable {
-        case gptMini
-        case gptFull
     }
     
     
@@ -63,8 +59,17 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func openAIRequest(userMessage: String, userFileUrl: [URL]?, userPhotoData: [Data]?, gptModel: String = "mini", context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
+    private static func sendChatContextMetadata(chatID: UUID, context: ModelContext) async throws -> [OpenAIMeta] {
+        let fetch: FetchDescriptor = FetchDescriptor<OpenAIMeta>(predicate: #Predicate { $0.chatID == chatID })
+        return try context.fetch(fetch)
+    }
+    
+    
+    private var previousResponseIDs: [UUID: String] = [:]
+    public func openAIRequest(userMessage: String, userFileUrl: [URL]?, userPhotoData: [Data]?, gptModel: String, chatID: UUID, context: ModelContext, idempotentKey: UUID, onChunk: @escaping(String) async -> Void, onMeta: @escaping(String) -> Void) async throws {
         let fileIdentifier: String = UUID().uuidString
+        let _  = try await Self.sendChatContextMetadata(chatID: chatID, context: context)
+        let previousResponseID: String? = previousResponseIDs[chatID]
         
         let openAIRequest: URL = URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!
         var urlRequest: URLRequest = URLRequest(url: openAIRequest)
@@ -91,6 +96,12 @@ public final class AIRequestManager: ObservableObject {
         multipartReqBody.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
         multipartReqBody.append("\(gptModel)\r\n".data(using: .utf8)!)
         
+        if let previousResponseID {
+            multipartReqBody.append("--\(fileIdentifier)\r\n".data(using: .utf8)!)
+            multipartReqBody.append("Content-Disposition: form-data; name=\"previous_response_id\"\r\n\r\n".data(using: .utf8)!)
+            multipartReqBody.append("\(previousResponseID)\r\n".data(using: .utf8)!)
+        }
+        
         if let fileUrls: [URL] = userFileUrl {
             for files in fileUrls {
                 let fileBytes = try buildFilePathHelper(userFileUrl: files, fileIdentifier: fileIdentifier)
@@ -110,9 +121,8 @@ public final class AIRequestManager: ObservableObject {
         
         do {
             let (bytes, response) = try await URLSession.shared.bytes(for: urlRequest)
-            print("EDGE FUNCTION OPENAI RESPONSE: \(bytes)")
-            
             guard let billingResponse = response as? HTTPURLResponse else { throw PaymentStoreError.billingCustomerNotFound }
+            
             if billingResponse.statusCode == 402 {
                 try? await paymentStoreCredits.refreshBillingCredits(plan: PaymentStore.shared.currentPlan)
                 throw PaymentStoreError.insufficientTokens
@@ -131,8 +141,8 @@ public final class AIRequestManager: ObservableObject {
             }
             
             for try await stream in bytes.lines {
-                
                 guard stream.hasPrefix("data:") else { continue }
+                
                 let ssePayload = String(stream.dropFirst(6))
                 if ssePayload == "[DONE]" { break }
                 
@@ -145,9 +155,17 @@ public final class AIRequestManager: ObservableObject {
                     continue
                 }
                 
-                let streamDecoder = try JSONDecoder().decode(StreamEvent.self, from: streamData)
+                if let custom = try? decoder.decode(RepCustomResponse.self, from: streamData) {
+                    let response = custom.rep_response
+                    if response.status == "completed", !response.id.isEmpty {
+                        previousResponseIDs[chatID] = response.id
+                    }
+                    continue
+                }
+
+                let streamDecoder = try decoder.decode(StreamEvent.self, from: streamData)
                 if streamDecoder.response != nil {
-                    let meta = try await AIRequestManager.shared.extractChatMetadata(aiResponse: streamDecoder, context: context)
+                    let meta = try await AIRequestManager.shared.extractChatMetadata(aiResponse: streamDecoder, chatID: chatID, context: context)
                     onMeta(meta)
                 }
                 guard streamDecoder.type == "response.output_text.delta", let delta = streamDecoder.delta else { continue }
@@ -165,20 +183,24 @@ public final class AIRequestManager: ObservableObject {
     }
     
     
-    public func extractChatMetadata(aiResponse: OpenAIStreamMeta, context: ModelContext) async throws -> String {
+    public func extractChatMetadata(aiResponse: OpenAIStreamMeta, chatID: UUID, context: ModelContext) async throws -> String {
         let responseID: String = aiResponse.response?.id ?? "missing chat id"
         let responseStatus: String = aiResponse.response?.status ?? "missing status"
         let responseAIModel: String = aiResponse.response?.model ?? "missing ai model"
         
         do {
-            let metaContent: OpenAIMeta = OpenAIMeta(id: responseID, model: responseAIModel, status: responseStatus)
+            let metaContent: OpenAIMeta = OpenAIMeta(id: responseID, model: responseAIModel, status: responseStatus, chatID: chatID)
             context.insert(metaContent)
             try context.save()
             
         } catch {
             print("error saving chat metadata", ErrorDesc.persistenceError, error)
         }
-        return "extracted AI id: \(responseID) | status: \(responseStatus) | ai model: \(responseAIModel) ✅"
+        
+        if responseStatus == "completed", let openaiID = aiResponse.response?.id {
+            previousResponseIDs[chatID] = openaiID
+        }
+        return "extracted AI id: \(responseID) | status: \(responseStatus) | ai model: \(responseAIModel)"
     }
     
     
@@ -196,8 +218,7 @@ public final class AIRequestManager: ObservableObject {
                 await SupabaseClientManager.shared.supabaseOpenaiChatUpsert(openaiID: openaiID, title: title, content: content, token: token)
                 print("==========================\neach chunk: \(chunk)")
             }
-            
-            print("openai chat successfully upserted into supabase ✅")
+        
         } catch {
             print("openai chat did not get upserted into supabase ❗️", ErrorDesc.persistenceError, error)
         }

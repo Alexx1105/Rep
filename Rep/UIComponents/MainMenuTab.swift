@@ -51,11 +51,19 @@ struct MainMenuTab: View {
                     }
                     
                     if openaiChatTitle?.content != nil {
-                        Image("openaiLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 25, height: 25)
-                            .opacity(textOpacity)
+                        if openaiChatTitle?.isAppleFoundationModel == true {
+                            Image(systemName: "apple.intelligence")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundStyle(Color.mmDark)
+                                .opacity(textOpacity)
+                                .accessibilityLabel("Apple Intelligence")
+                        } else {
+                            Image("openaiLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .opacity(textOpacity)
+                        }
                         
                         Text(openaiChatTitle?.content ?? "OpenAI Chat")
                             .fontWeight(.medium)

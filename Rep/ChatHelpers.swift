@@ -5,7 +5,8 @@
 //  Created by alex haidar on 4/20/26.
 //
 /* helper functions, methods, and classes for the AI Chat view
- and voice transcription and accessing system level APIs/view controllers for the front-end here */
+ and voice transcription and accessing system level APIs/view
+ controllers for the front-end here */
 
 import Foundation
 import SwiftUI
@@ -13,9 +14,10 @@ import UniformTypeIdentifiers
 import PhotosUI
 import UIKit
 import SwiftData
+import ImageIO
 
 
-final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {     ///FYI: acts a a bridge between SwiftUI & UIKit
+final class CoordinatorBridge: NSObject, UIDocumentPickerDelegate {
     let onSelect: ([URL]) -> Void
     init(onSelect: @escaping ([URL]) -> Void) {
         self.onSelect = onSelect
@@ -64,8 +66,11 @@ public class Chat: ObservableObject {
     private init() {}
     
     static let shared = Chat()
+    var chatID: UUID = UUID()
     @Published var chat: String = ""
     @Published var responseMessage: [messageModel] = []
+    @Published private(set) var isSyncingChat: Bool = false
+    private var pendingChatSaves = 0
     
     public struct messageModel: Identifiable {
         public let id: String
@@ -73,11 +78,44 @@ public class Chat: ObservableObject {
     }
     
     
+    public enum ModelTier: String, Codable {
+        case gptMini = "mini"
+        case gptFull = "full"
+        case appleFoundationModel = "local"
+    }
+
+    static func fileRequiresOpenAI(_ url: URL) -> Bool {
+        switch url.pathExtension.lowercased() {
+        case "zip", "docx": return true
+        default: return false
+        }
+    }
+    
+    
     @MainActor
-    public static func sendChatMessage(userFile: [URL]?, context: ModelContext, selectedPhotos: [PhotosPickerItem], onCreditsNeeded: @escaping () -> Void) async throws {
+    static func loadSavedChat(pageID: String, context: ModelContext) throws -> OpenAIChat? {
+        let descriptor = FetchDescriptor<OpenAIChat>(predicate: #Predicate { $0.openaiId == pageID })
+        guard let chat = try context.fetch(descriptor).first else { return nil }
+        
+        shared.chatID = UUID(uuidString: pageID) ?? UUID()
+        shared.chat = ""
+        shared.responseMessage = [messageModel(id: chat.openaiId, text: chat.content)]
+        return chat
+    }
+    
+    
+    @MainActor
+    static func sendChatMessage(userFile: [URL]?, context: ModelContext, modelTier: Chat.ModelTier, selectedPhotos: [PhotosPickerItem], capturedImage: [Data] = [], existingChat: OpenAIChat? = nil, onCreditsNeeded: @escaping () -> Void, onResponseComplete: () -> Void = {}) async throws {
         let idempotentKey: UUID = UUID()
+        let requestChatID = shared.chatID
         let trimUserInput = Chat.shared.chat.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimUserInput.isEmpty else { return }
+        let requestInput: String
+        if let existingChat {
+            requestInput = "Existing saved chat content:\n\(existingChat.content)\n\nUser request:\n\(trimUserInput)\n\nReturn the updated content in full."
+        } else {
+            requestInput = trimUserInput
+        }
         
         Chat.shared.chat = ""
         let localId: String = UUID().uuidString
@@ -89,7 +127,7 @@ public class Chat: ObservableObject {
         
         if let userFile { print("sending selected file: \(userFile)") }
         
-        var userPhotoData: [Data] = []
+        var userPhotoData = capturedImage
         for photoData in selectedPhotos {
             if let transferPhoto: PhotoTransfer = try await photoData.loadTransferable(type: PhotoTransfer.self) {
                 userPhotoData.append(transferPhoto.photo)
@@ -100,38 +138,58 @@ public class Chat: ObservableObject {
         var pendingUIText: String = ""
         let requestBuffer = chatBuffer()
         
-        do {
-            try await AIRequestManager.shared.openAIRequest(userMessage: trimUserInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: "mini", context: context, idempotentKey: idempotentKey) { chunk in
+        let hasOpenAIOnlyFile = userFile?.contains(where: fileRequiresOpenAI) ?? false
+        let selectedModel: String = modelTier == .appleFoundationModel ? ModelTier.gptMini.rawValue : modelTier.rawValue
+        let usesAppleFoundationModel = modelTier == .appleFoundationModel && !hasOpenAIOnlyFile
+        
+        if usesAppleFoundationModel {
+            let clock = ContinuousClock()
+            var lastPublished: ContinuousClock.Instant?
+            
+            let answer = try await FoundationModelsManager.callFoundationModel(userMessage: requestInput, userFileUrl: userFile, userPhotoData: userPhotoData, ontextSnapshot: { snapshot in
+                let now = clock.now
+                if let previous = lastPublished, previous.duration(to: now) < .milliseconds(100) { return }
                 
-                await requestBuffer.append(chunk)
-                pendingUIText += chunk
+                guard let firstIndex = shared.responseMessage.firstIndex(where: { $0.id == localId }) else { return }
+                lastPublished = now
+                shared.responseMessage[firstIndex].text = snapshot
                 
-                guard pendingUIText.count >= 16 else { return }
-                
-                let format = pendingUIText
-                pendingUIText.removeAll(keepingCapacity: true)
-                
-                await MainActor.run {
-                    if let addLastRawChunk = shared.responseMessage.indices.last {
-                        shared.responseMessage[addLastRawChunk].text.append(format)
+            }, chatID: requestChatID)
+            await requestBuffer.append(answer)
+            
+        } else {
+            do {
+                try await AIRequestManager.shared.openAIRequest(userMessage: requestInput, userFileUrl: userFile, userPhotoData: userPhotoData, gptModel: selectedModel, chatID: requestChatID, context: context, idempotentKey: idempotentKey) { chunk in
+                    
+                    await requestBuffer.append(chunk)
+                    pendingUIText += chunk
+                    
+                    guard pendingUIText.count >= 5 else { return }
+                    
+                    let format = pendingUIText
+                    pendingUIText.removeAll(keepingCapacity: true)
+                    
+                    await MainActor.run {
+                        if let addLastRawChunk = shared.responseMessage.indices.last {
+                            shared.responseMessage[addLastRawChunk].text.append(format)
+                        }
                     }
                 }
                 
+                onMeta: { meta in
+                    metadataText = meta
+                    print("metadata:", metadataText)
+                }
+                
+            } catch PaymentStoreError.insufficientTokens {
+                shared.responseMessage.removeAll(where: { $0.id == localId })
+                onCreditsNeeded()
+                return
+            } catch {
+                shared.responseMessage.removeAll(where: { $0.id == localId })
+                print("billing or function call failure", ErrorDesc.callsiteError, error)
+                throw error
             }
-            
-            onMeta: { meta in
-                metadataText = meta
-                print("metadata:", metadataText) //Use later
-            }
-            
-        } catch PaymentStoreError.insufficientTokens {
-            shared.responseMessage.removeAll(where: { $0.id == localId })
-            onCreditsNeeded()
-            return
-        } catch {
-            shared.responseMessage.removeAll(where: { $0.id == localId })
-            print("billing or function call failure", ErrorDesc.callsiteError, error)
-            throw error
         }
         
         
@@ -144,16 +202,41 @@ public class Chat: ObservableObject {
         
         guard !fullSnapahot.isEmpty else { throw ErrorDesc.ssetextStreamEventError }
         
+        shared.pendingChatSaves += 1
+        shared.isSyncingChat = true
+        defer {
+            shared.pendingChatSaves -= 1
+            shared.isSyncingChat = shared.pendingChatSaves > 0
+        }
+        onResponseComplete()
+        
         do {
-            let cacheChat: OpenAIChat = OpenAIChat(content: fullSnapahot, openaiId: localId)
-            context.insert(cacheChat)
+            let savedPageID: String
+            if let existingChat {
+                existingChat.content = fullSnapahot
+                existingChat.isAppleFoundationModel = usesAppleFoundationModel
+                savedPageID = existingChat.openaiId
+            } else {
+                let cacheChat = OpenAIChat(content: fullSnapahot, openaiId: localId, isAppleFoundationModel: usesAppleFoundationModel)
+                context.insert(cacheChat)
+                savedPageID = localId
+            }
             try context.save()
+            
+            if existingChat != nil {
+                shared.responseMessage.removeAll { $0.id == localId }
+                if let index = shared.responseMessage.firstIndex(where: { $0.id == savedPageID }) {
+                    shared.responseMessage[index].text = fullSnapahot
+                } else {
+                    shared.responseMessage.append(messageModel(id: savedPageID, text: fullSnapahot))
+                }
+            }
             
             let title: String = String(fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines).prefix(20))
             let trimmedText: String = fullSnapahot.trimmingCharacters(in: .whitespacesAndNewlines)
             
             guard !title.isEmpty && !trimmedText.isEmpty else { throw ErrorDesc.nilValue }
-            try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: localId, title: title)
+            try await AIRequestManager.shared.upsertChatContent(fullSnapshot: trimmedText, openaiID: savedPageID, title: title)
             
         } catch {
             print("failed to persist chat session:", ErrorDesc.persistenceError, error)
@@ -185,69 +268,135 @@ struct DocPicker: UIViewControllerRepresentable {
 }
 
 
-//struct CameraPicker: UIViewControllerRepresentable {
-//    var onImagePicked: (UIImage?) -> Void
-//    var onCancel: (() -> Void)? = nil
-//
-//    func makeCoordinator() -> Coordinator { Coordinator(pickerParent: self) }
-//
-//    func makeUIViewController(context: Context) -> UIImagePickerController {
-//        let picker = UIImagePickerController()
-//        picker.sourceType = .camera
-//        picker.cameraCaptureMode = .photo
-//        picker.delegate = context.coordinator
-//        return picker
-//    }
-//
-//    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-//
-//    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-//        let pickerParent: CameraPicker
-//        init(pickerParent: CameraPicker) { self.pickerParent = pickerParent }
-//
-//        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-//            pickerParent.onImagePicked(info[.originalImage] as? UIImage)
-//            picker.presentingViewController?.dismiss(animated: true)
-//        }
-//
-//        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-//            pickerParent.onCancel?()
-//            picker.presentingViewController?.dismiss(animated: true)
-//        }
-//    }
-//}
+struct CameraPicker: UIViewControllerRepresentable {
+    var onImagePicked: (UIImage?) -> Void
+    var onCancel: (() -> Void)? = nil
+    
+    func makeCoordinator() -> Coordinator { Coordinator(pickerParent: self) }
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.cameraCaptureMode = .photo
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let pickerParent: CameraPicker
+        init(pickerParent: CameraPicker) { self.pickerParent = pickerParent }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            pickerParent.onImagePicked(info[.originalImage] as? UIImage)
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            pickerParent.onCancel?()
+        }
+    }
+}
+
+
+struct CapturedPhotoAttachmentTile: View {
+    let image: UIImage
+    let onRemove: () -> Void
+
+    var body: some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFill()
+            .frame(width: 96, height: 96)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(alignment: .topTrailing) {
+                Button(action: onRemove) {
+                    Image(systemName: "xmark.circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, .black.opacity(0.65))
+                        .font(.system(size: 22))
+                        .padding(6)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Remove captured photo")
+            }
+    }
+}
 
 
 struct PhotoPickerList: View {
     @Binding var selectedPhotos: [PhotosPickerItem]
-    let keyboardHeight: CGFloat 
+    let keyboardHeight: CGFloat
     
     var body: some View {
-        ForEach(Array(selectedPhotos.indices), id: \.self) { index in
-            ZStack {
-                Capsule()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 28)
-                    .glassEffect(.regular)
-               
-                
-                HStack(spacing: 3) {
-                    Text(String("Image \(index + 1)")).font(Font.system(size: 12))
-                        .fontWeight(.semibold)
-                        .fontDesign(.rounded)
-                    
-                    Button {
-                        selectedPhotos.remove(at: index)
-                    } label: {
-                        Image(systemName: "x.circle.fill").fixedSize()
-                            .foregroundStyle(Color.mmDark)
+        if !selectedPhotos.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(selectedPhotos, id: \.self) { item in
+                        PhotoAttachmentTile(item: item) {
+                            selectedPhotos.removeAll { $0 == item }
+                        }
                     }
-                }.padding(6)
-            }.fixedSize()
-        }.offset(y: -keyboardHeight)
-      
-        .onAppear {
-            print("SELECED: \(selectedPhotos.count)")
+                }
+            }
+            .frame(height: 96)
+            .offset(y: -keyboardHeight)
+        }
+    }
+}
+
+private struct PhotoAttachmentTile: View {
+    let item: PhotosPickerItem
+    let onRemove: () -> Void
+    @State private var thumbnail: UIImage?
+    @State private var isLoading = true
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.secondary.opacity(0.15))
+            
+            if let thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFill()
+            } else if isLoading {
+                ProgressView()
+            } else {
+                Image(systemName: "photo")
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("Photo preview unavailable")
+            }
+        }
+        .frame(width: 96, height: 96)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(alignment: .topTrailing) {
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, .black.opacity(0.65))
+                    .font(.system(size: 22))
+                    .padding(6)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Remove photo")
+        }
+        .task(id: item) {
+            thumbnail = nil
+            isLoading = true
+            defer { isLoading = false }
+            
+            // Decode a small preview instead of retaining the full-resolution image.
+            guard let data = try? await item.loadTransferable(type: Data.self),
+                  !Task.isCancelled,
+                  let source = CGImageSourceCreateWithData(data as CFData, nil),
+                  let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                    kCGImageSourceCreateThumbnailFromImageAlways: true,
+                    kCGImageSourceCreateThumbnailWithTransform: true,
+                    kCGImageSourceThumbnailMaxPixelSize: 288
+                  ] as CFDictionary) else { return }
+            
+            thumbnail = UIImage(cgImage: image)
         }
     }
 }
@@ -286,7 +435,7 @@ struct PhotoPicker: View {
                         HStack(alignment: .bottom , spacing: 5) {
                             ForEach(0..<5) { square in
                                 RoundedRectangle(cornerRadius: 12).frame(maxWidth: 55, maxHeight: 55)
-                                .foregroundStyle(Color.mmDark).opacity(0.1)
+                                    .foregroundStyle(Color.mmDark).opacity(0.1)
                                 
                             }
                         }.padding(.top, 2)
