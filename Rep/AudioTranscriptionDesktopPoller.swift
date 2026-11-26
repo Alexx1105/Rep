@@ -37,14 +37,12 @@ final class RepDesktopPoller: ObservableObject {
                 }
             }
         }
-        print("started polling...")
     }
     
     
     func stopPollingNotes() {
         task?.cancel()
         task = nil
-        print("polling stopped")
     }
     
     
@@ -53,7 +51,7 @@ final class RepDesktopPoller: ObservableObject {
         let session: Session = try await supabaseDBClient.auth.session
         guard !session.isExpired else { throw ErrorDesc.authTokenError }
         
-        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!)  
+        var request: URLRequest = URLRequest(url: URL(string: "https://oxgumwqxnghqccazzqvw.supabase.co/functions/v1/ai_summerizer-chat")!)
         request.httpMethod = "GET"
         request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("desktop_notes", forHTTPHeaderField: "x-rep-action")
@@ -71,11 +69,6 @@ final class RepDesktopPoller: ObservableObject {
             let createdAt: String = note.created_at
             let title = String(fullNotes.prefix(30))
             
-            print("FULL TRANSCRIPT: \(fullTranscript)")
-            print("FULL NOTES: \(fullNotes)")
-            print("user id: \(userId) | created at: \(createdAt)")
-            print("title: \(title)")
-            
             let existingNote = FetchDescriptor<RepDesktopTranscription>(predicate: #Predicate { $0.userId == userId })
             guard try context.fetch(existingNote).isEmpty else { continue }
             
@@ -86,7 +79,17 @@ final class RepDesktopPoller: ObservableObject {
             didPollerReturnDesktopNotes = true
             
             if !fullNotes.isEmpty && !userId.isEmpty {
-                try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, pageID: userId, title: title)
+                while !Task.isCancelled {
+                    do {
+                        try await SupabaseClientManager.shared.upsertRepDesktopNotes(fullNotes: fullNotes, pageID: userId, title: title)
+                        break
+                        
+                    } catch is CancellationError {
+                        throw CancellationError()
+                    } catch {
+                        try await Task.sleep(for: .milliseconds(300))
+                    }
+                }
             }
         }
     }
