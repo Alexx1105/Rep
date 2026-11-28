@@ -153,6 +153,16 @@ struct RepApp: App {
                 guard isUserAuthed else { return }
                 await PaymentStore.shared.prepareForAuthenticatedUser()
             }
+            
+            .task(id: isUserAuthed) {
+                guard isUserAuthed else { return }
+                do {
+                    try await McpClientManager().supabaseRealtimeListener()
+                   
+                } catch {
+                    print("MCP realtime listener failed:", ErrorDesc.callsiteError, error)
+                }
+            }
             .task {
                 if isUserAuthed {
                     do {
